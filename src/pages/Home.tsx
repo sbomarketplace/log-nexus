@@ -100,6 +100,15 @@ const Home = () => {
           <p className="text-xs text-muted-foreground">All workplace incidents</p>
         </div>
 
+        {/* New Incident Button */}
+        <div className="mb-6">
+          <Link to="/add">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
+              + New Incident
+            </Button>
+          </Link>
+        </div>
+
         {/* Incidents List */}
         <div className="space-y-3">
           {incidents.length === 0 ? (
