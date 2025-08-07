@@ -13,7 +13,6 @@ import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { parseMultipleIncidents } from '@/utils/parser';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
-import mammoth from 'mammoth';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
@@ -124,6 +123,8 @@ const Home = () => {
       if (fileExtension === '.txt' || fileExtension === '.md') {
         text = await file.text();
       } else if (fileExtension === '.docx') {
+        // Dynamic import for mammoth
+        const mammoth = await import('mammoth');
         const arrayBuffer = await file.arrayBuffer();
         const result = await mammoth.extractRawText({ arrayBuffer });
         text = result.value;
@@ -357,14 +358,14 @@ const Home = () => {
                       </div>
                       <div className="flex gap-2">
                         <Link to={`/incident/${incident.id}`}>
-                          <Button variant="outline" size="sm" className="text-sm p-2">
+                          <Button variant="outline" size="sm" className="text-sm px-3 py-1">
                             View
                           </Button>
                         </Link>
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-sm p-2"
+                          className="text-sm px-3 py-1"
                           onClick={() => navigate(`/add?id=${incident.id}`)}
                         >
                           Edit
@@ -372,7 +373,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-sm p-2"
+                          className="text-sm px-3 py-1"
                           onClick={() => handleExport(incident)}
                         >
                           Export
