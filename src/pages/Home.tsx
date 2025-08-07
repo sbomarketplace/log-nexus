@@ -13,11 +13,13 @@ import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { parseMultipleIncidents } from '@/utils/parser';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
+import mammoth from 'mammoth';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [rawNotes, setRawNotes] = useState('');
+  const [isFileProcessing, setIsFileProcessing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -94,6 +96,65 @@ const Home = () => {
         description: "There was an error parsing your notes. Please check the format and try again.",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const allowedTypes = ['.txt', '.md', '.docx', '.rtf'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    if (!allowedTypes.includes(fileExtension)) {
+      toast({
+        title: "Unsupported File Type",
+        description: `Please upload one of these file types: ${allowedTypes.join(', ')}`,
+        variant: "destructive",
+      });
+      event.target.value = '';
+      return;
+    }
+
+    setIsFileProcessing(true);
+
+    try {
+      let text = '';
+
+      if (fileExtension === '.txt' || fileExtension === '.md') {
+        text = await file.text();
+      } else if (fileExtension === '.docx') {
+        const arrayBuffer = await file.arrayBuffer();
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        text = result.value;
+      } else if (fileExtension === '.rtf') {
+        // Basic RTF text extraction (removes RTF formatting)
+        const rawText = await file.text();
+        text = rawText.replace(/\\[a-z]+\d*\s?/g, '').replace(/[{}]/g, '').replace(/\s+/g, ' ').trim();
+      }
+
+      if (text.trim()) {
+        setRawNotes(prev => prev ? `${prev}\n\n${text}` : text);
+        toast({
+          title: "File Uploaded",
+          description: "File content has been added to the text area. Review and edit as needed.",
+        });
+      } else {
+        toast({
+          title: "Empty File",
+          description: "The uploaded file appears to be empty or could not be processed.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "File Processing Error",
+        description: "There was an error processing the uploaded file.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFileProcessing(false);
+      event.target.value = '';
     }
   };
 
@@ -199,16 +260,38 @@ const Home = () => {
                   <DialogTitle>Import Raw Notes</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="import-notes">Paste your raw notes below</Label>
-                    <Textarea
-                      id="import-notes"
-                      value={rawNotes}
-                      onChange={(e) => setRawNotes(e.target.value)}
-                      placeholder="Paste multiple incident notes here. The parser will automatically detect separate incidents and create individual reports..."
-                      rows={12}
-                      className="min-h-[300px]"
-                    />
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="import-notes">Paste your raw notes below</Label>
+                      <Textarea
+                        id="import-notes"
+                        value={rawNotes}
+                        onChange={(e) => setRawNotes(e.target.value)}
+                        placeholder="Paste multiple incident notes here. The parser will automatically detect separate incidents and create individual reports..."
+                        rows={10}
+                        className="min-h-[250px]"
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="file-upload">Or upload a document</Label>
+                      <div className="flex items-center gap-2">
+                        <input
+                          id="file-upload"
+                          type="file"
+                          accept=".txt,.md,.docx,.rtf"
+                          onChange={handleFileUpload}
+                          disabled={isFileProcessing}
+                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                        />
+                        {isFileProcessing && (
+                          <span className="text-sm text-muted-foreground">Processing...</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Supports .txt, .md, .docx, and .rtf files
+                      </p>
+                    </div>
                   </div>
                   <p className="text-xs text-muted-foreground">
                     Supports multi-date logs (e.g., "7/18 - Incident..." and "7/22 - Incident..."), 
