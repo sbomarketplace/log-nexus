@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
+import { parseIncidentNote } from '@/utils/parser';
 
 interface Person {
   name: string;
@@ -42,6 +43,7 @@ const AddIncident = () => {
   const [unionInvolvement, setUnionInvolvement] = useState<UnionInvolvement[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rawNote, setRawNote] = useState('');
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -98,6 +100,88 @@ const AddIncident = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const handleNoteUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === 'text/plain') {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const content = event.target?.result as string;
+        if (content) {
+          setRawNote(content);
+          parseAndFillForm(content);
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please upload a .txt file only.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const parseAndFillForm = (content: string) => {
+    const parsed = parseIncidentNote(content);
+    
+    // Fill form data
+    if (parsed.title) {
+      setFormData(prev => ({ ...prev, title: parsed.title! }));
+    }
+    if (parsed.date) {
+      setFormData(prev => ({ ...prev, date: parsed.date! }));
+    }
+    if (parsed.time) {
+      setFormData(prev => ({ ...prev, time: parsed.time! }));
+    }
+    if (parsed.what) {
+      setFormData(prev => ({ ...prev, what: parsed.what! }));
+    }
+    if (parsed.where) {
+      setFormData(prev => ({ ...prev, where: parsed.where! }));
+    }
+    if (parsed.why) {
+      setFormData(prev => ({ ...prev, why: parsed.why! }));
+    }
+    if (parsed.how) {
+      setFormData(prev => ({ ...prev, how: parsed.how! }));
+    }
+
+    // Fill people involved
+    if (parsed.who && parsed.who.length > 0) {
+      setWhoInvolved(parsed.who.map(p => ({ name: p.name, role: p.role || '' })));
+    }
+
+    // Fill witnesses
+    if (parsed.witnesses && parsed.witnesses.length > 0) {
+      setWitnesses(parsed.witnesses.map(w => ({ name: w.name, role: w.role || '' })));
+    }
+
+    // Fill union involvement
+    if (parsed.unionInvolvement && parsed.unionInvolvement.length > 0) {
+      setUnionInvolvement(parsed.unionInvolvement.map(ui => ({
+        name: ui.name,
+        union: ui.union,
+        role: ui.role || '',
+        notes: ui.notes
+      })));
+    }
+
+    // Clear any existing errors
+    setErrors({});
+
+    toast({
+      title: "Note Parsed Successfully",
+      description: "Form fields have been populated. Please review and edit as needed.",
+    });
+  };
+
+  const handleParsePastedNote = () => {
+    if (rawNote.trim()) {
+      parseAndFillForm(rawNote);
+    }
   };
 
   const removeFile = (index: number) => {
@@ -215,6 +299,50 @@ const AddIncident = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Note Parsing Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Import Raw Notes (Optional)</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="raw-note">Paste incident notes or upload .txt file</Label>
+                <Textarea
+                  id="raw-note"
+                  value={rawNote}
+                  onChange={(e) => setRawNote(e.target.value)}
+                  placeholder="Paste your raw incident notes here..."
+                  rows={6}
+                />
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleParsePastedNote}
+                  disabled={!rawNote.trim()}
+                  className="flex-1"
+                >
+                  Parse Pasted Notes
+                </Button>
+                
+                <div className="flex-1">
+                  <Input
+                    type="file"
+                    accept=".txt"
+                    onChange={handleNoteUpload}
+                    className="cursor-pointer"
+                  />
+                </div>
+              </div>
+              
+              <p className="text-xs text-muted-foreground">
+                The parser will automatically extract title, date, time, people involved, and incident details from your notes.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Basic Information */}
           <Card>
             <CardHeader>
