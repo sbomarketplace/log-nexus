@@ -25,4 +25,5 @@ export interface Incident {
   files?: string[];
   rewrittenSummary?: string;
   folder?: string;
+  tags?: string[];
 }
