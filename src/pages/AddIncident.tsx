@@ -569,60 +569,6 @@ const AddIncident = () => {
               Save Incident
             </Button>
             
-            {/* Tagging Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Tags (Optional)</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex gap-2">
-                  <Input
-                    value={newTag}
-                    onChange={(e) => setNewTag(e.target.value)}
-                    onKeyPress={handleTagKeyPress}
-                    placeholder="Add a tag..."
-                    className="flex-1"
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addTag}
-                    disabled={!newTag.trim()}
-                  >
-                    <PlusIcon size={16} className="mr-1" />
-                    Add
-                  </Button>
-                </div>
-                
-                {tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {tags.map((tag, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1 px-2 py-1 bg-secondary text-secondary-foreground rounded-md text-sm"
-                      >
-                        <span>{tag}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeTag(tag)}
-                          className="h-auto w-auto p-0 hover:bg-transparent"
-                        >
-                          <XIcon size={12} />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                <p className="text-xs text-muted-foreground">
-                  Add tags like "workplace-injury", "safety-violation", "harassment" to categorize this incident.
-                </p>
-              </CardContent>
-            </Card>
-            
             <Button 
               type="button" 
               variant="outline" 
