@@ -10,14 +10,13 @@ import { Label } from '@/components/ui/label';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
-import { parseMultipleIncidents } from '@/utils/parser';
+import { ImportNotesModal } from '@/components/ImportNotesModal';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [rawNotes, setRawNotes] = useState('');
   const [isFileProcessing, setIsFileProcessing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -34,40 +33,21 @@ const Home = () => {
     });
   };
 
-  const handleImportNotes = () => {
-    if (!rawNotes.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter some notes to parse.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const handleImportNotes = (parsedIncidents: any[], batchTitle: string) => {
     try {
-      const parsedIncidents = parseMultipleIncidents(rawNotes);
-      
-      if (parsedIncidents.length === 0) {
-        toast({
-          title: "No Incidents Found",
-          description: "Could not parse any valid incidents from the provided notes.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       let savedCount = 0;
+      const batchId = `batch_${Date.now()}`;
       
       parsedIncidents.forEach((parsed, index) => {
         const incident: Incident = {
           id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${index}`,
-          title: parsed.title || `Imported Incident ${index + 1}`,
+          title: parsed.title || `Incident ${index + 1} from ${batchTitle}`,
           date: parsed.date || new Date().toISOString().split('T')[0],
           time: parsed.time || new Date().toTimeString().slice(0, 5),
           summary: parsed.what || 'Imported incident',
-          location: parsed.location, // Enhanced: store location
-          category: parsed.category, // Enhanced: store category  
-          peopleInvolved: parsed.peopleInvolved, // Enhanced: store people list
+          location: parsed.location,
+          category: parsed.category,
+          peopleInvolved: parsed.peopleInvolved,
           who: parsed.who || [],
           what: parsed.what || '',
           where: parsed.where || parsed.location || '',
@@ -76,7 +56,8 @@ const Home = () => {
           witnesses: parsed.witnesses || [],
           unionInvolvement: parsed.unionInvolvement || [],
           files: [],
-          tags: [],
+          tags: [`import:${batchTitle}`, `batch:${batchId}`],
+          folder: batchTitle, // Store batch title as folder for grouping
         };
         
         storage.saveIncident(incident);
@@ -84,83 +65,21 @@ const Home = () => {
       });
       
       setIncidents(storage.getIncidents());
-      setRawNotes('');
-      setIsImportModalOpen(false);
       
       toast({
         title: "Import Successful",
-        description: `Successfully imported ${savedCount} incident${savedCount > 1 ? 's' : ''}.`,
+        description: `Imported ${savedCount} incident${savedCount > 1 ? 's' : ''} from "${batchTitle}".`,
       });
-      
     } catch (error) {
+      console.error('Error importing notes:', error);
       toast({
-        title: "Parsing Error",
-        description: "There was an error parsing your notes. Please check the format and try again.",
+        title: "Import Failed", 
+        description: "There was an error importing your notes. Please try again.",
         variant: "destructive",
       });
     }
   };
 
-  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const allowedTypes = ['.txt', '.md', '.docx', '.rtf'];
-    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    
-    if (!allowedTypes.includes(fileExtension)) {
-      toast({
-        title: "Unsupported File Type",
-        description: `Please upload one of these file types: ${allowedTypes.join(', ')}`,
-        variant: "destructive",
-      });
-      event.target.value = '';
-      return;
-    }
-
-    setIsFileProcessing(true);
-
-    try {
-      let text = '';
-
-      if (fileExtension === '.txt' || fileExtension === '.md') {
-        text = await file.text();
-      } else if (fileExtension === '.docx') {
-        // Dynamic import for mammoth
-        const mammoth = await import('mammoth');
-        const arrayBuffer = await file.arrayBuffer();
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        text = result.value;
-      } else if (fileExtension === '.rtf') {
-        // Basic RTF text extraction (removes RTF formatting)
-        const rawText = await file.text();
-        text = rawText.replace(/\\[a-z]+\d*\s?/g, '').replace(/[{}]/g, '').replace(/\s+/g, ' ').trim();
-      }
-
-      if (text.trim()) {
-        setRawNotes(prev => prev ? `${prev}\n\n${text}` : text);
-        toast({
-          title: "File Uploaded",
-          description: "File content has been added to the text area. Review and edit as needed.",
-        });
-      } else {
-        toast({
-          title: "Empty File",
-          description: "The uploaded file appears to be empty or could not be processed.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      toast({
-        title: "File Processing Error",
-        description: "There was an error processing the uploaded file.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsFileProcessing(false);
-      event.target.value = '';
-    }
-  };
 
   const handleExport = (incident: Incident) => {
     const doc = new jsPDF();
@@ -253,74 +172,18 @@ const Home = () => {
           </Link>
           
           <div>
-            <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-accent text-white rounded p-2 text-sm">
-                  Import Notes
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Import Raw Notes</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="import-notes">Paste your raw notes below</Label>
-                      <Textarea
-                        id="import-notes"
-                        value={rawNotes}
-                        onChange={(e) => setRawNotes(e.target.value)}
-                        placeholder="Paste multiple incident notes here. The parser will automatically detect separate incidents and create individual reports..."
-                        rows={10}
-                        className="min-h-[250px]"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="file-upload">Or upload a document</Label>
-                      <div className="flex items-center gap-2">
-                        <input
-                          id="file-upload"
-                          type="file"
-                          accept=".txt,.md,.docx,.rtf"
-                          onChange={handleFileUpload}
-                          disabled={isFileProcessing}
-                          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-foreground file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                        />
-                        {isFileProcessing && (
-                          <span className="text-sm text-muted-foreground">Processing...</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Supports .txt, .md, .docx, and .rtf files
-                      </p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Supports multi-date logs (e.g., "7/18 - Incident..." and "7/22 - Incident..."), 
-                    union involvement, witnesses, and other details. Each incident will be saved separately.
-                  </p>
-                  <div className="flex gap-3 justify-end">
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsImportModalOpen(false);
-                        setRawNotes('');
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={handleImportNotes}
-                      disabled={!rawNotes.trim()}
-                    >
-                      Parse Notes
-                    </Button>
-                  </div>
-                </div>
-              </DialogContent>
-            </Dialog>
+            <Button 
+              onClick={() => setIsImportModalOpen(true)}
+              className="bg-accent text-white rounded p-2 text-sm"
+            >
+              Import Notes
+            </Button>
+            
+            <ImportNotesModal
+              isOpen={isImportModalOpen}
+              onClose={() => setIsImportModalOpen(false)}
+              onImport={handleImportNotes}
+            />
           </div>
         </div>
 
