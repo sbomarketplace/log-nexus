@@ -102,13 +102,13 @@ const Home = () => {
         </div>
 
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 text-center">
           <h1 className="text-lg font-medium text-foreground">Incidents</h1>
           <p className="text-xs text-muted-foreground">All workplace incidents</p>
         </div>
 
         {/* New Incident Button */}
-        <div className="mb-6">
+        <div className="mb-6 text-center">
           <Link to="/add">
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
               + New Incident
