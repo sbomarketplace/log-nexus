@@ -20,7 +20,8 @@ const Home = () => {
   const filteredIncidents = incidents.filter(incident =>
     incident.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     incident.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    incident.who.some(person => person.toLowerCase().includes(searchTerm.toLowerCase()))
+    incident.who.some(person => person.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    incident.where.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatDate = (dateString: string) => {
@@ -150,7 +151,7 @@ const Home = () => {
                         <div className="flex flex-wrap gap-2 mb-3">
                           {incident.who.slice(0, 3).map((person, index) => (
                             <Badge key={index} variant="outline">
-                              {person}
+                              {person.role ? `${person.name} (${person.role})` : person.name}
                             </Badge>
                           ))}
                           {incident.who.length > 3 && (

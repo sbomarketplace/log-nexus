@@ -4,15 +4,22 @@ export interface Incident {
   time: string;
   title: string;
   summary: string;
-  who: string[];
+  who: {
+    name: string;
+    role?: string;
+  }[];
   what: string;
   where: string;
   why: string;
   how: string;
-  witnesses?: string[];
+  witnesses?: {
+    name: string;
+    role?: string;
+  }[];
   unionInvolvement?: {
     name: string;
     union: string;
+    role?: string;
     notes?: string;
   }[];
   files?: string[];

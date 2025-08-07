@@ -89,7 +89,7 @@ const ViewIncident = () => {
                 <div className="flex flex-wrap gap-2">
                   {incident.who.map((person, index) => (
                     <Badge key={index} variant="secondary">
-                      {person}
+                      {person.role ? `${person.name} (${person.role})` : person.name}
                     </Badge>
                   ))}
                 </div>
@@ -101,7 +101,7 @@ const ViewIncident = () => {
                   <div className="flex flex-wrap gap-2">
                     {incident.witnesses.map((witness, index) => (
                       <Badge key={index} variant="outline">
-                        {witness}
+                        {witness.role ? `${witness.name} (${witness.role})` : witness.name}
                       </Badge>
                     ))}
                   </div>
@@ -165,7 +165,9 @@ const ViewIncident = () => {
                 {incident.unionInvolvement.map((union, index) => (
                   <div key={index} className="border-l-4 border-accent pl-4">
                     <h4 className="font-medium">{union.name}</h4>
-                    <p className="text-sm text-muted-foreground">{union.union}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {union.union}{union.role && ` - ${union.role}`}
+                    </p>
                     {union.notes && (
                       <p className="text-sm mt-2">{union.notes}</p>
                     )}

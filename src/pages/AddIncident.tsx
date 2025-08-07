@@ -11,9 +11,15 @@ import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
 
+interface Person {
+  name: string;
+  role: string;
+}
+
 interface UnionInvolvement {
   name: string;
   union: string;
+  role: string;
   notes: string;
 }
 
@@ -25,15 +31,14 @@ const AddIncident = () => {
     title: '',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().slice(0, 5),
-    summary: '',
-    who: [''],
     what: '',
     where: '',
     why: '',
     how: '',
-    witnesses: [''],
   });
 
+  const [whoInvolved, setWhoInvolved] = useState<Person[]>([{ name: '', role: '' }]);
+  const [witnesses, setWitnesses] = useState<Person[]>([{ name: '', role: '' }]);
   const [unionInvolvement, setUnionInvolvement] = useState<UnionInvolvement[]>([]);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -44,7 +49,7 @@ const AddIncident = () => {
     if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.what.trim()) newErrors.what = 'What happened is required';
     if (!formData.where.trim()) newErrors.where = 'Location is required';
-    if (formData.who.filter(person => person.trim()).length === 0) {
+    if (whoInvolved.filter(person => person.name.trim()).length === 0) {
       newErrors.who = 'At least one person involved is required';
     }
 
@@ -59,32 +64,25 @@ const AddIncident = () => {
     }
   };
 
-  const handleArrayInputChange = (field: 'who' | 'witnesses', index: number, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].map((item, i) => i === index ? value : item)
-    }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+  const updatePerson = (persons: Person[], setPersons: React.Dispatch<React.SetStateAction<Person[]>>, index: number, field: 'name' | 'role', value: string) => {
+    setPersons(prev => 
+      prev.map((person, i) => i === index ? { ...person, [field]: value } : person)
+    );
+    if (errors.who && setPersons === setWhoInvolved) {
+      setErrors(prev => ({ ...prev, who: '' }));
     }
   };
 
-  const addArrayInput = (field: 'who' | 'witnesses') => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: [...prev[field], '']
-    }));
+  const addPerson = (setPersons: React.Dispatch<React.SetStateAction<Person[]>>) => {
+    setPersons(prev => [...prev, { name: '', role: '' }]);
   };
 
-  const removeArrayInput = (field: 'who' | 'witnesses', index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: prev[field].filter((_, i) => i !== index)
-    }));
+  const removePerson = (setPersons: React.Dispatch<React.SetStateAction<Person[]>>, index: number) => {
+    setPersons(prev => prev.filter((_, i) => i !== index));
   };
 
   const addUnionInvolvement = () => {
-    setUnionInvolvement(prev => [...prev, { name: '', union: '', notes: '' }]);
+    setUnionInvolvement(prev => [...prev, { name: '', union: '', role: '', notes: '' }]);
   };
 
   const updateUnionInvolvement = (index: number, field: keyof UnionInvolvement, value: string) => {
@@ -124,12 +122,12 @@ const AddIncident = () => {
       date: formData.date,
       time: formData.time,
       summary: formData.what, // Using 'what' as the main summary
-      who: formData.who.filter(person => person.trim()),
+      who: whoInvolved.filter(person => person.name.trim()),
       what: formData.what,
       where: formData.where,
       why: formData.why,
       how: formData.how,
-      witnesses: formData.witnesses.filter(w => w.trim()),
+      witnesses: witnesses.filter(w => w.name.trim()),
       unionInvolvement: unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()),
       files: uploadedFiles.map(file => file.name), // In real app, store file references
     };
@@ -143,6 +141,64 @@ const AddIncident = () => {
 
     navigate('/');
   };
+
+  const renderPersonSection = (
+    title: string,
+    persons: Person[],
+    setPersons: React.Dispatch<React.SetStateAction<Person[]>>,
+    isRequired = false,
+    roleExamples = ""
+  ) => (
+    <Card>
+      <CardHeader>
+        <CardTitle>{title} {isRequired && '*'}</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {persons.map((person, index) => (
+          <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2">
+            <div className="md:col-span-2">
+              <Input
+                value={person.name}
+                onChange={(e) => updatePerson(persons, setPersons, index, 'name', e.target.value)}
+                placeholder="Name"
+                className={errors.who && setPersons === setWhoInvolved ? 'border-destructive' : ''}
+              />
+            </div>
+            <div className="flex gap-2">
+              <Input
+                value={person.role}
+                onChange={(e) => updatePerson(persons, setPersons, index, 'role', e.target.value)}
+                placeholder={roleExamples || "Role (optional)"}
+              />
+              {persons.length > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => removePerson(setPersons, index)}
+                >
+                  <XIcon size={16} />
+                </Button>
+              )}
+            </div>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => addPerson(setPersons)}
+          className="w-full"
+        >
+          <PlusIcon size={16} className="mr-2" />
+          Add Another Person
+        </Button>
+        {errors.who && setPersons === setWhoInvolved && (
+          <p className="text-sm text-destructive">{errors.who}</p>
+        )}
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Layout>
@@ -214,44 +270,13 @@ const AddIncident = () => {
           </Card>
 
           {/* Who was involved */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Who was involved? *</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.who.map((person, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={person}
-                    onChange={(e) => handleArrayInputChange('who', index, e.target.value)}
-                    placeholder="Name of person involved"
-                    className={errors.who ? 'border-destructive' : ''}
-                  />
-                  {formData.who.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeArrayInput('who', index)}
-                    >
-                      <XIcon size={16} />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => addArrayInput('who')}
-                className="w-full"
-              >
-                <PlusIcon size={16} className="mr-2" />
-                Add Another Person
-              </Button>
-              {errors.who && <p className="text-sm text-destructive">{errors.who}</p>}
-            </CardContent>
-          </Card>
+          {renderPersonSection(
+            "Who was involved?",
+            whoInvolved,
+            setWhoInvolved,
+            true,
+            "Manager, Coworker, etc."
+          )}
 
           {/* Incident Details */}
           <Card>
@@ -303,42 +328,13 @@ const AddIncident = () => {
           </Card>
 
           {/* Witnesses */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Witnesses (Optional)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {formData.witnesses.map((witness, index) => (
-                <div key={index} className="flex gap-2">
-                  <Input
-                    value={witness}
-                    onChange={(e) => handleArrayInputChange('witnesses', index, e.target.value)}
-                    placeholder="Name of witness"
-                  />
-                  {formData.witnesses.length > 1 && (
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={() => removeArrayInput('witnesses', index)}
-                    >
-                      <XIcon size={16} />
-                    </Button>
-                  )}
-                </div>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => addArrayInput('witnesses')}
-                className="w-full"
-              >
-                <PlusIcon size={16} className="mr-2" />
-                Add Witness
-              </Button>
-            </CardContent>
-          </Card>
+          {renderPersonSection(
+            "Witnesses (Optional)",
+            witnesses,
+            setWitnesses,
+            false,
+            "Bystander, Lead Mechanic, etc."
+          )}
 
           {/* Union Involvement */}
           <Card>
@@ -359,7 +355,7 @@ const AddIncident = () => {
                       <XIcon size={16} />
                     </Button>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="space-y-2">
                       <Label>Name</Label>
                       <Input
@@ -374,6 +370,14 @@ const AddIncident = () => {
                         value={ui.union}
                         onChange={(e) => updateUnionInvolvement(index, 'union', e.target.value)}
                         placeholder="Union name"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Role</Label>
+                      <Input
+                        value={ui.role}
+                        onChange={(e) => updateUnionInvolvement(index, 'role', e.target.value)}
+                        placeholder="Steward, Representative, etc."
                       />
                     </div>
                   </div>
