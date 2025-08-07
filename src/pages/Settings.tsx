@@ -32,11 +32,11 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Settings</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-lg font-medium text-foreground">Settings</h1>
+          <p className="text-xs text-muted-foreground">
             Manage your incident reporting preferences and data
           </p>
         </div>
@@ -46,9 +46,9 @@ const Settings = () => {
           <CardHeader>
             <CardTitle>Organization Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label htmlFor="org-name">Organization Name</Label>
                 <Input
                   id="org-name"
@@ -56,7 +56,7 @@ const Settings = () => {
                   defaultValue="Acme Corporation"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="dept">Department</Label>
                 <Input
                   id="dept"
@@ -66,13 +66,13 @@ const Settings = () => {
               </div>
             </div>
             
-            <div className="space-y-2">
+            <div className="space-y-1">
               <Label htmlFor="address">Address</Label>
               <Textarea
                 id="address"
                 placeholder="Organization address"
                 defaultValue="123 Business St, Corporate City, CC 12345"
-                rows={3}
+                rows={2}
               />
             </div>
           </CardContent>
@@ -83,9 +83,9 @@ const Settings = () => {
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+          <CardContent className="space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label htmlFor="contact-name">Primary Contact</Label>
                 <Input
                   id="contact-name"
@@ -93,7 +93,7 @@ const Settings = () => {
                   defaultValue="Jane Smith"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="contact-email">Email</Label>
                 <Input
                   id="contact-email"
@@ -104,8 +104,8 @@ const Settings = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="space-y-1">
                 <Label htmlFor="contact-phone">Phone</Label>
                 <Input
                   id="contact-phone"
@@ -113,7 +113,7 @@ const Settings = () => {
                   defaultValue="(555) 123-4567"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="emergency-phone">Emergency Line</Label>
                 <Input
                   id="emergency-phone"
@@ -130,19 +130,19 @@ const Settings = () => {
           <CardHeader>
             <CardTitle>Data Management</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button variant="outline" onClick={handleExport}>
+          <CardContent className="space-y-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button variant="outline" onClick={handleExport} size="sm">
                 Export Data
               </Button>
-              <Button variant="outline" onClick={handleImport}>
+              <Button variant="outline" onClick={handleImport} size="sm">
                 Import Data
               </Button>
-              <Button variant="destructive">
+              <Button variant="destructive" size="sm">
                 Clear All Data
               </Button>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               Export your incident data to a JSON file for backup or transfer to another system.
               Import allows you to restore from a previous backup.
             </p>
@@ -154,8 +154,8 @@ const Settings = () => {
           <CardHeader>
             <CardTitle>Notification Preferences</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
               <div className="flex items-center space-x-2">
                 <input type="checkbox" id="email-notifications" defaultChecked />
                 <Label htmlFor="email-notifications">Email notifications for new incidents</Label>
@@ -174,7 +174,7 @@ const Settings = () => {
 
         {/* Save Button */}
         <div className="flex justify-end">
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} size="sm">
             Save Settings
           </Button>
         </div>

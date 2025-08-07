@@ -23,10 +23,10 @@ const ViewIncident = () => {
   if (!incident) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center py-16">
-          <h2 className="text-2xl font-bold mb-4">Incident Not Found</h2>
-          <p className="text-muted-foreground mb-6">The requested incident could not be found.</p>
-          <Button onClick={() => navigate('/')}>
+        <div className="flex flex-col items-center justify-center py-12">
+          <h2 className="text-sm font-medium mb-2">Incident Not Found</h2>
+          <p className="text-xs text-muted-foreground mb-4">The requested incident could not be found.</p>
+          <Button onClick={() => navigate('/')} size="sm">
             Return to Dashboard
           </Button>
         </div>
@@ -53,15 +53,15 @@ const ViewIncident = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6">
+      <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeftIcon size={18} />
+            <ArrowLeftIcon size={16} />
           </Button>
           <div className="flex-1">
-            <h1 className="text-3xl font-bold text-foreground">{incident.title}</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-lg font-medium text-foreground">{incident.title}</h1>
+            <p className="text-xs text-muted-foreground">
               {formatDate(incident.date)} at {formatTime(incident.time)}
             </p>
           </div>
@@ -73,7 +73,7 @@ const ViewIncident = () => {
             <CardTitle>Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-foreground leading-relaxed">{incident.summary}</p>
+            <p className="text-sm text-foreground leading-relaxed">{incident.summary}</p>
           </CardContent>
         </Card>
 
@@ -83,12 +83,12 @@ const ViewIncident = () => {
             <CardTitle>People Involved</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <h4 className="font-medium mb-2">Involved Parties</h4>
-                <div className="flex flex-wrap gap-2">
+                <h4 className="font-medium mb-1.5 text-sm">Involved Parties</h4>
+                <div className="flex flex-wrap gap-1.5">
                   {incident.who.map((person, index) => (
-                    <Badge key={index} variant="secondary">
+                    <Badge key={index} variant="secondary" className="text-xs">
                       {person.role ? `${person.name} (${person.role})` : person.name}
                     </Badge>
                   ))}
@@ -97,10 +97,10 @@ const ViewIncident = () => {
               
               {incident.witnesses && incident.witnesses.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-2">Witnesses</h4>
-                  <div className="flex flex-wrap gap-2">
+                  <h4 className="font-medium mb-1.5 text-sm">Witnesses</h4>
+                  <div className="flex flex-wrap gap-1.5">
                     {incident.witnesses.map((witness, index) => (
-                      <Badge key={index} variant="outline">
+                      <Badge key={index} variant="outline" className="text-xs">
                         {witness.role ? `${witness.name} (${witness.role})` : witness.name}
                       </Badge>
                     ))}
@@ -112,13 +112,13 @@ const ViewIncident = () => {
         </Card>
 
         {/* Incident Details */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
             <CardHeader>
               <CardTitle>What Happened</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground leading-relaxed">{incident.what}</p>
+              <p className="text-sm text-foreground leading-relaxed">{incident.what}</p>
             </CardContent>
           </Card>
 
@@ -127,7 +127,7 @@ const ViewIncident = () => {
               <CardTitle>Location</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-foreground leading-relaxed">{incident.where}</p>
+              <p className="text-sm text-foreground leading-relaxed">{incident.where}</p>
             </CardContent>
           </Card>
 
@@ -137,7 +137,7 @@ const ViewIncident = () => {
                 <CardTitle>Why It Happened</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-foreground leading-relaxed">{incident.why}</p>
+                <p className="text-sm text-foreground leading-relaxed">{incident.why}</p>
               </CardContent>
             </Card>
           )}
@@ -148,7 +148,7 @@ const ViewIncident = () => {
                 <CardTitle>How It Happened</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-foreground leading-relaxed">{incident.how}</p>
+                <p className="text-sm text-foreground leading-relaxed">{incident.how}</p>
               </CardContent>
             </Card>
           )}

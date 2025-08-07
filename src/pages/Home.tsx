@@ -34,40 +34,40 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Incident Dashboard</h1>
-            <p className="text-muted-foreground">Manage and track workplace incidents</p>
+            <h1 className="text-lg font-medium text-foreground">Incident Dashboard</h1>
+            <p className="text-xs text-muted-foreground">Manage and track workplace incidents</p>
           </div>
           <Link to="/add">
-            <Button className="flex items-center space-x-2">
-              <PlusIcon size={18} />
+            <Button className="flex items-center space-x-1.5" size="sm">
+              <PlusIcon size={14} />
               <span>New Incident</span>
             </Button>
           </Link>
         </div>
 
         {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Incidents</CardTitle>
-              <AlertIcon className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle>Total Incidents</CardTitle>
+              <AlertIcon className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{incidents.length}</div>
+              <div className="text-lg font-medium">{incidents.length}</div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">This Month</CardTitle>
-              <CalendarIcon className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle>This Month</CardTitle>
+              <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg font-medium">
                 {incidents.filter(incident => {
                   const incidentDate = new Date(incident.date);
                   const currentMonth = new Date().getMonth();
@@ -80,12 +80,12 @@ const Home = () => {
           </Card>
 
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Recent</CardTitle>
-              <AlertIcon className="h-4 w-4 text-muted-foreground" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+              <CardTitle>Recent</CardTitle>
+              <AlertIcon className="h-3.5 w-3.5 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">
+              <div className="text-lg font-medium">
                 {incidents.filter(incident => {
                   const incidentDate = new Date(incident.date);
                   const weekAgo = new Date();
@@ -98,33 +98,33 @@ const Home = () => {
         </div>
 
         {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Input
             placeholder="Search incidents..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-md"
+            className="max-w-sm"
           />
         </div>
 
         {/* Incidents List */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredIncidents.length === 0 ? (
             <Card>
-              <CardContent className="flex flex-col items-center justify-center py-16">
-                <AlertIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <AlertIcon className="h-8 w-8 text-muted-foreground mb-3" />
+                <h3 className="text-sm font-medium mb-1">
                   {incidents.length === 0 ? 'No incidents recorded' : 'No incidents found'}
                 </h3>
-                <p className="text-muted-foreground text-center mb-6">
+                <p className="text-xs text-muted-foreground text-center mb-4">
                   {incidents.length === 0 
                     ? 'Get started by reporting your first incident.' 
                     : 'Try adjusting your search terms.'}
                 </p>
                 {incidents.length === 0 && (
                   <Link to="/add">
-                    <Button>
-                      <PlusIcon className="mr-2" size={18} />
+                    <Button size="sm">
+                      <PlusIcon className="mr-1.5" size={14} />
                       Report First Incident
                     </Button>
                   </Link>
@@ -136,31 +136,31 @@ const Home = () => {
               .sort((a, b) => new Date(b.date + ' ' + b.time).getTime() - new Date(a.date + ' ' + a.time).getTime())
               .map((incident) => (
                 <Card key={incident.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                  <CardContent>
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-semibold text-lg">{incident.title}</h3>
-                          <Badge variant="secondary" className="ml-2">
+                        <div className="flex items-start justify-between mb-1.5">
+                          <h3 className="font-medium text-sm">{incident.title}</h3>
+                          <Badge variant="secondary" className="ml-2 text-xs">
                             {formatDate(incident.date)}
                           </Badge>
                         </div>
-                        <p className="text-muted-foreground mb-3 line-clamp-2">
+                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                           {incident.summary}
                         </p>
-                        <div className="flex flex-wrap gap-2 mb-3">
+                        <div className="flex flex-wrap gap-1.5 mb-2">
                           {incident.who.slice(0, 3).map((person, index) => (
-                            <Badge key={index} variant="outline">
+                            <Badge key={index} variant="outline" className="text-xs">
                               {person.role ? `${person.name} (${person.role})` : person.name}
                             </Badge>
                           ))}
                           {incident.who.length > 3 && (
-                            <Badge variant="outline">
+                            <Badge variant="outline" className="text-xs">
                               +{incident.who.length - 3} more
                             </Badge>
                           )}
                         </div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                           <span className="font-medium">Location:</span> {incident.where}
                         </div>
                       </div>

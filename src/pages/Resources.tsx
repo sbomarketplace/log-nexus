@@ -45,33 +45,33 @@ const Resources = () => {
 
   return (
     <Layout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Resources</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-lg font-medium text-foreground">Resources</h1>
+          <p className="text-xs text-muted-foreground">
             Essential documents and guidelines for incident management
           </p>
         </div>
 
         {/* Resources Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {resources.map((resource, index) => (
             <Card key={index} className="hover:shadow-md transition-shadow">
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <FileIcon className="h-8 w-8 text-primary mb-2" />
-                  <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
+                  <FileIcon className="h-6 w-6 text-primary mb-1.5" />
+                  <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded">
                     {resource.type}
                   </span>
                 </div>
-                <CardTitle className="text-lg">{resource.title}</CardTitle>
+                <CardTitle>{resource.title}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-xs text-muted-foreground mb-3">
                   {resource.description}
                 </p>
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full" size="sm">
                   View Resource
                 </Button>
               </CardContent>
@@ -85,29 +85,29 @@ const Resources = () => {
             <CardTitle>Quick Access</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Emergency Hotline</h4>
-                <p className="text-2xl font-bold text-destructive">911</p>
-                <p className="text-sm text-muted-foreground">For immediate emergencies</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="p-3 border border-border rounded-lg">
+                <h4 className="font-medium mb-1.5 text-sm">Emergency Hotline</h4>
+                <p className="text-lg font-medium text-destructive">911</p>
+                <p className="text-xs text-muted-foreground">For immediate emergencies</p>
               </div>
               
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">HR Department</h4>
-                <p className="text-lg font-semibold">(555) 123-4567</p>
-                <p className="text-sm text-muted-foreground">Business hours: 9 AM - 5 PM</p>
+              <div className="p-3 border border-border rounded-lg">
+                <h4 className="font-medium mb-1.5 text-sm">HR Department</h4>
+                <p className="text-sm font-medium">(555) 123-4567</p>
+                <p className="text-xs text-muted-foreground">Business hours: 9 AM - 5 PM</p>
               </div>
               
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Safety Officer</h4>
-                <p className="text-lg font-semibold">(555) 987-6543</p>
-                <p className="text-sm text-muted-foreground">Available 24/7</p>
+              <div className="p-3 border border-border rounded-lg">
+                <h4 className="font-medium mb-1.5 text-sm">Safety Officer</h4>
+                <p className="text-sm font-medium">(555) 987-6543</p>
+                <p className="text-xs text-muted-foreground">Available 24/7</p>
               </div>
               
-              <div className="p-4 border border-border rounded-lg">
-                <h4 className="font-medium mb-2">Legal Department</h4>
-                <p className="text-lg font-semibold">(555) 456-7890</p>
-                <p className="text-sm text-muted-foreground">Business hours only</p>
+              <div className="p-3 border border-border rounded-lg">
+                <h4 className="font-medium mb-1.5 text-sm">Legal Department</h4>
+                <p className="text-sm font-medium">(555) 456-7890</p>
+                <p className="text-xs text-muted-foreground">Business hours only</p>
               </div>
             </div>
           </CardContent>

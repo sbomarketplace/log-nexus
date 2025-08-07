@@ -106,6 +106,16 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground text-sm;
   }
+  
+  /* Compact sizing defaults */
+  h1 { @apply text-lg font-semibold; }
+  h2 { @apply text-base font-semibold; }
+  h3 { @apply text-sm font-medium; }
+  
+  /* Make default text sizes smaller */
+  p, div, span { @apply text-sm; }
+  label { @apply text-xs font-medium; }
+  input, textarea, select { @apply text-sm; }
 }

@@ -237,7 +237,7 @@ const AddIncident = () => {
       <CardHeader>
         <CardTitle>{title} {isRequired && '*'}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
         {persons.map((person, index) => (
           <div key={index} className="grid grid-cols-1 md:grid-cols-3 gap-2">
             <div className="md:col-span-2">
@@ -288,24 +288,24 @@ const AddIncident = () => {
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeftIcon size={18} />
+            <ArrowLeftIcon size={16} />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Report New Incident</h1>
-            <p className="text-muted-foreground">Provide detailed information about the incident</p>
+            <h1 className="text-lg font-medium text-foreground">Report New Incident</h1>
+            <p className="text-xs text-muted-foreground">Provide detailed information about the incident</p>
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Note Parsing Section */}
           <Card>
             <CardHeader>
               <CardTitle>Import Raw Notes (Optional)</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <Label htmlFor="raw-note">Paste incident notes or upload .txt file</Label>
                 <Textarea
                   id="raw-note"
@@ -361,8 +361,8 @@ const AddIncident = () => {
                 {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="space-y-2">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="space-y-1">
                   <Label htmlFor="date">Date *</Label>
                   <Input
                     id="date"
@@ -372,7 +372,7 @@ const AddIncident = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="time">Time *</Label>
                   <Input
                     id="time"
@@ -382,7 +382,7 @@ const AddIncident = () => {
                     required
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="space-y-1">
                   <Label htmlFor="where">Location *</Label>
                   <Input
                     id="where"
@@ -391,7 +391,7 @@ const AddIncident = () => {
                     placeholder="Where did this occur?"
                     className={errors.where ? 'border-destructive' : ''}
                   />
-                  {errors.where && <p className="text-sm text-destructive">{errors.where}</p>}
+                  {errors.where && <p className="text-xs text-destructive">{errors.where}</p>}
                 </div>
               </div>
             </CardContent>
