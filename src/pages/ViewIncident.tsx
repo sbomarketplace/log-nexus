@@ -1,0 +1,216 @@
+import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { storage } from '@/utils/storage';
+import { Incident } from '@/types/incident';
+import { ArrowLeftIcon } from '@/components/icons/CustomIcons';
+
+const ViewIncident = () => {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [incident, setIncident] = useState<Incident | null>(null);
+
+  useEffect(() => {
+    if (id) {
+      const foundIncident = storage.getIncident(id);
+      setIncident(foundIncident || null);
+    }
+  }, [id]);
+
+  if (!incident) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-16">
+          <h2 className="text-2xl font-bold mb-4">Incident Not Found</h2>
+          <p className="text-muted-foreground mb-6">The requested incident could not be found.</p>
+          <Button onClick={() => navigate('/')}>
+            Return to Dashboard
+          </Button>
+        </div>
+      </Layout>
+    );
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const formatTime = (timeString: string) => {
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-6">
+        {/* Header */}
+        <div className="flex items-center space-x-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
+            <ArrowLeftIcon size={18} />
+          </Button>
+          <div className="flex-1">
+            <h1 className="text-3xl font-bold text-foreground">{incident.title}</h1>
+            <p className="text-muted-foreground">
+              {formatDate(incident.date)} at {formatTime(incident.time)}
+            </p>
+          </div>
+        </div>
+
+        {/* Summary */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Summary</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-foreground leading-relaxed">{incident.summary}</p>
+          </CardContent>
+        </Card>
+
+        {/* People Involved */}
+        <Card>
+          <CardHeader>
+            <CardTitle>People Involved</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-medium mb-2">Involved Parties</h4>
+                <div className="flex flex-wrap gap-2">
+                  {incident.who.map((person, index) => (
+                    <Badge key={index} variant="secondary">
+                      {person}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+              
+              {incident.witnesses && incident.witnesses.length > 0 && (
+                <div>
+                  <h4 className="font-medium mb-2">Witnesses</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {incident.witnesses.map((witness, index) => (
+                      <Badge key={index} variant="outline">
+                        {witness}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Incident Details */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>What Happened</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground leading-relaxed">{incident.what}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Location</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground leading-relaxed">{incident.where}</p>
+            </CardContent>
+          </Card>
+
+          {incident.why && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Why It Happened</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground leading-relaxed">{incident.why}</p>
+              </CardContent>
+            </Card>
+          )}
+
+          {incident.how && (
+            <Card>
+              <CardHeader>
+                <CardTitle>How It Happened</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-foreground leading-relaxed">{incident.how}</p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+
+        {/* Union Involvement */}
+        {incident.unionInvolvement && incident.unionInvolvement.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Union Involvement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {incident.unionInvolvement.map((union, index) => (
+                  <div key={index} className="border-l-4 border-accent pl-4">
+                    <h4 className="font-medium">{union.name}</h4>
+                    <p className="text-sm text-muted-foreground">{union.union}</p>
+                    {union.notes && (
+                      <p className="text-sm mt-2">{union.notes}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* AI Rewritten Summary */}
+        {incident.rewrittenSummary && (
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Enhanced Summary</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-foreground leading-relaxed">{incident.rewrittenSummary}</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Files */}
+        {incident.files && incident.files.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Attached Files</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {incident.files.map((file, index) => (
+                  <div key={index} className="flex items-center justify-between p-3 border border-border rounded-md">
+                    <span className="text-sm text-foreground">{file}</span>
+                    <Button variant="outline" size="sm">
+                      Download
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default ViewIncident;
