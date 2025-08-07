@@ -94,6 +94,13 @@ const Home = () => {
   return (
     <Layout>
       <div className="space-y-4">
+        {/* Intro Description */}
+        <div className="text-center mb-8">
+          <p className="text-sm text-muted-foreground">
+            Use ClearCase to document workplace incidents, protect your rights, and stay organized.
+          </p>
+        </div>
+
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-lg font-medium text-foreground">Incidents</h1>
