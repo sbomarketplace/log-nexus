@@ -321,49 +321,6 @@ const AddIncident = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Note Parsing Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Import Raw Notes (Optional)</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="raw-note">Paste incident notes or upload .txt file</Label>
-                <Textarea
-                  id="raw-note"
-                  value={rawNote}
-                  onChange={(e) => setRawNote(e.target.value)}
-                  placeholder="Paste your raw incident notes here..."
-                  rows={6}
-                />
-              </div>
-              
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleParsePastedNote}
-                  disabled={!rawNote.trim()}
-                  className="flex-1"
-                >
-                  Parse Pasted Notes
-                </Button>
-                
-                <div className="flex-1">
-                  <Input
-                    type="file"
-                    accept=".txt"
-                    onChange={handleNoteUpload}
-                    className="cursor-pointer"
-                  />
-                </div>
-              </div>
-              
-              <p className="text-xs text-muted-foreground">
-                The parser will automatically extract title, date, time, people involved, and incident details from your notes.
-              </p>
-            </CardContent>
-          </Card>
 
           {/* Basic Information */}
           <Card>

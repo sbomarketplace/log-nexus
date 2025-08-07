@@ -16,6 +16,64 @@ interface ParsedIncident {
   }>;
 }
 
+export const parseMultipleIncidents = (text: string): ParsedIncident[] => {
+  // Split text by common separators for multiple incidents
+  const separators = [
+    /^\s*-{3,}\s*$/,  // --- separators
+    /^\s*={3,}\s*$/,  // === separators
+    /^\d{1,2}\/\d{1,2}(?:\/\d{2,4})?\s*[-–]\s*/,  // Date separators like "7/18 - " or "7/22 – "
+    /^incident\s*#?\d+/i,  // "Incident #1", "Incident 2", etc.
+    /^report\s*#?\d+/i,    // "Report #1", "Report 2", etc.
+    /^entry\s*#?\d+/i,     // "Entry #1", "Entry 2", etc.
+  ];
+  
+  const sections: string[] = [];
+  let currentSection = '';
+  
+  const lines = text.split('\n');
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    let foundSeparator = false;
+    
+    // Check if current line is a separator
+    for (const separator of separators) {
+      if (separator.test(line)) {
+        if (currentSection.trim()) {
+          sections.push(currentSection.trim());
+        }
+        currentSection = '';
+        foundSeparator = true;
+        
+        // For date separators, include the date line in the new section
+        if (separator === separators[2]) {
+          currentSection = line + '\n';
+        }
+        break;
+      }
+    }
+    
+    if (!foundSeparator) {
+      currentSection += line + '\n';
+    }
+  }
+  
+  // Add the last section
+  if (currentSection.trim()) {
+    sections.push(currentSection.trim());
+  }
+  
+  // If no separators found, treat as single incident
+  if (sections.length === 0) {
+    sections.push(text);
+  }
+  
+  // Parse each section as a separate incident
+  return sections
+    .map(section => parseIncidentNote(section))
+    .filter(incident => incident.title || incident.what || incident.where); // Filter out empty incidents
+};
+
 export const parseIncidentNote = (text: string): ParsedIncident => {
   const result: ParsedIncident = {};
   const lines = text.split('\n').map(line => line.trim()).filter(line => line);

@@ -4,14 +4,22 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
+import { parseMultipleIncidents } from '@/utils/parser';
+import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [rawNotes, setRawNotes] = useState('');
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     setIncidents(storage.getIncidents());
@@ -23,6 +31,70 @@ const Home = () => {
       day: 'numeric',
       year: 'numeric'
     });
+  };
+
+  const handleImportNotes = () => {
+    if (!rawNotes.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter some notes to parse.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const parsedIncidents = parseMultipleIncidents(rawNotes);
+      
+      if (parsedIncidents.length === 0) {
+        toast({
+          title: "No Incidents Found",
+          description: "Could not parse any valid incidents from the provided notes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      let savedCount = 0;
+      
+      parsedIncidents.forEach((parsed, index) => {
+        const incident: Incident = {
+          id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${index}`,
+          title: parsed.title || `Imported Incident ${index + 1}`,
+          date: parsed.date || new Date().toISOString().split('T')[0],
+          time: parsed.time || new Date().toTimeString().slice(0, 5),
+          summary: parsed.what || 'Imported incident',
+          who: parsed.who || [],
+          what: parsed.what || '',
+          where: parsed.where || '',
+          why: parsed.why || '',
+          how: parsed.how || '',
+          witnesses: parsed.witnesses || [],
+          unionInvolvement: parsed.unionInvolvement || [],
+          files: [],
+          tags: [],
+        };
+        
+        storage.saveIncident(incident);
+        savedCount++;
+      });
+      
+      setIncidents(storage.getIncidents());
+      setRawNotes('');
+      setIsImportModalOpen(false);
+      
+      toast({
+        title: "Import Successful",
+        description: `Successfully imported ${savedCount} incident${savedCount > 1 ? 's' : ''}.`,
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Parsing Error",
+        description: "There was an error parsing your notes. Please check the format and try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleExport = (incident: Incident) => {
@@ -107,13 +179,62 @@ const Home = () => {
           <p className="text-xs text-muted-foreground">All workplace incidents</p>
         </div>
 
-        {/* New Incident Button */}
-        <div className="mb-6 text-center">
+        {/* Action Buttons */}
+        <div className="mb-6 text-center space-y-3">
           <Link to="/add">
             <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
               + New Incident
             </Button>
           </Link>
+          
+          <div>
+            <Dialog open={isImportModalOpen} onOpenChange={setIsImportModalOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-accent text-white rounded p-2 text-sm">
+                  Import Notes
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>Import Raw Notes</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="import-notes">Paste your raw notes below</Label>
+                    <Textarea
+                      id="import-notes"
+                      value={rawNotes}
+                      onChange={(e) => setRawNotes(e.target.value)}
+                      placeholder="Paste multiple incident notes here. The parser will automatically detect separate incidents and create individual reports..."
+                      rows={12}
+                      className="min-h-[300px]"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Supports multi-date logs (e.g., "7/18 - Incident..." and "7/22 - Incident..."), 
+                    union involvement, witnesses, and other details. Each incident will be saved separately.
+                  </p>
+                  <div className="flex gap-3 justify-end">
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsImportModalOpen(false);
+                        setRawNotes('');
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleImportNotes}
+                      disabled={!rawNotes.trim()}
+                    >
+                      Parse Notes
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         {/* Incidents List */}
