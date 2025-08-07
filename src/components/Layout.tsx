@@ -25,7 +25,10 @@ export const Layout = ({ children }: LayoutProps) => {
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <AlertIcon className="text-primary-foreground" size={20} />
               </div>
-              <h1 className="text-xl font-semibold text-foreground">HR Incident Manager</h1>
+              <div className="flex flex-col">
+                <h1 className="text-lg font-bold text-foreground">ClearCase</h1>
+                <p className="text-sm text-muted-foreground leading-none">Workplace Incident Manager</p>
+              </div>
             </div>
             
             <nav className="hidden md:flex space-x-8">
