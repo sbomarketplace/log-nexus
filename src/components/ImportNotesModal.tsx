@@ -370,3 +370,5 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
     </Dialog>
   );
 };
+
+export default ImportNotesModal;
