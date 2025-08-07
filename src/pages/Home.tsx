@@ -1,28 +1,21 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
-import { PlusIcon, AlertIcon, CalendarIcon } from '@/components/icons/CustomIcons';
+import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
+import jsPDF from 'jspdf';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIncidents(storage.getIncidents());
   }, []);
-
-  const filteredIncidents = incidents.filter(incident =>
-    incident.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    incident.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    incident.who.some(person => person.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    incident.where.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -32,144 +25,138 @@ const Home = () => {
     });
   };
 
+  const handleExport = (incident: Incident) => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 20;
+    let yPos = 30;
+
+    // Title
+    doc.setFontSize(18);
+    doc.setFont('helvetica', 'bold');
+    doc.text(incident.title, margin, yPos);
+    yPos += 20;
+
+    // Basic info
+    doc.setFontSize(12);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Date: ${incident.date}`, margin, yPos);
+    yPos += 10;
+    doc.text(`Time: ${incident.time}`, margin, yPos);
+    yPos += 10;
+    doc.text(`Location: ${incident.where}`, margin, yPos);
+    yPos += 20;
+
+    // Summary
+    doc.setFont('helvetica', 'bold');
+    doc.text('Summary:', margin, yPos);
+    yPos += 10;
+    doc.setFont('helvetica', 'normal');
+    const summaryLines = doc.splitTextToSize(incident.summary, pageWidth - 2 * margin);
+    doc.text(summaryLines, margin, yPos);
+    yPos += summaryLines.length * 6 + 10;
+
+    // People involved
+    if (incident.who.length > 0) {
+      doc.setFont('helvetica', 'bold');
+      doc.text('People Involved:', margin, yPos);
+      yPos += 10;
+      doc.setFont('helvetica', 'normal');
+      incident.who.forEach(person => {
+        doc.text(`• ${person.name}${person.role ? ` (${person.role})` : ''}`, margin + 5, yPos);
+        yPos += 8;
+      });
+      yPos += 10;
+    }
+
+    // Details sections
+    const sections = [
+      { title: 'What Happened', content: incident.what },
+      { title: 'Why It Happened', content: incident.why },
+      { title: 'How It Happened', content: incident.how }
+    ];
+
+    sections.forEach(section => {
+      if (section.content) {
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${section.title}:`, margin, yPos);
+        yPos += 10;
+        doc.setFont('helvetica', 'normal');
+        const contentLines = doc.splitTextToSize(section.content, pageWidth - 2 * margin);
+        doc.text(contentLines, margin, yPos);
+        yPos += contentLines.length * 6 + 15;
+      }
+    });
+
+    doc.save(`incident-${incident.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
+  };
+
   return (
     <Layout>
       <div className="space-y-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-          <div>
-            <h1 className="text-lg font-medium text-foreground">Incident Dashboard</h1>
-            <p className="text-xs text-muted-foreground">Manage and track workplace incidents</p>
-          </div>
-          <Link to="/add">
-            <Button className="flex items-center space-x-1.5" size="sm">
-              <PlusIcon size={14} />
-              <span>New Incident</span>
-            </Button>
-          </Link>
-        </div>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle>Total Incidents</CardTitle>
-              <AlertIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-medium">{incidents.length}</div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle>This Month</CardTitle>
-              <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-medium">
-                {incidents.filter(incident => {
-                  const incidentDate = new Date(incident.date);
-                  const currentMonth = new Date().getMonth();
-                  const currentYear = new Date().getFullYear();
-                  return incidentDate.getMonth() === currentMonth && 
-                         incidentDate.getFullYear() === currentYear;
-                }).length}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-              <CardTitle>Recent</CardTitle>
-              <AlertIcon className="h-3.5 w-3.5 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-lg font-medium">
-                {incidents.filter(incident => {
-                  const incidentDate = new Date(incident.date);
-                  const weekAgo = new Date();
-                  weekAgo.setDate(weekAgo.getDate() - 7);
-                  return incidentDate >= weekAgo;
-                }).length}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Search */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Input
-            placeholder="Search incidents..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
+        <div className="mb-6">
+          <h1 className="text-lg font-medium text-foreground">Incidents</h1>
+          <p className="text-xs text-muted-foreground">All workplace incidents</p>
         </div>
 
         {/* Incidents List */}
         <div className="space-y-3">
-          {filteredIncidents.length === 0 ? (
+          {incidents.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <AlertIcon className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="text-sm font-medium mb-1">
-                  {incidents.length === 0 ? 'No incidents recorded' : 'No incidents found'}
-                </h3>
-                <p className="text-xs text-muted-foreground text-center mb-4">
-                  {incidents.length === 0 
-                    ? 'Get started by reporting your first incident.' 
-                    : 'Try adjusting your search terms.'}
+                <h3 className="text-sm font-medium mb-1">No incidents recorded</h3>
+                <p className="text-xs text-muted-foreground text-center">
+                  Start by creating your first incident report.
                 </p>
-                {incidents.length === 0 && (
-                  <Link to="/add">
-                    <Button size="sm">
-                      <PlusIcon className="mr-1.5" size={14} />
-                      Report First Incident
-                    </Button>
-                  </Link>
-                )}
               </CardContent>
             </Card>
           ) : (
-            filteredIncidents
+            incidents
               .sort((a, b) => new Date(b.date + ' ' + b.time).getTime() - new Date(a.date + ' ' + a.time).getTime())
               .map((incident) => (
-                <Card key={incident.id} className="hover:shadow-md transition-shadow">
-                  <CardContent>
+                <Card key={incident.id} className="border rounded p-2">
+                  <CardContent className="p-2">
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
                       <div className="flex-1">
-                        <div className="flex items-start justify-between mb-1.5">
+                        <div className="flex items-start justify-between mb-2">
                           <h3 className="font-medium text-sm">{incident.title}</h3>
-                          <Badge variant="secondary" className="ml-2 text-xs">
-                            {formatDate(incident.date)}
-                          </Badge>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                          {incident.summary}
-                        </p>
-                        <div className="flex flex-wrap gap-1.5 mb-2">
-                          {incident.who.slice(0, 3).map((person, index) => (
-                            <Badge key={index} variant="outline" className="text-xs">
-                              {person.role ? `${person.name} (${person.role})` : person.name}
+                          <div className="flex flex-col gap-1 items-end">
+                            <Badge variant="secondary" className="text-xs">
+                              {formatDate(incident.date)}
                             </Badge>
-                          ))}
-                          {incident.who.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{incident.who.length - 3} more
-                            </Badge>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          <span className="font-medium">Location:</span> {incident.where}
+                            {incident.folder && (
+                              <Badge variant="outline" className="text-xs">
+                                <FileIcon className="mr-1" size={12} />
+                                {incident.folder}
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="flex flex-col sm:flex-row gap-2">
+                      <div className="flex gap-2">
                         <Link to={`/incident/${incident.id}`}>
-                          <Button variant="outline" size="sm">
-                            View Details
+                          <Button variant="outline" size="sm" className="text-sm p-2">
+                            View
                           </Button>
                         </Link>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-sm p-2"
+                          onClick={() => navigate(`/add?id=${incident.id}`)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-sm p-2"
+                          onClick={() => handleExport(incident)}
+                        >
+                          Export
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
