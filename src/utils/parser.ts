@@ -35,12 +35,14 @@ const locationPatterns = [
   /([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*)\s+(?:room|area|department|office|floor|building)/gi
 ];
 
-// Enhanced people detection patterns
+// Enhanced people detection patterns with role context
 const peoplePatterns = [
   /(?:supervisor|manager|boss|lead|director|hr|human resources)\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?)/gi,
   /([A-Z][a-z]+(?:\s+[A-Z]\.?)?)\s+(?:said|told|asked|stated|mentioned|claimed)/gi,
+  /(?:witness|witnesses?):\s*([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:,\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?)*)/gi,
   /(?:with|from|by|to)\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?)/gi,
-  /([A-Z][a-z]+)\s+(?:was|is|had|has|did|does)/gi
+  /([A-Z][a-z]+)\s+(?:was|is|had|has|did|does)/gi,
+  /(?:who|people involved):\s*([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:,\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?)*)/gi
 ];
 
 function extractTitle(text: string): string {
@@ -56,6 +58,20 @@ function extractTitle(text: string): string {
 }
 
 function extractLocation(text: string): string | undefined {
+  // First check for explicit location patterns
+  const locationMarkers = [
+    /(?:where|location|at|in):\s*([^\n\.]+)/gi,
+    /(?:occurred at|happened at|took place at)\s+([^\n\.]+)/gi
+  ];
+  
+  for (const marker of locationMarkers) {
+    const match = text.match(marker);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+  
+  // Then check general location patterns
   for (const pattern of locationPatterns) {
     const matches = Array.from(text.matchAll(pattern));
     if (matches.length > 0) {
@@ -82,14 +98,42 @@ function extractCategory(text: string): string | undefined {
 function extractPeopleInvolved(text: string): string[] {
   const people = new Set<string>();
   
-  for (const pattern of peoplePatterns) {
+  // Extract from explicit patterns first
+  const explicitPatterns = [
+    /(?:who|people involved|witnesses?):\s*([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:,\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?)*)/gi,
+    /(?:witness|witnesses?)\s+(?:by|were)\s+([A-Z][a-z]+(?:\s+[A-Z]\.?)?(?:,\s*[A-Z][a-z]+(?:\s+[A-Z]\.?)?)*)/gi
+  ];
+  
+  for (const pattern of explicitPatterns) {
     const matches = Array.from(text.matchAll(pattern));
     matches.forEach(match => {
-      const name = match[1]?.trim();
-      if (name && name.length > 1 && name.length < 30) {
-        people.add(name);
-      }
+      const names = match[1].split(',').map(n => n.trim());
+      names.forEach(name => {
+        if (name && name.length > 1 && name.length < 30) {
+          // Capitalize first letter of each word
+          const capitalizedName = name.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          ).join(' ');
+          people.add(capitalizedName);
+        }
+      });
     });
+  }
+  
+  // Fall back to general patterns if no explicit mentions
+  if (people.size === 0) {
+    for (const pattern of peoplePatterns) {
+      const matches = Array.from(text.matchAll(pattern));
+      matches.forEach(match => {
+        const name = match[1]?.trim();
+        if (name && name.length > 1 && name.length < 30) {
+          const capitalizedName = name.split(' ').map(word => 
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          ).join(' ');
+          people.add(capitalizedName);
+        }
+      });
+    }
   }
   
   return Array.from(people).slice(0, 5); // Limit to 5 names for display
@@ -219,15 +263,15 @@ function parseIncidentSection(text: string, extractedDate?: string): ParsedIncid
   // Parse main content as "what happened"
   result.what = text.trim();
 
-  // Parse location if not already extracted
-  if (!result.location) {
+  // Format location as full sentence
+  if (result.location) {
+    result.where = `Incident occurred at ${result.location}.`;
+  } else {
     const whereMatch = text.match(/(?:where|location|at|in):\s*([^\n]+)/i);
     if (whereMatch) {
-      result.where = whereMatch[1].trim();
+      result.where = `Incident occurred at ${whereMatch[1].trim()}.`;
       result.location = whereMatch[1].trim();
     }
-  } else {
-    result.where = result.location;
   }
 
   // Parse why
