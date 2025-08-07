@@ -1,29 +1,33 @@
+export interface Person {
+  name: string;
+  role?: string;
+}
+
+export interface UnionInvolvement {
+  name: string;
+  union: string;
+  role?: string;
+  notes?: string;
+}
+
 export interface Incident {
   id: string;
+  title: string;
   date: string;
   time: string;
-  title: string;
   summary: string;
-  who: {
-    name: string;
-    role?: string;
-  }[];
+  location?: string; // Enhanced: extracted location
+  category?: string; // Enhanced: inferred category
+  peopleInvolved?: string[]; // Enhanced: quick list of people names
+  who: Person[];
   what: string;
   where: string;
   why: string;
   how: string;
-  witnesses?: {
-    name: string;
-    role?: string;
-  }[];
-  unionInvolvement?: {
-    name: string;
-    union: string;
-    role?: string;
-    notes?: string;
-  }[];
+  witnesses?: Person[];
+  unionInvolvement?: UnionInvolvement[];
   files?: string[];
-  rewrittenSummary?: string;
-  folder?: string;
   tags?: string[];
+  folder?: string;
+  rewrittenSummary?: string;
 }

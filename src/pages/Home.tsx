@@ -65,9 +65,12 @@ const Home = () => {
           date: parsed.date || new Date().toISOString().split('T')[0],
           time: parsed.time || new Date().toTimeString().slice(0, 5),
           summary: parsed.what || 'Imported incident',
+          location: parsed.location, // Enhanced: store location
+          category: parsed.category, // Enhanced: store category  
+          peopleInvolved: parsed.peopleInvolved, // Enhanced: store people list
           who: parsed.who || [],
           what: parsed.what || '',
-          where: parsed.where || '',
+          where: parsed.where || parsed.location || '',
           why: parsed.why || '',
           how: parsed.how || '',
           witnesses: parsed.witnesses || [],
@@ -337,26 +340,59 @@ const Home = () => {
             incidents
               .sort((a, b) => new Date(b.date + ' ' + b.time).getTime() - new Date(a.date + ' ' + a.time).getTime())
               .map((incident) => (
-                <Card key={incident.id} className="border rounded p-2">
-                  <CardContent className="p-2">
-                    <div className="flex flex-col sm:flex-row justify-between items-start gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <h3 className="font-medium text-sm">{incident.title}</h3>
-                          <div className="flex flex-col gap-1 items-end">
-                            <Badge variant="secondary" className="text-xs">
+                <Card key={incident.id} className="border rounded-lg">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {/* Enhanced header with date and title */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="secondary" className="text-xs px-2 py-1">
                               {formatDate(incident.date)}
                             </Badge>
-                            {incident.folder && (
-                              <Badge variant="outline" className="text-xs">
-                                <FileIcon className="mr-1" size={12} />
-                                {incident.folder}
+                            {incident.category && (
+                              <Badge variant="outline" className="text-xs px-2 py-1">
+                                {incident.category}
                               </Badge>
                             )}
                           </div>
+                          <h3 className="font-medium text-sm leading-tight mb-2 line-clamp-2">
+                            {incident.title}
+                          </h3>
                         </div>
                       </div>
-                      <div className="flex gap-2">
+
+                      {/* Enhanced metadata row */}
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <div className="flex flex-wrap gap-3">
+                          {incident.location && (
+                            <span className="flex items-center gap-1">
+                              <span className="font-medium">Location:</span>
+                              <span className="truncate max-w-[120px]">{incident.location}</span>
+                            </span>
+                          )}
+                          {incident.peopleInvolved && incident.peopleInvolved.length > 0 && (
+                            <span className="flex items-center gap-1">
+                              <span className="font-medium">People:</span>
+                              <span className="truncate max-w-[140px]">
+                                {incident.peopleInvolved.slice(0, 2).join(', ')}
+                                {incident.peopleInvolved.length > 2 && ` +${incident.peopleInvolved.length - 2}`}
+                              </span>
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs opacity-75">
+                          Created: {new Date(incident.date + ' ' + incident.time).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Action buttons */}
+                      <div className="flex gap-2 pt-2">
                         <Link to={`/incident/${incident.id}`}>
                           <Button variant="outline" size="sm" className="text-sm px-3 py-1">
                             View

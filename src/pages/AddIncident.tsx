@@ -227,6 +227,9 @@ const AddIncident = () => {
       date: formData.date,
       time: formData.time,
       summary: formData.what, // Using 'what' as the main summary
+      location: formData.where, // Enhanced: populate location field
+      category: undefined, // Enhanced: could be set later via categorization
+      peopleInvolved: whoInvolved.filter(person => person.name.trim()).map(person => person.name), // Enhanced: extract names for quick display
       who: whoInvolved.filter(person => person.name.trim()),
       what: formData.what,
       where: formData.where,

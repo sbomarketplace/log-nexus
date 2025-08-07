@@ -119,3 +119,22 @@ All colors MUST be HSL.
   label { @apply text-xs font-medium; }
   input, textarea, select { @apply text-sm; }
 }
+
+/* Enhanced UI utilities for incident list */
+@layer utilities {
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+}
