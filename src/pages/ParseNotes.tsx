@@ -77,23 +77,31 @@ const ParseNotes = () => {
       const mockParsedResults: ParsedIncident[] = [
         {
           title: "Inappropriate Comment",
-          category: "Harassment",
+          category: "Harassment", 
           date: "11/18",
           location: "Office desk area",
           peopleInvolved: ["Troy Malone"],
-          summary: `📅 11/18 — Inappropriate Comment
-• Who: Troy Malone
-• What: Asked if an Indian QA had an OnlyFans account during a team meeting
-• Where: At our desks
-• When: 6:00 AM
-• Witnesses: Mark, Jake, Billy, AL, Darryl, 2 AOG contractors
-• Notes: Occurred during formal team setting`,
+          summary: "Inappropriate comment made during team meeting",
           who: "Troy Malone",
           what: "Asked if an Indian QA had an OnlyFans account during a team meeting",
           where: "At our desks",
           when: "6:00 AM",
           witnesses: "Mark, Jake, Billy, AL, Darryl, 2 AOG contractors",
           notes: "Occurred during formal team setting"
+        },
+        {
+          title: "Workplace Dispute",
+          category: "Conflict",
+          date: "11/19", 
+          location: "Conference Room B",
+          peopleInvolved: ["Sarah Wilson", "Mike Chen"],
+          summary: "Disagreement over project timeline escalated",
+          who: "Sarah Wilson, Mike Chen",
+          what: "Heated argument over project deadline changes leading to raised voices",
+          where: "Conference Room B",
+          when: "2:30 PM",
+          witnesses: "Jennifer Adams, Tom Rodriguez",
+          notes: "Meeting had to be paused for 10 minutes to de-escalate"
         }
       ];
 
@@ -311,13 +319,45 @@ const ParseNotes = () => {
         <Dialog open={!!selectedIncident} onOpenChange={() => setSelectedIncident(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>{selectedIncident?.title}</DialogTitle>
+              <DialogTitle className="flex items-center space-x-2">
+                <span>📅 {selectedIncident?.date} — {selectedIncident?.category}</span>
+              </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4">
-              <pre className="whitespace-pre-wrap text-sm bg-muted p-4 rounded">
-                {selectedIncident?.summary}
-              </pre>
-            </div>
+            <section className="space-y-4">
+              <div className="grid grid-cols-1 gap-3">
+                <article className="space-y-3">
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• Who:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.who || 'Not specified'}</span>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• What:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.what || 'Not specified'}</span>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• Where:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.where || 'Not specified'}</span>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• When:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.when || 'Not specified'}</span>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• Witnesses:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.witnesses || 'None noted'}</span>
+                  </div>
+                  
+                  <div className="flex items-start space-x-2">
+                    <span className="font-medium text-sm">• Notes:</span>
+                    <span className="text-sm text-muted-foreground">{selectedIncident?.notes || 'None noted'}</span>
+                  </div>
+                </article>
+              </div>
+            </section>
           </DialogContent>
         </Dialog>
 
