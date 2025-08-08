@@ -10,14 +10,11 @@ import { Label } from '@/components/ui/label';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
-import { ImportNotesModal } from '@/components/ImportNotesModal';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isFileProcessing, setIsFileProcessing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,52 +30,6 @@ const Home = () => {
     });
   };
 
-  const handleImportNotes = (parsedIncidents: any[], batchTitle: string) => {
-    try {
-      let savedCount = 0;
-      const batchId = `batch_${Date.now()}`;
-      
-      parsedIncidents.forEach((parsed, index) => {
-        const incident: Incident = {
-          id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}_${index}`,
-          title: parsed.title || `Incident ${index + 1} from ${batchTitle}`,
-          date: parsed.date || new Date().toISOString().split('T')[0],
-          time: parsed.time || new Date().toTimeString().slice(0, 5),
-          summary: parsed.what || 'Imported incident',
-          location: parsed.location,
-          category: parsed.category,
-          peopleInvolved: parsed.peopleInvolved,
-          who: parsed.who || [],
-          what: parsed.what || '',
-          where: parsed.where || parsed.location || '',
-          why: parsed.why || '',
-          how: parsed.how || '',
-          witnesses: parsed.witnesses || [],
-          unionInvolvement: parsed.unionInvolvement || [],
-          files: [],
-          tags: [`import:${batchTitle}`, `batch:${batchId}`],
-          folder: batchTitle, // Store batch title as folder for grouping
-        };
-        
-        storage.saveIncident(incident);
-        savedCount++;
-      });
-      
-      setIncidents(storage.getIncidents());
-      
-      toast({
-        title: "Import Successful",
-        description: `Imported ${savedCount} incident${savedCount > 1 ? 's' : ''} from "${batchTitle}".`,
-      });
-    } catch (error) {
-      console.error('Error importing notes:', error);
-      toast({
-        title: "Import Failed", 
-        description: "There was an error importing your notes. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
 
   const handleExport = (incident: Incident) => {
@@ -170,21 +121,6 @@ const Home = () => {
               + New Incident
             </Button>
           </Link>
-          
-          <div>
-            <Button 
-              onClick={() => setIsImportModalOpen(true)}
-              className="bg-accent text-white rounded p-2 text-sm"
-            >
-              Import Notes
-            </Button>
-            
-            <ImportNotesModal
-              isOpen={isImportModalOpen}
-              onClose={() => setIsImportModalOpen(false)}
-              onImport={handleImportNotes}
-            />
-          </div>
         </div>
 
         {/* Incidents List */}
