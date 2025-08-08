@@ -282,7 +282,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
   if (showReview) {
     return (
       <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Edit2 className="h-5 w-5" />
@@ -462,7 +462,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
         <DialogHeader>
           <DialogTitle>Import Raw Notes</DialogTitle>
           <p className="text-sm text-muted-foreground">
