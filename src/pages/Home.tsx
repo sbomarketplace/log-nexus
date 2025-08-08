@@ -12,6 +12,7 @@ import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { useToast } from '@/hooks/use-toast';
+import { ImportNotesModal } from '@/components/ImportNotesModal';
 import jsPDF from 'jspdf';
 
 const Home = () => {
@@ -23,6 +24,10 @@ const Home = () => {
   useEffect(() => {
     setIncidents(storage.getIncidents());
   }, []);
+
+  const handleImportComplete = () => {
+    setIncidents(storage.getIncidents());
+  };
 
   const handleDeleteIncident = (id: string) => {
     storage.deleteIncident(id);
@@ -134,6 +139,7 @@ const Home = () => {
                 + New Incident
               </Button>
             </Link>
+            <ImportNotesModal onImportComplete={handleImportComplete} />
           </div>
         </div>
 
