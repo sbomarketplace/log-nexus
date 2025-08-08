@@ -4,6 +4,7 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -15,12 +16,23 @@ import jsPDF from 'jspdf';
 
 const Home = () => {
   const [incidents, setIncidents] = useState<Incident[]>([]);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
     setIncidents(storage.getIncidents());
   }, []);
+
+  const handleDeleteIncident = (id: string) => {
+    storage.deleteIncident(id);
+    setIncidents(storage.getIncidents());
+    setDeleteId(null);
+    toast({
+      title: "Incident Deleted",
+      description: "The incident has been permanently removed.",
+    });
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -116,11 +128,18 @@ const Home = () => {
 
         {/* Action Buttons */}
         <div className="mb-6 text-center space-y-3">
-          <Link to="/add">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
-              + New Incident
-            </Button>
-          </Link>
+          <div className="flex justify-center gap-3">
+            <Link to="/add">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
+                + New Incident
+              </Button>
+            </Link>
+            <Link to="/parse">
+              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium">
+                Parse Notes
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Incidents List */}
@@ -213,6 +232,14 @@ const Home = () => {
                         >
                           Export
                         </Button>
+                        <Button 
+                          variant="destructive" 
+                          size="sm" 
+                          className="text-sm px-3 py-1"
+                          onClick={() => setDeleteId(incident.id)}
+                        >
+                          Delete
+                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -220,6 +247,27 @@ const Home = () => {
               ))
           )}
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Incident</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete this incident? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => deleteId && handleDeleteIncident(deleteId)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </Layout>
   );
