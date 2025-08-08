@@ -48,37 +48,35 @@ serve(async (req) => {
     }
 
     const prompt = `
-You are a structured workplace incident summarization agent.
+You are a professional HR documentation assistant. Your job is to parse raw HR incident notes into individual structured summaries.
 
-Your job is to process raw incident notes and extract the following fields:
-- Title: A short descriptive label for this incident
-- Category: Choose from [Wrongful Accusation, Retaliation, Harassment, Unsafe Conditions, Forced Drug Test, Policy Violation, Discrimination, Other]
-- Date: First known date of the incident (or earliest date mentioned in the note)
-- Location: Room, workplace zone, or general area where the incident occurred
-- People Involved: List all named individuals and assign a role if known (e.g., Manager, Union Steward, Security, Witness)
-- Summary: Write a clear, factual summary using the format below:
+Rules:
+- Each incident must be separated into its own summary block
+- Use the first clear date (e.g. 11/18, 7/22) as the incident date
+- Clean up obvious typos (e.g. "at out desks" to "at our desks")
+- Always assign a meaningful incident category from: Harassment, Discrimination, Favoritism, Retaliation, Privacy Violation, Inappropriate Behavior, False Accusation, Unsafe Conditions, Workplace Negligence, Policy Violation, Other
+- Don't include duplicate information
+- Use only information explicitly stated in the raw text
 
-[SUMMARY TEMPLATE]
+Format each incident exactly like this:
 
-On [DATE], the user experienced [ISSUE] at [LOCATION] involving [KEY PEOPLE].
+📅 [Date] — [Category or Issue]
+• Who: [People involved]
+• What: [What happened]
+• Where: [Location if mentioned, otherwise "Not specified"]
+• When: [Time if mentioned, otherwise "Not specified"]
+• Witnesses: [Witnesses if mentioned, otherwise "None noted"]
+• Notes: [Additional context if any, otherwise "None"]
 
-[Brief narrative: Describe what happened, any violations of policy, involvement of management, union reps, or security. Summarize key statements and actions.]
-
-[Escalations: Include if any complaints were filed, such as emails to Ethics or EEOC inquiries.]
-
-[Ongoing Retaliation: If present, include any follow-up dates or behavior that suggests the user was targeted or harassed.]
-
-Do not invent or assume any details. Use only what is explicitly stated in the raw text.
-
-Respond with a clean JSON object like this:
+Respond with a JSON object like this:
 
 {
-  "title": "...",
-  "category": "...",
-  "date": "...",
-  "location": "...",
-  "peopleInvolved": ["...", "..."],
-  "summary": "..."
+  "title": "[Short descriptive title]",
+  "category": "[Category from the list above]",
+  "date": "[Date in MM/DD format]",
+  "location": "[Where it happened]",
+  "peopleInvolved": ["person1", "person2"],
+  "summary": "[The formatted summary using the 📅 format above]"
 }
 `;
 
