@@ -462,7 +462,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Import Raw Notes</DialogTitle>
           <p className="text-sm text-muted-foreground">
