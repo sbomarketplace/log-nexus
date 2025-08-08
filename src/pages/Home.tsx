@@ -134,11 +134,6 @@ const Home = () => {
                 + New Incident
               </Button>
             </Link>
-            <Link to="/parse">
-              <Button variant="outline" className="border-primary text-primary hover:bg-primary hover:text-primary-foreground rounded-lg px-4 py-2 text-sm font-medium">
-                Parse Notes
-              </Button>
-            </Link>
           </div>
         </div>
 
