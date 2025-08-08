@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { X, Edit2, Calendar, MapPin, Users, Tag, Mic, MicOff } from 'lucide-react';
+import { Mic, MicOff, Upload, Eye, Import } from 'lucide-react';
+import IncidentSummaryBox from '@/components/IncidentSummaryBox';
+import IncidentEditModal from '@/components/IncidentEditModal';
+import FileUploader from '@/components/FileUploader';
 import { parseMultipleIncidents } from '@/utils/parser';
 import { toast } from '@/hooks/use-toast';
 
@@ -117,6 +117,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isGeneratingAI, setIsGeneratingAI] = useState(false);
+  const [uploadedFileName, setUploadedFileName] = useState<string>('');
   const recognitionRef = useRef<any>(null);
 
   const handleVoiceInput = () => {
@@ -264,12 +265,13 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
     setShowReview(false);
     setEditingIndex(null);
     setIsRecording(false);
+    setUploadedFileName('');
     onClose();
   };
 
-  const updateIncident = (index: number, field: keyof ParsedIncident, value: any) => {
+  const updateIncident = (index: number, updatedIncident: ParsedIncident) => {
     const updated = [...parsedIncidents];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = updatedIncident;
     setParsedIncidents(updated);
   };
 
@@ -279,184 +281,79 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
     setEditingIndex(null);
   };
 
+  const handleFileContent = (content: string, filename: string) => {
+    setRawNotes(content);
+    setUploadedFileName(filename);
+    if (!batchTitle && filename) {
+      setBatchTitle(`Import from ${filename}`);
+    }
+  };
+
+  const handleEditIncident = (index: number) => {
+    setEditingIndex(index);
+  };
+
   if (showReview) {
     return (
-      <Dialog open={isOpen} onOpenChange={handleClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Edit2 className="h-5 w-5" />
-              Review Parsed Incidents ({parsedIncidents.length})
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground">
-              Batch: <span className="font-medium">{batchTitle}</span>
-            </p>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            {parsedIncidents.map((incident, index) => (
-              <Card key={index} className="relative">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <Calendar className="h-4 w-4" />
-                      Incident {index + 1}
-                    </CardTitle>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeIncident(index)}
-                      className="text-destructive hover:text-destructive"
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {/* Title - Required Field */}
-                  <div className="space-y-1">
-                    <Label className="text-xs font-medium text-destructive">Title *</Label>
-                    <Input
-                      value={incident.title || ''}
-                      onChange={(e) => updateIncident(index, 'title', e.target.value)}
-                      placeholder="Enter incident title (required)"
-                      className="text-sm"
-                      required
-                    />
-                  </div>
-
-                  {/* Category - Dropdown */}
-                  <div className="space-y-1">
-                    <Label className="text-xs font-medium flex items-center gap-1">
-                      <Tag className="h-3 w-3" />
-                      Category
-                    </Label>
-                    <Select 
-                      value={incident.category || ''} 
-                      onValueChange={(value) => updateIncident(index, 'category', value)}
-                    >
-                      <SelectTrigger className="text-sm">
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INCIDENT_CATEGORIES.map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="space-y-1">
-                      <Label className="text-xs font-medium">Date</Label>
-                      <Input
-                        type="date"
-                        value={incident.date || ''}
-                        onChange={(e) => updateIncident(index, 'date', e.target.value)}
-                        className="text-sm"
-                      />
-                    </div>
-                    
-                    <div className="space-y-1">
-                      <Label className="text-xs font-medium flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        Location
-                      </Label>
-                      <Input
-                        value={incident.location || ''}
-                        onChange={(e) => updateIncident(index, 'location', e.target.value)}
-                        placeholder="Room, area, or department"
-                        className="text-sm"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label className="text-xs font-medium flex items-center gap-1">
-                      <Users className="h-3 w-3" />
-                      People Involved
-                    </Label>
-                    <Input
-                      value={incident.peopleInvolved?.join(', ') || ''}
-                      onChange={(e) => updateIncident(index, 'peopleInvolved', 
-                        e.target.value.split(',').map(p => p.trim()).filter(p => p)
-                      )}
-                      placeholder="Enter names separated by commas"
-                      className="text-sm"
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label className="text-xs font-medium">AI-Generated Summary</Label>
-                    <Textarea
-                      value={incident.summary || incident.what || ''}
-                      onChange={(e) => updateIncident(index, 'summary', e.target.value)}
-                      placeholder="AI-generated summary of the incident"
-                      rows={2}
-                      className="text-sm bg-muted/50"
-                      readOnly
-                    />
-                  </div>
-                  
-                  <div className="space-y-1">
-                    <Label className="text-xs font-medium">Full Raw Text</Label>
-                    <Textarea
-                      value={incident.what || ''}
-                      onChange={(e) => updateIncident(index, 'what', e.target.value)}
-                      placeholder="Full incident description and details"
-                      rows={4}
-                      className="text-sm"
-                    />
-                  </div>
-                  
-                  {/* Display extracted metadata as badges */}
-                  <div className="flex flex-wrap gap-1">
-                    {incident.date && (
-                      <Badge variant="secondary" className="text-xs">
-                        {incident.date}
-                      </Badge>
-                    )}
-                    {incident.location && (
-                      <Badge variant="outline" className="text-xs">
-                        📍 {incident.location}
-                      </Badge>
-                    )}
-                    {incident.category && (
-                      <Badge variant="default" className="text-xs">
-                        🏷️ {incident.category}
-                      </Badge>
-                    )}
-                    {incident.peopleInvolved && incident.peopleInvolved.length > 0 && (
-                      <Badge variant="outline" className="text-xs">
-                        👥 {incident.peopleInvolved.length} people
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+      <>
+        <Dialog open={isOpen} onOpenChange={handleClose}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Review Parsed Incidents ({parsedIncidents.length})
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground">
+                Batch: <span className="font-medium">{batchTitle}</span>
+                {uploadedFileName && (
+                  <span className="ml-2">• From: <span className="font-medium">{uploadedFileName}</span></span>
+                )}
+              </p>
+            </DialogHeader>
             
-            <Separator />
-            
-            <div className="flex justify-between items-center pt-4">
-              <div className="text-sm text-muted-foreground">
-                {parsedIncidents.length} incident{parsedIncidents.length > 1 ? 's' : ''} ready to import
+            <div className="space-y-4">
+              {/* Summary boxes grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {parsedIncidents.map((incident, index) => (
+                  <IncidentSummaryBox
+                    key={index}
+                    incident={incident}
+                    index={index}
+                    onEdit={handleEditIncident}
+                    onRemove={removeIncident}
+                  />
+                ))}
               </div>
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setShowReview(false)}>
-                  Back to Edit
-                </Button>
-                <Button onClick={handleSubmitAll} className="bg-primary text-primary-foreground">
-                  Import All Incidents
-                </Button>
+              
+              <Separator />
+              
+              <div className="flex justify-between items-center pt-4">
+                <div className="text-sm text-muted-foreground">
+                  {parsedIncidents.length} incident{parsedIncidents.length > 1 ? 's' : ''} ready to import
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" onClick={() => setShowReview(false)}>
+                    Back to Edit
+                  </Button>
+                  <Button onClick={handleSubmitAll} className="bg-primary text-primary-foreground">
+                    <Import className="h-4 w-4 mr-2" />
+                    Import All Incidents
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Modal */}
+        <IncidentEditModal
+          isOpen={editingIndex !== null}
+          incident={editingIndex !== null ? parsedIncidents[editingIndex] : null}
+          index={editingIndex || 0}
+          onClose={() => setEditingIndex(null)}
+          onSave={updateIncident}
+        />
+      </>
     );
   }
 
@@ -464,9 +361,12 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
         <DialogHeader>
-          <DialogTitle>Import Raw Notes</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Upload className="h-5 w-5" />
+            Import Raw Notes
+          </DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Paste multiple incident notes below. The parser will automatically detect separate incidents by date anchors.
+            Paste or upload incident notes. The AI parser will automatically detect separate incidents and structure them.
           </p>
         </DialogHeader>
         
@@ -485,6 +385,14 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
             </p>
           </div>
           
+          {/* File Upload Section */}
+          <FileUploader
+            onFileContent={handleFileContent}
+            disabled={isGeneratingAI}
+          />
+          
+          <Separator className="my-4" />
+
           <div className="space-y-2">
             <Label htmlFor="import-notes">Raw Notes</Label>
             <p className="text-xs text-muted-foreground italic">
@@ -522,11 +430,11 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
           </div>
           
           <div className="bg-muted/50 p-3 rounded-lg text-xs text-muted-foreground">
-            <strong>Tip:</strong> The parser will automatically detect incidents by date patterns like:
-            <br />• MM/DD/YY or MM/DD/YYYY
-            <br />• Month Day, Year
-            <br />• Date: MM/DD/YY
-            <br />Each date block will become a separate incident for review.
+            <strong>✨ AI-Powered Parsing:</strong> The system automatically detects incidents by:
+            <br />• Date patterns (MM/DD/YY, Month Day Year)
+            <br />• New people involved or issue types
+            <br />• Timeline changes and paragraph breaks
+            <br />Each detected incident will be structured with Who, What, When, Where, and Witnesses.
           </div>
           
           <div className="flex justify-end gap-2">
