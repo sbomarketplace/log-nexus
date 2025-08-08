@@ -57,8 +57,36 @@ const INCIDENT_CATEGORIES = [
   'Other'
 ];
 
-// Simple AI-style summarization (client-side)
-const generateSummary = (text: string): string => {
+// AI-powered summarization using Supabase Edge Function
+const generateAISummary = async (text: string): Promise<string> => {
+  try {
+    const response = await fetch('/functions/v1/summarize-incident', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ 
+        rawText: text,
+        userId: 'placeholder' // TODO: Replace with actual user ID
+      }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || 'Failed to generate AI summary');
+    }
+
+    const result = await response.json();
+    return result.summary || text;
+  } catch (error) {
+    console.error('AI summarization failed:', error);
+    // Fallback to simple client-side summarization
+    return generateSimpleSummary(text);
+  }
+};
+
+// Fallback simple summarization (client-side)
+const generateSimpleSummary = (text: string): string => {
   if (!text || text.length < 50) return text;
   
   // Extract key sentences and create a concise summary
@@ -88,6 +116,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
   const [showReview, setShowReview] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isRecording, setIsRecording] = useState(false);
+  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
   const recognitionRef = useRef<any>(null);
 
   const handleVoiceInput = () => {
@@ -146,7 +175,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
     recognitionRef.current.start();
   };
 
-  const handleParse = () => {
+  const handleParse = async () => {
     if (!rawNotes.trim()) {
       toast({
         title: "Error",
@@ -177,13 +206,20 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
         return;
       }
 
-      // Generate summaries and enhance each incident
-      const enhancedIncidents = parsed.map(incident => ({
-        ...incident,
-        summary: generateSummary(incident.what || ''),
-        title: incident.title || generateSummary(incident.what || '').substring(0, 60),
-        where: incident.location ? `Incident occurred at ${incident.location}.` : incident.where
-      }));
+      // Generate AI summaries and enhance each incident
+      setIsGeneratingAI(true);
+      const enhancedIncidents = await Promise.all(
+        parsed.map(async (incident) => {
+          const aiSummary = await generateAISummary(incident.what || '');
+          return {
+            ...incident,
+            summary: aiSummary,
+            title: incident.title || aiSummary.substring(0, 60),
+            where: incident.location ? `Incident occurred at ${incident.location}.` : incident.where
+          };
+        })
+      );
+      setIsGeneratingAI(false);
 
       setParsedIncidents(enhancedIncidents);
       setShowReview(true);
@@ -193,6 +229,7 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
         description: `Found ${enhancedIncidents.length} incident${enhancedIncidents.length > 1 ? 's' : ''} to review.`,
       });
     } catch (error) {
+      setIsGeneratingAI(false);
       toast({
         title: "Parsing Error",
         description: "There was an error parsing your notes. Please check the format and try again.",
@@ -498,9 +535,9 @@ export const ImportNotesModal: React.FC<ImportNotesModalProps> = ({
             </Button>
             <Button
               onClick={handleParse}
-              disabled={!rawNotes.trim() || !batchTitle.trim()}
+              disabled={!rawNotes.trim() || !batchTitle.trim() || isGeneratingAI}
             >
-              Parse & Review
+              {isGeneratingAI ? "Generating AI Summaries..." : "Parse & Review"}
             </Button>
           </div>
         </div>
