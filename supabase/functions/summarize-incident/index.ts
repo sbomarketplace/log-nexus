@@ -48,36 +48,58 @@ serve(async (req) => {
     }
 
     const prompt = `
-You are a professional HR documentation assistant. Your job is to parse raw HR incident notes into individual structured summaries.
-
-Rules:
-- Each incident must be separated into its own summary block
-- Use the first clear date (e.g. 11/18, 7/22) as the incident date
-- Clean up obvious typos (e.g. "at out desks" to "at our desks")
-- Always assign a meaningful incident category from: Harassment, Discrimination, Favoritism, Retaliation, Privacy Violation, Inappropriate Behavior, False Accusation, Unsafe Conditions, Workplace Negligence, Policy Violation, Other
-- Don't include duplicate information
-- Use only information explicitly stated in the raw text
-
-Format each incident exactly like this:
+You are a professional HR documentation assistant. Your task is to parse raw HR incident notes into separate, structured incident summaries.
+Each summary must follow this format exactly:
 
 📅 [Date] — [Category or Issue]
-• Who: [People involved]
-• What: [What happened]
-• Where: [Location if mentioned, otherwise "Not specified"]
-• When: [Time if mentioned, otherwise "Not specified"]
-• Witnesses: [Witnesses if mentioned, otherwise "None noted"]
-• Notes: [Additional context if any, otherwise "None"]
+• Who:
+• What:
+• Where:
+• When:
+• Witnesses:
+• Notes:
 
-Respond with a JSON object like this:
+Rules:
 
-{
-  "title": "[Short descriptive title]",
-  "category": "[Category from the list above]",
-  "date": "[Date in MM/DD format]",
-  "location": "[Where it happened]",
-  "peopleInvolved": ["person1", "person2"],
-  "summary": "[The formatted summary using the 📅 format above]"
-}
+- Split each distinct incident into its own structured block based on new dates, topic shifts, or scene changes.
+- Use the first clear date (e.g., 11/18, 7/22) as the incident date. If missing, write "Unknown Date".
+- Assign a relevant incident category like: Harassment, Retaliation, Discrimination, Favoritism, Inappropriate Comment, False Accusation, Privacy Violation, Unsafe Condition, etc.
+- Clean up obvious typos like "at out desks" → "at our desks"
+- If a field is missing (e.g., no witnesses), still include the field but write "None noted"
+- Return summaries in this clean, readable format. Do not output any extra commentary or headers.
+
+Example input:
+11/18
+Who: Troy Malone
+What: Asked if Indian QA has an OF during a meeting...
+[...more entries with other dates]
+
+Expected output:
+📅 11/18 — Inappropriate Comment
+• Who: Troy Malone
+• What: Asked if an Indian QA had an OnlyFans during a team meeting
+• Where: At our desks
+• When: 6:00 AM
+• Witnesses: Mark, Jake, Billy, AL, Darryl, 2 AOG contractors
+• Notes: Occurred during a formal team meeting
+
+📅 7/22 — False Accusation
+• Who: Arthur Samora, Vincent Jessie, Seth Bentley
+• What: Accused employee of smoking weed in the tool room...
+[...]
+
+Respond with a JSON array of incident objects like this:
+
+[
+  {
+    "title": "[Short descriptive title]",
+    "category": "[Category from above]",
+    "date": "[Date in MM/DD format]",
+    "location": "[Where it happened or 'None noted']",
+    "peopleInvolved": ["person1", "person2"],
+    "summary": "[The formatted summary using the 📅 format above]"
+  }
+]
 `;
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
@@ -87,7 +109,7 @@ Respond with a JSON object like this:
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4o',
         temperature: 0.2,
         messages: [
           {
@@ -112,10 +134,13 @@ Respond with a JSON object like this:
     try {
       const parsed = JSON.parse(content)
       
+      // Handle both single incident and multiple incidents
+      const incidents = Array.isArray(parsed) ? parsed : [parsed]
+      
       // TODO: Decrement user credits here
       
       return new Response(
-        JSON.stringify(parsed),
+        JSON.stringify({ incidents }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
         }
