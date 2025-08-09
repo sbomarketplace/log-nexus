@@ -7,8 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { incidentService } from '@/services/incidents';
 import { IncidentEvent } from '@/types/incidents';
+import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 
 interface OrganizeNotesModalProps {
   onOrganizeComplete: () => void;
@@ -69,13 +69,21 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     if (organizedIncidents.length === 0) return;
 
     try {
-      const incidentRecord = {
+      const newIncidents: OrganizedIncident[] = organizedIncidents.map(event => ({
         id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        events: organizedIncidents
-      };
+        date: event.date,
+        categoryOrIssue: event.category,
+        who: event.who,
+        what: event.what,
+        where: event.where,
+        when: event.when,
+        witnesses: event.witnesses,
+        notes: event.notes,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }));
 
-      await incidentService.createIncident(incidentRecord);
+      organizedIncidentStorage.saveMultiple(newIncidents);
       
       toast({
         title: "Incidents Saved",
