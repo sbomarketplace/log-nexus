@@ -11,29 +11,29 @@ const corsHeadersJson = {
 const OPENAI_API_KEY = Deno.env.get("OPENAI_SECRET_KEY");
 
 const SYSTEM_PROMPT = `
-You are an assistant that organizes raw workplace incident notes into a structured JSON object.
-Return a JSON object with this exact structure:
-
+You are an HR incident organizer. Split raw notes into one or more incidents.
+For EACH incident, produce JSON that matches this schema:
 {
-  "incidents": [
-    {
-      "date": "string",
-      "category": "string", 
-      "who": "string",
-      "what": "string",
-      "where": "string",
-      "when": "string",
-      "witnesses": "string",
-      "notes": "string"
-    }
-  ]
+  "date": "string | null",
+  "category": "one of: Harassment | Discrimination | Retaliation | Substance Abuse Allegation | Policy Violation | Inappropriate Comment | Wrongful Accusation | Other",
+  "who": "string",
+  "what": "1-2 sentence summary, neutral tone",
+  "where": "string | null",
+  "when": "string | null",
+  "witnesses": ["string", ...],
+  "notes": "3–6 sentences capturing key facts with specifics (policies, decisions, denials, exact requests). Keep names and times.",
+  "timeline": [
+    {"time":"string","event":"concise fact (keep exact wording for critical statements)"},
+    ...
+  ],
+  "policyConcerns": ["brief bullets of policy/procedure concerns"],
+  "directQuotes": ["short exact quotes if present (10–25 words)"]
 }
-
 Rules:
-- Split into multiple incidents when dates, topics, or scenes change.
-- Do not invent details; if unknown, use "None noted".
-- Keep short, plain phrasing.
-- MUST return valid JSON in the exact structure shown above.
+- Preserve concrete details (times, who did what, requests made/denied).
+- Keep quotes short but exact in directQuotes.
+- If a field is missing, use null or [].
+- Return a single JSON object: { "incidents": [ ... ] } with NO extra text.
 `.trim();
 
 // Robust JSON extraction with fallback parsing
@@ -119,8 +119,9 @@ serve(async (req) => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o-mini",
+          model: "gpt-4o",
           temperature: 0.2,
+          max_tokens: 2000,
           response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
@@ -171,14 +172,23 @@ serve(async (req) => {
         parsedData = extractJSON(text);
       } catch (e) {
         console.error("JSON extraction failed:", e, "\nAI content:", text);
-        return new Response(JSON.stringify({ 
-          ok: false,
-          code: 'parse_error',
-          message: "Could not extract valid JSON from AI response. Please try rephrasing your notes." 
-        }), {
-          status: 500,
-          headers: corsHeadersJson,
-        });
+        // Fallback to a single incident with category "Other"
+        console.log("Creating fallback incident from raw notes");
+        parsedData = {
+          incidents: [{
+            date: null,
+            category: "Other",
+            who: "Unknown",
+            what: "Raw notes could not be parsed into structured format",
+            where: null,
+            when: null,
+            witnesses: [],
+            notes: rawNotes.substring(0, 500) + (rawNotes.length > 500 ? "..." : ""),
+            timeline: [],
+            policyConcerns: [],
+            directQuotes: []
+          }]
+        };
       }
 
       // Handle both direct array and wrapped object formats
