@@ -19,6 +19,56 @@ interface IncidentEvent {
   notes: string;             // Detailed notes
 }
 
+const SYSTEM_PROMPT = `
+You are a professional HR documentation assistant.
+
+Task:
+Convert raw workplace incident notes into a STRICT JSON object with this shape:
+{
+  "events": [
+    {
+      "date": "string",          // "7/22" or "Unknown" if missing
+      "category": "string",      // e.g., "Wrongful Accusation", "Harassment", "Discrimination", etc.
+      "who": "string",           // comma-separated names
+      "what": "string",          // 1–2 sentence neutral summary
+      "where": "string",         // location; "None noted" if missing
+      "when": "string",          // time; "None noted" if missing
+      "witnesses": "string",     // comma-separated names; "None noted" if missing
+      "notes": "string"          // 1–3 concise, neutral details
+    }
+  ]
+}
+
+Rules:
+- Return ONLY JSON with the key "events" (no markdown, no commentary).
+- Split into multiple events when dates/topics/scenes change.
+- If a field is missing, use "None noted" (except date: use "Unknown").
+- Keep tone neutral and factual; no judgments.
+- Max 2 sentences for "what"; max 3 short bullets rolled into one sentence for "notes".
+- Normalize names to Title Case.
+- Do not invent dates/times or people.
+`;
+
+function normalizeIncidentEvent(event: any): IncidentEvent {
+  const normalize = (value: any, fallback: string = "None noted"): string => {
+    if (typeof value !== 'string' || !value.trim()) {
+      return fallback;
+    }
+    return value.trim();
+  };
+
+  return {
+    date: normalize(event.date, "Unknown"),
+    category: normalize(event.category),
+    who: normalize(event.who),
+    what: normalize(event.what),
+    where: normalize(event.where),
+    when: normalize(event.when),
+    witnesses: normalize(event.witnesses),
+    notes: normalize(event.notes)
+  };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -61,38 +111,11 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o',
         temperature: 0.2,
+        response_format: { type: "json_object" },
         messages: [
           {
             role: 'system',
-            content: `You are a structured HR incident parser. Convert raw workplace incident notes into an array of IncidentEvent objects in JSON that match our schema exactly.
-
-Each IncidentEvent must have these exact fields:
-- date: string (ISO date format like "2024-01-15")
-- category: string (e.g., "Accusation", "Harassment", "Safety Violation")
-- who: string (comma-separated list of people involved, properly capitalized)
-- what: string (short description of what happened)
-- where: string (location where incident occurred)
-- when: string (time of day when incident occurred)
-- witnesses: string (comma-separated list of witness names, or "None noted" if none)
-- notes: string (detailed notes about the incident)
-
-Always respond with valid JSON in this exact format:
-{
-  "events": [
-    {
-      "date": "2024-01-15",
-      "category": "Accusation",
-      "who": "John Smith, Mary Johnson",
-      "what": "Verbal altercation in break room",
-      "where": "Employee break room",
-      "when": "2:30 PM",
-      "witnesses": "Tom Wilson, Sarah Davis",
-      "notes": "Detailed description of what occurred..."
-    }
-  ]
-}
-
-No extra commentary or text outside JSON.`
+            content: SYSTEM_PROMPT
           },
           {
             role: 'user',
@@ -117,27 +140,31 @@ No extra commentary or text outside JSON.`
     let parsedEvents;
     try {
       const parsed = JSON.parse(generatedText);
-      parsedEvents = parsed.events;
       
-      // Validate that events is an array
-      if (!Array.isArray(parsedEvents)) {
-        throw new Error('Events is not an array');
+      // Validate response structure
+      if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.events)) {
+        throw new Error('Invalid response structure: missing events array');
       }
       
-      // Basic validation of event structure
-      for (const event of parsedEvents) {
+      // Normalize and validate each event
+      parsedEvents = parsed.events.map((event: any) => {
+        const normalized = normalizeIncidentEvent(event);
+        
+        // Validate required fields exist after normalization
         const requiredFields = ['date', 'category', 'who', 'what', 'where', 'when', 'witnesses', 'notes'];
         for (const field of requiredFields) {
-          if (typeof event[field] !== 'string') {
-            throw new Error(`Invalid or missing field: ${field}`);
+          if (!normalized[field as keyof IncidentEvent]) {
+            throw new Error(`Missing field after normalization: ${field}`);
           }
         }
-      }
+        
+        return normalized;
+      });
       
     } catch (parseError) {
       console.error('JSON parsing error:', parseError, 'Raw response:', generatedText);
-      return new Response(JSON.stringify({ error: 'Failed to parse notes' }), {
-        status: 500,
+      return new Response(JSON.stringify({ error: 'Invalid AI response' }), {
+        status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
