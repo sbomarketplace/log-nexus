@@ -1,5 +1,5 @@
 import { supabase } from "@/integrations/supabase/client";
-import type { OrganizeResponse } from "@/types/incidents";
+import type { StructuredIncidentResponse } from "@/types/structured-incidents";
 
 export async function organizeNotes(rawNotes: string) {
   const { data, error } = await supabase.functions.invoke(
@@ -17,7 +17,7 @@ export async function organizeNotes(rawNotes: string) {
 
   console.log('Organize response data:', data);
 
-  if (!data?.ok) {
+  if (data?.ok === false) {
     // Handle specific error codes
     if (data?.code === 'quota_exceeded') {
       throw new Error("OpenAI quota exceeded. Add credits or raise your monthly limit, then try again.");
@@ -27,7 +27,7 @@ export async function organizeNotes(rawNotes: string) {
     throw new Error(message);
   }
 
-  if (!data.incidents || !Array.isArray(data.incidents)) {
+  if (!data?.incidents || !Array.isArray(data.incidents)) {
     throw new Error("Organizer returned unexpected format.");
   }
 

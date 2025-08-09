@@ -10,38 +10,60 @@ const corsHeadersJson = {
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_SECRET_KEY");
 
-const SYSTEM_PROMPT = `You are an assistant that organizes raw workplace incident notes into a structured, detailed format while preserving every meaningful fact, name, time, and quote. Do not shorten or generalize unless information is clearly redundant. Separate each incident clearly.
+const SYSTEM_PROMPT = `You ORGANIZE raw workplace notes into the structured schema below. Do NOT lose information.
 
-Return a JSON object with an "incidents" array. For each incident, use this structure:
+Schema for each incident:
 {
-  "date": "MM/DD format or 'Unknown'",
-  "category": "one of: Harassment | Discrimination | Retaliation | Substance Abuse Allegation | Policy Violation | Safety Concern | Injury/Medical | Inappropriate Comment | Other",
-  "who": "Detailed list of all people involved, preserving original names and titles",
-  "what": "Comprehensive description maintaining all factual details and context",
-  "where": "Complete location details as provided",
-  "when": "Full time information including duration and sequence",
-  "witnesses": "All witnesses mentioned, preserving names exactly as written",
-  "notes": "Detailed preservation of all factual context, policy violations, requests made/denied, exact statements, and procedural concerns. Maintain original wording for quotes and key statements.",
+  "date": string | null,                 // e.g., "7/22" or ISO if present
+  "category": string,                    // e.g., "Wrongful Accusation", "Harassment", "Discrimination", "Substance Abuse Allegation", "Policy Violation", "Safety Concern", "Injury/Medical", "Inappropriate Comment", "Other"
+  "who": {
+    "accused": string[],                // people accused
+    "accusers": string[],               // managers, reporters
+    "managers": string[],
+    "unionStewards": string[],
+    "security": string[],
+    "others": string[]
+  },
+  "where": string | null,
   "timeline": [
-    {"time": "exact time format", "event": "preserve exact wording for critical statements and actions"}
+    {
+      "time": string | null,             // "8:00 AM", "9:25 AM"
+      "event": string,                   // concise event sentence
+      "quotes": string[]                 // verbatim quotes if present
+    }
   ],
-  "policy_concerns": [
-    "specific policy violations or procedural concerns mentioned in notes"
+  "whatHappened": string,                // stitched narrative (keep detail, no summarizing away)
+  "requestsAndResponses": [
+    {
+      "request": string,                 // e.g., "Requested search and dog sniff"
+      "response": "approved" | "denied" | "unknown",
+      "byWhom": string | null            // who approved/denied
+    }
   ],
-  "quotes": [
-    {"speaker": "exact name or role", "text": "exact quote from notes"}
-  ]
+  "policyOrProcedure": string[],         // explicit policy notes (e.g., "Two managers must approach together")
+  "evidenceOrTests": [
+    {
+      "type": string,                    // "lab test", "rapid test", "security report"
+      "detail": string,
+      "status": string                   // "performed", "planned", "unclear"
+    }
+  ],
+  "witnesses": string[],                 // explicitly listed witnesses
+  "outcomeOrNext": string | null,        // outcome or next steps (if any)
+  "notes": string[]                      // keep extra details verbatim lines
 }
 
 Rules:
-- Maintain original wording for quotes and key statements
-- Do not merge separate events — keep them split if they have different times or topics  
-- Fill all fields with as much detail as provided
-- If times are given in sequence, retain them exactly
-- If the notes imply policy violations, note them with specifics
-- For missing information, use "None noted" for text fields or empty arrays for lists
-- Preserve all names, times, locations, and procedural details exactly as written
-- Output only valid JSON with no additional text`;
+• Split distinct moments into timeline items with their times in order.
+• Preserve names exactly (managers, union stewards, security, accused).
+• Keep quotes verbatim in timeline item quotes arrays.
+• Capture policy mentions in policyOrProcedure with plain text lines.
+• Capture every request with its outcome in requestsAndResponses.
+• Include all tests/evidence mentions in evidenceOrTests with status.
+• If a time is stated (8am, 9:25), map to timeline.time exactly as written.
+• Populate whatHappened with a faithful, detailed narrative (no brevity penalty).
+• If a field is absent, use [] or null; never invent details.
+• Output ONLY valid JSON matching the incidents array with this schema.`;
 
 // Robust JSON extraction with fallback parsing
 function extractJSON(text: string): any {
@@ -129,7 +151,7 @@ serve(async (req) => {
         body: JSON.stringify({
           model: "gpt-4o",
           temperature: 0.1,
-          max_tokens: 3000,
+          max_tokens: 4000,
           response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
@@ -179,23 +201,14 @@ serve(async (req) => {
         parsedData = extractJSON(text);
       } catch (e) {
         console.error("JSON extraction failed:", e, "\nAI content:", text);
-        // Fallback to a single incident with category "Other"
-        console.log("Creating fallback incident from raw notes");
-        parsedData = {
-          incidents: [{
-            date: "Unknown",
-            category: "Other",
-            who: "Unknown",
-            what: "Raw notes could not be parsed into structured format",
-            where: "None noted",
-            when: "None noted",
-            witnesses: [],
-            notes: inputNotes.substring(0, 500) + (inputNotes.length > 500 ? "..." : ""),
-            timeline: [],
-            policy_concerns: [],
-            quotes: []
-          }]
-        };
+        return new Response(JSON.stringify({ 
+          ok: false,
+          code: 'invalid_json',
+          message: 'Invalid AI JSON response' 
+        }), {
+          status: 400,
+          headers: corsHeadersJson,
+        });
       }
 
       // Handle both direct array and wrapped object formats
@@ -216,20 +229,53 @@ serve(async (req) => {
         });
       }
 
-      // Validate incidents structure
+      // Validate incidents structure and add defensive defaults
       if (!incidents.length) {
-        return new Response(JSON.stringify({ 
-          ok: false,
-          code: 'no_incidents',
-          message: "No incidents were identified in your notes. Please provide more detailed information." 
-        }), {
-          status: 500,
+        return new Response(JSON.stringify({ incidents: [] }), {
           headers: corsHeadersJson,
         });
       }
 
-      console.log(`organize-incidents ok in ${Date.now() - t0}ms, parsed ${incidents.length} incidents`);
-      return new Response(JSON.stringify({ ok: true, incidents }), {
+      // Add defensive defaults to ensure all required fields exist
+      const validatedIncidents = incidents.map((inc: any) => ({
+        date: inc.date || null,
+        category: inc.category || "Other",
+        who: {
+          accused: Array.isArray(inc.who?.accused) ? inc.who.accused : [],
+          accusers: Array.isArray(inc.who?.accusers) ? inc.who.accusers : [],
+          managers: Array.isArray(inc.who?.managers) ? inc.who.managers : [],
+          unionStewards: Array.isArray(inc.who?.unionStewards) ? inc.who.unionStewards : [],
+          security: Array.isArray(inc.who?.security) ? inc.who.security : [],
+          others: Array.isArray(inc.who?.others) ? inc.who.others : []
+        },
+        where: inc.where || null,
+        timeline: Array.isArray(inc.timeline) ? inc.timeline : [],
+        whatHappened: inc.whatHappened || "",
+        requestsAndResponses: Array.isArray(inc.requestsAndResponses) ? inc.requestsAndResponses : [],
+        policyOrProcedure: Array.isArray(inc.policyOrProcedure) ? inc.policyOrProcedure : [],
+        evidenceOrTests: Array.isArray(inc.evidenceOrTests) ? inc.evidenceOrTests : [],
+        witnesses: Array.isArray(inc.witnesses) ? inc.witnesses : [],
+        outcomeOrNext: inc.outcomeOrNext || null,
+        notes: Array.isArray(inc.notes) ? inc.notes : []
+      }));
+
+      // Verify each incident has a timeline array (unit-like check)
+      for (const incident of validatedIncidents) {
+        if (!Array.isArray(incident.timeline)) {
+          console.error("Timeline validation failed for incident:", incident);
+          return new Response(JSON.stringify({ 
+            ok: false,
+            code: 'validation_error',
+            message: 'Incident timeline validation failed' 
+          }), {
+            status: 400,
+            headers: corsHeadersJson,
+          });
+        }
+      }
+
+      console.log(`organize-incidents ok in ${Date.now() - t0}ms, parsed ${validatedIncidents.length} incidents`);
+      return new Response(JSON.stringify({ incidents: validatedIncidents }), {
         headers: corsHeadersJson,
       });
       

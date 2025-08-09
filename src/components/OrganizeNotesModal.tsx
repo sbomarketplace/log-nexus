@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { organizeNotes } from '@/services/organizer';
-import { Incident, OrganizedIncident } from '@/types/incidents';
+import { StructuredIncident } from '@/types/structured-incidents';
 import { incidentService } from '@/services/incidents';
 import { IncidentRecord } from '@/types/incidents';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
@@ -19,12 +19,10 @@ interface OrganizeNotesModalProps {
 export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalProps) => {
   const [open, setOpen] = useState(false);
   const [rawNotes, setRawNotes] = useState('');
-  const [organizedIncidents, setOrganizedIncidents] = useState<OrganizedIncident[]>([]);
+  const [organizedIncidents, setOrganizedIncidents] = useState<StructuredIncident[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [editingIncident, setEditingIncident] = useState<string | null>(null);
-  const [editingData, setEditingData] = useState<OrganizedIncident | null>(null);
   const { toast } = useToast();
 
   // Prevent body scroll when modal is open
@@ -77,19 +75,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         return;
       }
       
-      // Convert Incident to OrganizedIncident format
-      const converted = incidents.map(incident => ({
-        date: incident.date,
-        categoryOrIssue: incident.category,
-        who: incident.who,
-        what: incident.what,
-        where: incident.where,
-        when: incident.when,
-        witnesses: incident.witnesses,
-        notes: incident.notes,
-      }));
-      
-      setOrganizedIncidents(converted);
+      setOrganizedIncidents(incidents);
       setShowResults(true);
       
       toast({
@@ -120,20 +106,20 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     }
   };
 
-  const handleSaveIncident = async (incident: OrganizedIncident) => {
+  const handleSaveIncident = async (incident: StructuredIncident) => {
     try {
       const incidentRecord: IncidentRecord = {
         id: crypto.randomUUID(),
         created_at: new Date().toISOString(),
         events: [{
-          date: incident.date,
-          category: incident.categoryOrIssue,
-          who: incident.who,
-          what: incident.what,
-          where: incident.where,
-          when: incident.when,
-          witnesses: incident.witnesses,
-          notes: incident.notes
+          date: incident.date || "Unknown",
+          category: incident.category,
+          who: Object.values(incident.who).flat().join(", "),
+          what: incident.whatHappened,
+          where: incident.where || "None noted",
+          when: incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; "),
+          witnesses: incident.witnesses.join(", "),
+          notes: `${incident.notes.join(" ")} | Timeline: ${incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ")} | Requests: ${incident.requestsAndResponses.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ")} | Policy: ${incident.policyOrProcedure.join("; ")} | Evidence: ${incident.evidenceOrTests.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ")}`
         }]
       };
       
@@ -169,14 +155,14 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
           id: crypto.randomUUID(),
           created_at: new Date().toISOString(),
           events: [{
-            date: incident.date,
-            category: incident.categoryOrIssue,
-            who: incident.who,
-            what: incident.what,
-            where: incident.where,
-            when: incident.when,
-            witnesses: incident.witnesses,
-            notes: incident.notes
+            date: incident.date || "Unknown",
+            category: incident.category,
+            who: Object.values(incident.who).flat().join(", "),
+            what: incident.whatHappened,
+            where: incident.where || "None noted",
+            when: incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; "),
+            witnesses: incident.witnesses.join(", "),
+            notes: `${incident.notes.join(" ")} | Timeline: ${incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ")} | Requests: ${incident.requestsAndResponses.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ")} | Policy: ${incident.policyOrProcedure.join("; ")} | Evidence: ${incident.evidenceOrTests.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ")}`
           }]
         };
         
@@ -200,46 +186,50 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     }
   };
 
-  const handleEditIncident = (incident: OrganizedIncident) => {
-    setEditingIncident(organizedIncidents.indexOf(incident).toString());
-    setEditingData({ ...incident });
-  };
+  const handleExportIncident = (incident: StructuredIncident) => {
+    const content = `📅 ${incident.date || 'Unknown'} — ${incident.category}
 
-  const handleSaveEdit = () => {
-    if (editingData && editingIncident !== null) {
-      const index = parseInt(editingIncident);
-      setOrganizedIncidents(prev => prev.map((inc, i) => i === index ? editingData : inc));
-      setEditingIncident(null);
-      setEditingData(null);
-    }
-  };
+Who:
+- Accused: ${incident.who.accused?.join(', ') || 'None'}
+- Accusers: ${incident.who.accusers?.join(', ') || 'None'}
+- Managers: ${incident.who.managers?.join(', ') || 'None'}
+- Union Stewards: ${incident.who.unionStewards?.join(', ') || 'None'}
+- Security: ${incident.who.security?.join(', ') || 'None'}
+- Others: ${incident.who.others?.join(', ') || 'None'}
 
-  const handleCancelEdit = () => {
-    setEditingIncident(null);
-    setEditingData(null);
-  };
+What Happened: ${incident.whatHappened}
+Where: ${incident.where || 'None noted'}
 
-  const handleExportIncident = (incident: OrganizedIncident) => {
-    const content = `📅 ${incident.date} — ${incident.categoryOrIssue}
-Who: ${incident.who}
-What: ${incident.what}
-Where: ${incident.where}
-When: ${incident.when}
-Witnesses: ${incident.witnesses}
-Notes: ${incident.notes}`;
+Timeline:
+${incident.timeline.map(t => `• ${t.time || 'Time unspecified'}: ${t.event}${t.quotes?.length ? `\n  Quotes: ${t.quotes.join('; ')}` : ''}`).join('\n')}
+
+Requests & Responses:
+${incident.requestsAndResponses.map(r => `• ${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join('\n')}
+
+Policy/Procedure:
+${incident.policyOrProcedure.map(p => `• ${p}`).join('\n')}
+
+Evidence/Tests:
+${incident.evidenceOrTests.map(e => `• ${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join('\n')}
+
+Witnesses: ${incident.witnesses.join(', ') || 'None'}
+Outcome/Next: ${incident.outcomeOrNext || 'None noted'}
+
+Notes:
+${incident.notes.map(n => `• ${n}`).join('\n')}`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `incident-${incident.date}-${incident.categoryOrIssue.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    link.download = `incident-${incident.date || 'unknown'}-${incident.category.toLowerCase().replace(/\s+/g, '-')}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
   };
 
-  const handleDeleteIncident = (incident: OrganizedIncident) => {
+  const handleDeleteIncident = (incident: StructuredIncident) => {
     setOrganizedIncidents(prev => prev.filter(inc => inc !== incident));
     
     // If no more incidents, go back to input view
@@ -253,8 +243,6 @@ Notes: ${incident.notes}`;
     setOrganizedIncidents([]);
     setShowResults(false);
     setError(null);
-    setEditingIncident(null);
-    setEditingData(null);
     setOpen(false);
   };
 
@@ -326,7 +314,7 @@ Notes: ${incident.notes}`;
                 </Label>
                 <Textarea
                   id="raw-notes"
-                  placeholder="Paste your raw incident notes here... Be sure to include Who, What, When, Where, Why, and How to capture the full details."
+                  placeholder="Paste your raw incident notes here… Include Who, What, When, Where, Why, and How; list times (e.g., 8:00 AM, 9:25 AM), quotes, requests made/denied, policies involved, and all people present."
                   value={rawNotes}
                   onChange={(e) => setRawNotes(e.target.value)}
                   className="min-h-[220px] w-full rounded-xl border border-border focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
@@ -406,150 +394,174 @@ Notes: ${incident.notes}`;
                   <Card key={index} className="border rounded-xl">
                     <CardContent className="p-4">
                       <div className="space-y-3">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="text-xs rounded-lg">
-                            📅 {incident.date}
-                          </Badge>
-                          <Badge variant="outline" className="text-xs rounded-lg">
-                            {incident.categoryOrIssue}
-                          </Badge>
-                        </div>
-                        
-                        {editingIncident === index.toString() && editingData ? (
-                          <div className="space-y-3">
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label className="text-xs">Date</Label>
-                                <Input 
-                                  value={editingData.date}
-                                  onChange={(e) => setEditingData({...editingData, date: e.target.value})}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">Category</Label>
-                                <Input 
-                                  value={editingData.categoryOrIssue}
-                                  onChange={(e) => setEditingData({...editingData, categoryOrIssue: e.target.value})}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs">Who</Label>
-                              <Input 
-                                value={editingData.who}
-                                onChange={(e) => setEditingData({...editingData, who: e.target.value})}
-                                className="h-8 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs">What</Label>
-                              <Textarea 
-                                value={editingData.what}
-                                onChange={(e) => setEditingData({...editingData, what: e.target.value})}
-                                className="min-h-[60px] text-xs"
-                              />
-                            </div>
-                            <div className="grid grid-cols-2 gap-2">
-                              <div>
-                                <Label className="text-xs">Where</Label>
-                                <Input 
-                                  value={editingData.where}
-                                  onChange={(e) => setEditingData({...editingData, where: e.target.value})}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                              <div>
-                                <Label className="text-xs">When</Label>
-                                <Input 
-                                  value={editingData.when}
-                                  onChange={(e) => setEditingData({...editingData, when: e.target.value})}
-                                  className="h-8 text-xs"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <Label className="text-xs">Witnesses</Label>
-                              <Input 
-                                value={editingData.witnesses}
-                                onChange={(e) => setEditingData({...editingData, witnesses: e.target.value})}
-                                className="h-8 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <Label className="text-xs">Notes</Label>
-                              <Textarea 
-                                value={editingData.notes}
-                                onChange={(e) => setEditingData({...editingData, notes: e.target.value})}
-                                className="min-h-[60px] text-xs"
-                              />
-                            </div>
-                            <div className="flex gap-2 pt-2">
-                              <Button 
-                                onClick={handleSaveEdit}
-                                size="sm"
-                                className="bg-green-600 text-white hover:bg-green-700"
-                              >
-                                <Save className="h-3 w-3 mr-1" />
-                                Save
-                              </Button>
-                              <Button 
-                                onClick={handleCancelEdit}
-                                size="sm"
-                                variant="outline"
-                              >
-                                Cancel
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="text-sm space-y-1">
-                              <div><strong>Who:</strong> {incident.who}</div>
-                              <div><strong>What:</strong> {incident.what}</div>
-                              <div><strong>Where:</strong> {incident.where}</div>
-                              <div><strong>When:</strong> {incident.when}</div>
-                              <div><strong>Witnesses:</strong> {incident.witnesses}</div>
-                              <div><strong>Notes:</strong> {incident.notes}</div>
-                            </div>
-                            <div className="flex gap-2 pt-3 border-t">
-                              <Button 
-                                onClick={() => handleSaveIncident(incident)}
-                                size="sm"
-                                className="bg-green-600 text-white hover:bg-green-700"
-                              >
-                                <Save className="h-3 w-3 mr-1" />
-                                Save
-                              </Button>
-                              <Button 
-                                onClick={() => handleEditIncident(incident)}
-                                size="sm"
-                                variant="outline"
-                              >
-                                <Edit className="h-3 w-3 mr-1" />
-                                Edit
-                              </Button>
-                              <Button 
-                                onClick={() => handleExportIncident(incident)}
-                                size="sm"
-                                variant="outline"
-                              >
-                                <Download className="h-3 w-3 mr-1" />
-                                Export
-                              </Button>
-                              <Button 
-                                onClick={() => handleDeleteIncident(incident)}
-                                size="sm"
-                                variant="outline"
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-3 w-3 mr-1" />
-                                Delete
-                              </Button>
-                            </div>
-                          </>
-                        )}
+                         {/* Header */}
+                         <div className="flex items-center gap-2 mb-4">
+                           <Badge variant="secondary" className="text-xs rounded-lg">
+                             📅 {incident.date || 'Unknown'}
+                           </Badge>
+                           <Badge variant="outline" className="text-xs rounded-lg">
+                             {incident.category}
+                           </Badge>
+                         </div>
+                         
+                         {/* Who Section */}
+                         <div className="mb-4">
+                           <h4 className="text-sm font-medium mb-2">Who:</h4>
+                           <div className="grid grid-cols-2 gap-2 text-xs">
+                             {incident.who.accused?.length > 0 && (
+                               <div><strong>Accused:</strong> {incident.who.accused.join(', ')}</div>
+                             )}
+                             {incident.who.accusers?.length > 0 && (
+                               <div><strong>Accusers:</strong> {incident.who.accusers.join(', ')}</div>
+                             )}
+                             {incident.who.managers?.length > 0 && (
+                               <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
+                             )}
+                             {incident.who.unionStewards?.length > 0 && (
+                               <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
+                             )}
+                             {incident.who.security?.length > 0 && (
+                               <div><strong>Security:</strong> {incident.who.security.join(', ')}</div>
+                             )}
+                             {incident.who.others?.length > 0 && (
+                               <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
+                             )}
+                           </div>
+                         </div>
+
+                         {/* What Happened */}
+                         <div className="mb-4">
+                           <h4 className="text-sm font-medium mb-2">What Happened:</h4>
+                           <p className="text-xs text-muted-foreground">{incident.whatHappened}</p>
+                         </div>
+
+                         {/* Where */}
+                         <div className="mb-4">
+                           <h4 className="text-sm font-medium mb-1">Where:</h4>
+                           <p className="text-xs text-muted-foreground">{incident.where || 'None noted'}</p>
+                         </div>
+
+                         {/* Timeline */}
+                         {incident.timeline.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Timeline:</h4>
+                             <div className="space-y-1">
+                               {incident.timeline.map((event, eventIndex) => (
+                                 <div key={eventIndex} className="text-xs border-l-2 border-muted pl-3">
+                                   <div className="font-medium">{event.time || 'Time unspecified'}</div>
+                                   <div className="text-muted-foreground">{event.event}</div>
+                                   {event.quotes && event.quotes.length > 0 && (
+                                     <div className="italic mt-1 text-xs">"{event.quotes.join('; ')}"</div>
+                                   )}
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         )}
+
+                         {/* Requests & Responses */}
+                         {incident.requestsAndResponses.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Requests & Responses:</h4>
+                             <div className="space-y-1">
+                               {incident.requestsAndResponses.map((req, reqIndex) => (
+                                 <div key={reqIndex} className="text-xs">
+                                   <span className="font-medium">{req.request}</span> - 
+                                   <Badge variant={req.response === 'approved' ? 'default' : req.response === 'denied' ? 'destructive' : 'secondary'} className="mx-1 text-xs">
+                                     {req.response}
+                                   </Badge>
+                                   {req.byWhom && <span className="text-muted-foreground">by {req.byWhom}</span>}
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         )}
+
+                         {/* Policy/Procedure */}
+                         {incident.policyOrProcedure.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Policy/Procedure:</h4>
+                             <ul className="list-disc list-inside space-y-1">
+                               {incident.policyOrProcedure.map((policy, policyIndex) => (
+                                 <li key={policyIndex} className="text-xs text-muted-foreground">{policy}</li>
+                               ))}
+                             </ul>
+                           </div>
+                         )}
+
+                         {/* Evidence/Tests */}
+                         {incident.evidenceOrTests.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Evidence/Tests:</h4>
+                             <div className="space-y-1">
+                               {incident.evidenceOrTests.map((evidence, evidenceIndex) => (
+                                 <div key={evidenceIndex} className="text-xs">
+                                   <span className="font-medium">{evidence.type}:</span> {evidence.detail || ''} 
+                                   <Badge variant="secondary" className="ml-1 text-xs">
+                                     {evidence.status || 'unknown'}
+                                   </Badge>
+                                 </div>
+                               ))}
+                             </div>
+                           </div>
+                         )}
+
+                         {/* Witnesses */}
+                         {incident.witnesses.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-1">Witnesses:</h4>
+                             <p className="text-xs text-muted-foreground">{incident.witnesses.join(', ')}</p>
+                           </div>
+                         )}
+
+                         {/* Outcome/Next */}
+                         {incident.outcomeOrNext && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-1">Outcome/Next:</h4>
+                             <p className="text-xs text-muted-foreground">{incident.outcomeOrNext}</p>
+                           </div>
+                         )}
+
+                         {/* Notes */}
+                         {incident.notes.length > 0 && (
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Notes:</h4>
+                             <ul className="list-disc list-inside space-y-1">
+                               {incident.notes.map((note, noteIndex) => (
+                                 <li key={noteIndex} className="text-xs text-muted-foreground">{note}</li>
+                               ))}
+                             </ul>
+                           </div>
+                         )}
+
+                         {/* Action Buttons */}
+                         <div className="flex gap-2 pt-3 border-t">
+                           <Button 
+                             onClick={() => handleSaveIncident(incident)}
+                             size="sm"
+                             className="bg-green-600 text-white hover:bg-green-700"
+                           >
+                             <Save className="h-3 w-3 mr-1" />
+                             Save
+                           </Button>
+                           <Button 
+                             onClick={() => handleExportIncident(incident)}
+                             size="sm"
+                             variant="outline"
+                           >
+                             <Download className="h-3 w-3 mr-1" />
+                             Export
+                           </Button>
+                           <Button 
+                             onClick={() => handleDeleteIncident(incident)}
+                             size="sm"
+                             variant="outline"
+                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                           >
+                             <Trash2 className="h-3 w-3 mr-1" />
+                             Delete
+                           </Button>
+                         </div>
                       </div>
                     </CardContent>
                   </Card>
