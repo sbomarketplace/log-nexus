@@ -98,7 +98,11 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       });
     } catch (error) {
       console.error('Error organizing notes:', error);
-      setError(error instanceof Error ? error.message : 'We couldn\'t organize these notes. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'We couldn\'t organize these notes. Please try again.';
+      setError(errorMessage);
+      
+      // Keep the raw notes in the textarea so nothing is lost
+      // No need to clear rawNotes here
     } finally {
       setIsProcessing(false);
     }
@@ -319,8 +323,13 @@ Notes: ${incident.notes}`;
               </div>
               
               {error && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                  <p className="text-red-700 text-sm">{error}</p>
+                <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                  <p className="text-destructive text-sm font-medium">
+                    {error.includes('quota') ? 
+                      "We couldn't organize these notes because the AI quota is exhausted. Please add credits and try again." : 
+                      error
+                    }
+                  </p>
                 </div>
               )}
               
