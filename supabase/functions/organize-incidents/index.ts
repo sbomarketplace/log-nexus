@@ -10,31 +10,51 @@ const corsHeadersJson = {
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_SECRET_KEY");
 
-const SYSTEM_PROMPT = `
-You are an HR incident organizer. Split raw notes into one or more incidents.
-For EACH incident, produce JSON that matches this schema:
+const SYSTEM_PROMPT = `You are ClearCase's HR incident organizer (not a summarizer).
+Given messy workplace notes, extract and normalize all incident details and return pure JSON that the UI will render.
+
+Goals
+Identify one or more distinct incidents.
+For each incident, organize details into a clean structure with fields below.
+Add useful, factual organization such as a timeline, policy_concerns, and direct quotes pulled from the notes.
+Never invent facts. If a field is missing, use "None noted".
+
+Normalize
+Dates: MM/DD if present; else "Unknown"
+Times: h:mm AM/PM
+People names: title case; de-duplicate ("Jon" vs "John" -> keep as written if uncertain)
+Location: short phrase ("Tool closet")
+Category: choose the best single category from:
+Harassment, Discrimination, Retaliation, Substance Abuse Allegation, Policy Violation, Safety Concern, Injury/Medical, Inappropriate Comment, Other
+
+Output (JSON only)
+Return an object with a top-level incidents array. Each item:
 {
-  "date": "string | null",
-  "category": "one of: Harassment | Discrimination | Retaliation | Substance Abuse Allegation | Policy Violation | Inappropriate Comment | Wrongful Accusation | Other",
-  "who": "string",
-  "what": "1-2 sentence summary, neutral tone",
-  "where": "string | null",
-  "when": "string | null",
-  "witnesses": ["string", ...],
-  "notes": "3–6 sentences capturing key facts with specifics (policies, decisions, denials, exact requests). Keep names and times.",
+  "date": "MM/DD" | "Unknown",
+  "category": "…",
+  "who": "Short list of key people",
+  "what": "1–2 sentences stating the allegation/issue",
+  "where": "Short location",
+  "when": "Time span or point in time",
+  "witnesses": ["Name", "Name"],
+  "notes": "Short paragraph capturing key context",
   "timeline": [
-    {"time":"string","event":"concise fact (keep exact wording for critical statements)"},
-    ...
+    {"time": "h:mm AM/PM", "event": "What happened"},
+    {"time": "h:mm AM/PM", "event": "What happened"}
   ],
-  "policyConcerns": ["brief bullets of policy/procedure concerns"],
-  "directQuotes": ["short exact quotes if present (10–25 words)"]
+  "policy_concerns": [
+    "Concrete concern tied to the notes (e.g., 'Only one manager present; policy requires two.')"
+  ],
+  "quotes": [
+    {"speaker": "Name or Role", "text": "Exact quote from notes"},
+    {"speaker": "…", "text": "…"}
+  ]
 }
-Rules:
-- Preserve concrete details (times, who did what, requests made/denied).
-- Keep quotes short but exact in directQuotes.
-- If a field is missing, use null or [].
-- Return a single JSON object: { "incidents": [ ... ] } with NO extra text.
-`.trim();
+
+Quotes must be exact excerpts from the notes (trim to ≤ 25 words each).
+Policy concerns must be grounded in the notes (don't speculate).
+If there are multiple incidents in the notes, return multiple items.
+Output JSON only, no prose.`;
 
 // Robust JSON extraction with fallback parsing
 function extractJSON(text: string): any {
@@ -176,17 +196,17 @@ serve(async (req) => {
         console.log("Creating fallback incident from raw notes");
         parsedData = {
           incidents: [{
-            date: null,
+            date: "Unknown",
             category: "Other",
             who: "Unknown",
             what: "Raw notes could not be parsed into structured format",
-            where: null,
-            when: null,
+            where: "None noted",
+            when: "None noted",
             witnesses: [],
             notes: rawNotes.substring(0, 500) + (rawNotes.length > 500 ? "..." : ""),
             timeline: [],
-            policyConcerns: [],
-            directQuotes: []
+            policy_concerns: [],
+            quotes: []
           }]
         };
       }
