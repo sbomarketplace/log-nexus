@@ -18,7 +18,7 @@ Return a JSON object with this exact structure:
   "incidents": [
     {
       "date": "string",
-      "categoryOrIssue": "string", 
+      "category": "string", 
       "who": "string",
       "what": "string",
       "where": "string",
@@ -81,101 +81,132 @@ function extractJSON(text: string): any {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
-    return new Response("ok", { headers: CORS });
+    return new Response("ok", { 
+      headers: { 
+        'Content-Type': 'application/json', 
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'content-type, authorization, apikey, x-client-info',
+        'Access-Control-Allow-Methods': 'POST, OPTIONS'
+      } 
+    });
   }
 
   try {
     if (!OPENAI_API_KEY) {
       console.error("Missing OPENAI_SECRET_KEY");
-      return new Response(JSON.stringify({ error: "Server misconfigured" }), {
+      return new Response(JSON.stringify({ ok: false, message: "Server misconfigured" }), {
         status: 500,
-        headers: CORS,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
     const { rawNotes } = await req.json().catch(() => ({}));
     if (!rawNotes || typeof rawNotes !== "string" || !rawNotes.trim()) {
-      return new Response(JSON.stringify({ error: "rawNotes is required" }), {
+      return new Response(JSON.stringify({ ok: false, message: "rawNotes is required" }), {
         status: 400,
-        headers: CORS,
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
 
     const t0 = Date.now();
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        temperature: 0.3,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: rawNotes },
-        ],
-      }),
-    });
-
-    const raw = await openaiRes.json();
-    if (!openaiRes.ok) {
-      console.error("OpenAI error:", raw);
-      return new Response(JSON.stringify({ error: "OpenAI request failed" }), {
-        status: 502,
-        headers: CORS,
-      });
-    }
-
-    const text = raw?.choices?.[0]?.message?.content ?? "";
-    let parsedData: any;
     
     try {
-      parsedData = extractJSON(text);
-    } catch (e) {
-      console.error("JSON extraction failed:", e, "\nAI content:", text);
+      const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o",
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: rawNotes },
+          ],
+        }),
+      });
+
+      const raw = await openaiRes.json();
+      console.log("OpenAI raw response:", JSON.stringify(raw, null, 2));
+      
+      if (!openaiRes.ok) {
+        console.error("OpenAI error:", raw);
+        return new Response(JSON.stringify({ ok: false, message: "OpenAI request failed" }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
+      const text = raw?.choices?.[0]?.message?.content ?? "";
+      let parsedData: any;
+      
+      try {
+        parsedData = extractJSON(text);
+      } catch (e) {
+        console.error("JSON extraction failed:", e, "\nAI content:", text);
+        return new Response(JSON.stringify({ 
+          ok: false, 
+          message: "Could not extract valid JSON from AI response. Please try rephrasing your notes." 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
+      // Handle both direct array and wrapped object formats
+      let incidents: any[];
+      if (Array.isArray(parsedData)) {
+        incidents = parsedData;
+      } else if (parsedData?.incidents && Array.isArray(parsedData.incidents)) {
+        incidents = parsedData.incidents;
+      } else {
+        console.error("Unexpected response structure:", parsedData);
+        return new Response(JSON.stringify({ 
+          ok: false, 
+          message: "AI response format is invalid. Expected incidents array." 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
+      // Validate incidents structure
+      if (!incidents.length) {
+        return new Response(JSON.stringify({ 
+          ok: false, 
+          message: "No incidents were identified in your notes. Please provide more detailed information." 
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
+
+      console.log(`organize-incidents ok in ${Date.now() - t0}ms, parsed ${incidents.length} incidents`);
+      return new Response(JSON.stringify({ ok: true, incidents }), {
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      });
+      
+    } catch (openaiError) {
+      console.error("OpenAI call failed:", openaiError);
       return new Response(JSON.stringify({ 
-        error: "Could not extract valid JSON from AI response. Please try rephrasing your notes." 
+        ok: false, 
+        message: openaiError?.message || 'OpenAI API error' 
       }), {
-        status: 422,
-        headers: CORS,
+        status: 500, 
+        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
       });
     }
 
-    // Handle both direct array and wrapped object formats
-    let incidents: any[];
-    if (Array.isArray(parsedData)) {
-      incidents = parsedData;
-    } else if (parsedData?.incidents && Array.isArray(parsedData.incidents)) {
-      incidents = parsedData.incidents;
-    } else {
-      console.error("Unexpected response structure:", parsedData);
-      return new Response(JSON.stringify({ 
-        error: "AI response format is invalid. Expected incidents array." 
-      }), {
-        status: 422,
-        headers: CORS,
-      });
-    }
-
-    // Validate incidents structure
-    if (!incidents.length) {
-      return new Response(JSON.stringify({ 
-        error: "No incidents were identified in your notes. Please provide more detailed information." 
-      }), {
-        status: 422,
-        headers: CORS,
-      });
-    }
-
-    console.log("organize-incidents ok in", Date.now() - t0, "ms");
-    return new Response(JSON.stringify({ incidents }), { status: 200, headers: CORS });
   } catch (err) {
     console.error("organize-incidents exception:", err);
-    return new Response(JSON.stringify({ error: "Unexpected server error" }), {
-      status: 500,
-      headers: CORS,
+    return new Response(JSON.stringify({ 
+      ok: false, 
+      message: err?.message || 'Unknown error' 
+    }), {
+      status: 500, 
+      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
     });
   }
 });
