@@ -14,3 +14,14 @@ export interface IncidentRecord {
   created_at: string;        // Supabase timestamp
   events: IncidentEvent[];   // Array of parsed events
 }
+
+export interface OrganizedIncident {
+  date: string;
+  categoryOrIssue: string;
+  who: string;
+  what: string;
+  where: string;
+  when: string;
+  witnesses: string;
+  notes: string;
+}

@@ -1,15 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
-
-export interface OrganizedIncident {
-  date: string;
-  categoryOrIssue: string;
-  who: string;
-  what: string;
-  where: string;
-  when: string;
-  witnesses: string;
-  notes: string;
-}
+import { OrganizedIncident } from '@/types/incidents';
 
 export const aiService = {
   /**
@@ -17,7 +7,7 @@ export const aiService = {
    */
   async organizeIncidents(rawNotes: string): Promise<OrganizedIncident[]> {
     try {
-      const { data, error } = await supabase.functions.invoke('parse-incident-notes', {
+      const { data, error } = await supabase.functions.invoke('organize-incidents', {
         body: { rawNotes }
       });
 
@@ -25,21 +15,11 @@ export const aiService = {
         throw new Error(`AI processing failed: ${error.message}`);
       }
 
-      if (!data || !data.events) {
+      if (!data || !data.incidents) {
         throw new Error('No organized incidents returned from AI');
       }
 
-      // Map the response to our OrganizedIncident format
-      return data.events.map((event: any): OrganizedIncident => ({
-        date: event.date || 'None noted',
-        categoryOrIssue: event.category || 'None noted',
-        who: event.who || 'None noted',
-        what: event.what || 'None noted',
-        where: event.where || 'None noted',
-        when: event.when || 'None noted',
-        witnesses: event.witnesses || 'None noted',
-        notes: event.notes || 'None noted'
-      }));
+      return data.incidents;
     } catch (error) {
       console.error('Error organizing incidents:', error);
       throw error;
