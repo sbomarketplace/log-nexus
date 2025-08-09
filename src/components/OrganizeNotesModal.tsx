@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { aiService } from '@/services/ai';
+import { organizeIncidents } from '@/services/ai';
 import { OrganizedIncident } from '@/types/incidents';
 import { incidentService } from '@/services/incidents';
 import { IncidentRecord } from '@/types/incidents';
@@ -70,7 +70,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     setIsProcessing(true);
     setError(null);
     try {
-      const incidents = await aiService.organizeIncidents(rawNotes.trim());
+      const incidents = await organizeIncidents(rawNotes.trim());
       
       if (incidents.length === 0) {
         setError('No incidents could be organized. Please review your notes and try again.');

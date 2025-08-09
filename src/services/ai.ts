@@ -1,28 +1,28 @@
-import { supabase } from '@/integrations/supabase/client';
-import { OrganizedIncident } from '@/types/incidents';
+import type { OrganizedIncident } from "@/types/incidents";
 
-export const aiService = {
-  /**
-   * Organizes raw incident notes using AI via Supabase Edge Function
-   */
-  async organizeIncidents(rawNotes: string): Promise<OrganizedIncident[]> {
+const FN_PATH = "/functions/v1/organize-incidents";
+
+export async function organizeIncidents(rawNotes: string): Promise<OrganizedIncident[]> {
+  const url = `${import.meta.env.VITE_SUPABASE_URL ?? ""}${FN_PATH}`;
+
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ rawNotes }),
+  });
+
+  if (!res.ok) {
+    let msg = "Service error";
     try {
-      const { data, error } = await supabase.functions.invoke('organize-incidents', {
-        body: { rawNotes }
-      });
-
-      if (error) {
-        throw new Error(`AI processing failed: ${error.message}`);
-      }
-
-      if (!data || !data.incidents) {
-        throw new Error('No organized incidents returned from AI');
-      }
-
-      return data.incidents;
-    } catch (error) {
-      console.error('Error organizing incidents:', error);
-      throw error;
+      const j = await res.json();
+      if (j?.error) msg = j.error;
+    } catch {
+      /* ignore */
     }
+    throw new Error(msg);
   }
-};
+
+  const data = await res.json();
+  const incidents = (data?.incidents ?? []) as OrganizedIncident[];
+  return incidents;
+}
