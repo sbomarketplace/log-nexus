@@ -15,6 +15,21 @@ export interface IncidentRecord {
   events: IncidentEvent[];   // Array of parsed events
 }
 
+export type Incident = {
+  date: string;
+  category: string;
+  who: string;
+  what: string;
+  where: string;
+  when: string;
+  witnesses: string;
+  notes: string;
+};
+
+export type OrganizeResponse = {
+  incidents: Incident[];
+};
+
 export interface OrganizedIncident {
   date: string;
   categoryOrIssue: string;

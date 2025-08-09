@@ -6,8 +6,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { organizeIncidents } from '@/services/ai';
-import { OrganizedIncident } from '@/types/incidents';
+import { organizeNotes } from '@/services/organizer';
+import { Incident, OrganizedIncident } from '@/types/incidents';
 import { incidentService } from '@/services/incidents';
 import { IncidentRecord } from '@/types/incidents';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
@@ -70,14 +70,26 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     setIsProcessing(true);
     setError(null);
     try {
-      const incidents = await organizeIncidents(rawNotes.trim());
+      const incidents = await organizeNotes(rawNotes.trim());
       
       if (incidents.length === 0) {
         setError('No incidents could be organized. Please review your notes and try again.');
         return;
       }
       
-      setOrganizedIncidents(incidents);
+      // Convert Incident to OrganizedIncident format
+      const converted = incidents.map(incident => ({
+        date: incident.date,
+        categoryOrIssue: incident.category,
+        who: incident.who,
+        what: incident.what,
+        where: incident.where,
+        when: incident.when,
+        witnesses: incident.witnesses,
+        notes: incident.notes,
+      }));
+      
+      setOrganizedIncidents(converted);
       setShowResults(true);
       
       toast({
@@ -86,7 +98,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       });
     } catch (error) {
       console.error('Error organizing notes:', error);
-      setError('We couldn\'t organize these notes. Please try again.');
+      setError(error instanceof Error ? error.message : 'We couldn\'t organize these notes. Please try again.');
     } finally {
       setIsProcessing(false);
     }
