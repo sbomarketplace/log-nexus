@@ -206,7 +206,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
                 </Label>
                 <Textarea
                   id="raw-notes"
-                  placeholder="Paste your raw incident notes here…"
+                  placeholder="Paste your raw incident notes here... Be sure to include Who, What, When, Where, Why, and How to capture the full details."
                   value={rawNotes}
                   onChange={(e) => setRawNotes(e.target.value)}
                   className="min-h-[220px] w-full rounded-xl border border-border focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
