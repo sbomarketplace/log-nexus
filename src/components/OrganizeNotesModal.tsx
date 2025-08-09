@@ -215,7 +215,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
                 />
               </div>
               
-              <div className="flex gap-3 pt-4">
+              <div className="flex gap-3 pt-4 justify-center">
                 <Button 
                   onClick={handleOrganizeNotes}
                   disabled={isProcessing}
@@ -283,7 +283,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
                 ))}
               </div>
 
-              <div className="flex gap-3 pt-4 border-t">
+              <div className="flex gap-3 pt-4 border-t justify-center">
                 <Button 
                   onClick={handleSaveIncidents}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl px-6"
