@@ -5,7 +5,7 @@ export async function organizeNotes(rawNotes: string) {
   const { data, error } = await supabase.functions.invoke(
     "organize-incidents",
     {
-      body: { rawNotes },
+      body: { notes: rawNotes },
     }
   );
 

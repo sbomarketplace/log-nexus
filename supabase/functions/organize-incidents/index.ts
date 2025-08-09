@@ -10,51 +10,38 @@ const corsHeadersJson = {
 
 const OPENAI_API_KEY = Deno.env.get("OPENAI_SECRET_KEY");
 
-const SYSTEM_PROMPT = `You are ClearCase's HR incident organizer (not a summarizer).
-Given messy workplace notes, extract and normalize all incident details and return pure JSON that the UI will render.
+const SYSTEM_PROMPT = `You are an assistant that organizes raw workplace incident notes into a structured, detailed format while preserving every meaningful fact, name, time, and quote. Do not shorten or generalize unless information is clearly redundant. Separate each incident clearly.
 
-Goals
-Identify one or more distinct incidents.
-For each incident, organize details into a clean structure with fields below.
-Add useful, factual organization such as a timeline, policy_concerns, and direct quotes pulled from the notes.
-Never invent facts. If a field is missing, use "None noted".
-
-Normalize
-Dates: MM/DD if present; else "Unknown"
-Times: h:mm AM/PM
-People names: title case; de-duplicate ("Jon" vs "John" -> keep as written if uncertain)
-Location: short phrase ("Tool closet")
-Category: choose the best single category from:
-Harassment, Discrimination, Retaliation, Substance Abuse Allegation, Policy Violation, Safety Concern, Injury/Medical, Inappropriate Comment, Other
-
-Output (JSON only)
-Return an object with a top-level incidents array. Each item:
+Return a JSON object with an "incidents" array. For each incident, use this structure:
 {
-  "date": "MM/DD" | "Unknown",
-  "category": "…",
-  "who": "Short list of key people",
-  "what": "1–2 sentences stating the allegation/issue",
-  "where": "Short location",
-  "when": "Time span or point in time",
-  "witnesses": ["Name", "Name"],
-  "notes": "Short paragraph capturing key context",
+  "date": "MM/DD format or 'Unknown'",
+  "category": "one of: Harassment | Discrimination | Retaliation | Substance Abuse Allegation | Policy Violation | Safety Concern | Injury/Medical | Inappropriate Comment | Other",
+  "who": "Detailed list of all people involved, preserving original names and titles",
+  "what": "Comprehensive description maintaining all factual details and context",
+  "where": "Complete location details as provided",
+  "when": "Full time information including duration and sequence",
+  "witnesses": "All witnesses mentioned, preserving names exactly as written",
+  "notes": "Detailed preservation of all factual context, policy violations, requests made/denied, exact statements, and procedural concerns. Maintain original wording for quotes and key statements.",
   "timeline": [
-    {"time": "h:mm AM/PM", "event": "What happened"},
-    {"time": "h:mm AM/PM", "event": "What happened"}
+    {"time": "exact time format", "event": "preserve exact wording for critical statements and actions"}
   ],
   "policy_concerns": [
-    "Concrete concern tied to the notes (e.g., 'Only one manager present; policy requires two.')"
+    "specific policy violations or procedural concerns mentioned in notes"
   ],
   "quotes": [
-    {"speaker": "Name or Role", "text": "Exact quote from notes"},
-    {"speaker": "…", "text": "…"}
+    {"speaker": "exact name or role", "text": "exact quote from notes"}
   ]
 }
 
-Quotes must be exact excerpts from the notes (trim to ≤ 25 words each).
-Policy concerns must be grounded in the notes (don't speculate).
-If there are multiple incidents in the notes, return multiple items.
-Output JSON only, no prose.`;
+Rules:
+- Maintain original wording for quotes and key statements
+- Do not merge separate events — keep them split if they have different times or topics  
+- Fill all fields with as much detail as provided
+- If times are given in sequence, retain them exactly
+- If the notes imply policy violations, note them with specifics
+- For missing information, use "None noted" for text fields or empty arrays for lists
+- Preserve all names, times, locations, and procedural details exactly as written
+- Output only valid JSON with no additional text`;
 
 // Robust JSON extraction with fallback parsing
 function extractJSON(text: string): any {
@@ -117,12 +104,13 @@ serve(async (req) => {
       });
     }
 
-    const { rawNotes } = await req.json().catch(() => ({}));
-    if (!rawNotes || typeof rawNotes !== "string" || !rawNotes.trim()) {
+    const { rawNotes, notes } = await req.json().catch(() => ({}));
+    const inputNotes = rawNotes || notes; // Support both field names for compatibility
+    if (!inputNotes || typeof inputNotes !== "string" || !inputNotes.trim()) {
       return new Response(JSON.stringify({ 
         ok: false, 
         code: 'validation_error',
-        message: "rawNotes is required" 
+        message: "notes is required" 
       }), {
         status: 400,
         headers: corsHeadersJson,
@@ -140,12 +128,12 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           model: "gpt-4o",
-          temperature: 0.2,
-          max_tokens: 2000,
+          temperature: 0.1,
+          max_tokens: 3000,
           response_format: { type: "json_object" },
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: rawNotes },
+            { role: "user", content: inputNotes },
           ],
         }),
       });
@@ -161,11 +149,10 @@ serve(async (req) => {
         if (openaiRes.status === 429 || openaiRes.status === 403 || 
             message.toLowerCase().includes('quota') || 
             message.toLowerCase().includes('insufficient_quota') ||
+            message.toLowerCase().includes('exceeded your current quota') ||
             code === 'insufficient_quota') {
           return new Response(JSON.stringify({
-            ok: false,
-            code: 'quota_exceeded',
-            message: 'OpenAI quota exceeded. Add credits or raise your monthly limit, then try again.'
+            error: "Quota exceeded. Please update your API key or wait for reset."
           }), {
             status: 429,
             headers: corsHeadersJson,
@@ -203,7 +190,7 @@ serve(async (req) => {
             where: "None noted",
             when: "None noted",
             witnesses: [],
-            notes: rawNotes.substring(0, 500) + (rawNotes.length > 500 ? "..." : ""),
+            notes: inputNotes.substring(0, 500) + (inputNotes.length > 500 ? "..." : ""),
             timeline: [],
             policy_concerns: [],
             quotes: []
