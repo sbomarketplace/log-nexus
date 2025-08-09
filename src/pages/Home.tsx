@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { EditIncidentModal } from '@/components/EditIncidentModal';
+import { ImportNotesModal } from '@/components/ImportNotesModal';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 
 import jsPDF from 'jspdf';
@@ -114,6 +115,7 @@ const Home = () => {
                 + New Incident
               </Button>
             </Link>
+            <ImportNotesModal onImportComplete={handleOrganizeComplete} />
             <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
           </div>
         </div>
