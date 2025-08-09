@@ -11,26 +11,73 @@ const CORS = {
 const OPENAI_API_KEY = Deno.env.get("OPENAI_SECRET_KEY");
 
 const SYSTEM_PROMPT = `
-You are an assistant that organizes raw workplace incident notes into a JSON array of incidents.
-Return ONLY valid JSON (no markdown, no prose). Schema per array item:
+You are an assistant that organizes raw workplace incident notes into a structured JSON object.
+Return a JSON object with this exact structure:
 
 {
-  "date": "string",
-  "categoryOrIssue": "string",
-  "who": "string",
-  "what": "string",
-  "where": "string",
-  "when": "string",
-  "witnesses": "string",
-  "notes": "string"
+  "incidents": [
+    {
+      "date": "string",
+      "categoryOrIssue": "string", 
+      "who": "string",
+      "what": "string",
+      "where": "string",
+      "when": "string",
+      "witnesses": "string",
+      "notes": "string"
+    }
+  ]
 }
 
 Rules:
 - Split into multiple incidents when dates, topics, or scenes change.
 - Do not invent details; if unknown, use "None noted".
 - Keep short, plain phrasing.
-- Output MUST be a JSON array and nothing else.
+- MUST return valid JSON in the exact structure shown above.
 `.trim();
+
+// Robust JSON extraction with fallback parsing
+function extractJSON(text: string): any {
+  // First try direct parsing
+  try {
+    const parsed = JSON.parse(text);
+    return parsed;
+  } catch (e) {
+    console.log("Direct parse failed, trying fallback extraction...");
+  }
+
+  // Fallback: extract JSON from markdown code blocks or mixed content
+  const jsonMatches = text.match(/```(?:json)?\s*(\{[\s\S]*?\})\s*```/i) ||
+                     text.match(/(\{[\s\S]*"incidents"[\s\S]*?\})/i) ||
+                     text.match(/(\[[\s\S]*?\])/i);
+
+  if (jsonMatches && jsonMatches[1]) {
+    try {
+      const cleaned = jsonMatches[1].trim();
+      const parsed = JSON.parse(cleaned);
+      return parsed;
+    } catch (e) {
+      console.log("Fallback extraction failed:", e);
+    }
+  }
+
+  // Last resort: try to find any valid JSON object/array
+  const lines = text.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith('{') || line.startsWith('[')) {
+      try {
+        // Try to parse from this line to end
+        const remaining = lines.slice(i).join('\n');
+        return JSON.parse(remaining);
+      } catch (e) {
+        continue;
+      }
+    }
+  }
+
+  throw new Error("No valid JSON found in response");
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -62,8 +109,9 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-mini",
         temperature: 0.3,
+        response_format: { type: "json_object" },
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: rawNotes },
@@ -81,13 +129,41 @@ serve(async (req) => {
     }
 
     const text = raw?.choices?.[0]?.message?.content ?? "";
-    let incidents: unknown;
+    let parsedData: any;
+    
     try {
-      incidents = JSON.parse(text);
-      if (!Array.isArray(incidents)) throw new Error("Not an array");
+      parsedData = extractJSON(text);
     } catch (e) {
-      console.error("Invalid AI JSON:", e, "\nAI content:", text);
-      return new Response(JSON.stringify({ error: "Invalid AI response" }), {
+      console.error("JSON extraction failed:", e, "\nAI content:", text);
+      return new Response(JSON.stringify({ 
+        error: "Could not extract valid JSON from AI response. Please try rephrasing your notes." 
+      }), {
+        status: 422,
+        headers: CORS,
+      });
+    }
+
+    // Handle both direct array and wrapped object formats
+    let incidents: any[];
+    if (Array.isArray(parsedData)) {
+      incidents = parsedData;
+    } else if (parsedData?.incidents && Array.isArray(parsedData.incidents)) {
+      incidents = parsedData.incidents;
+    } else {
+      console.error("Unexpected response structure:", parsedData);
+      return new Response(JSON.stringify({ 
+        error: "AI response format is invalid. Expected incidents array." 
+      }), {
+        status: 422,
+        headers: CORS,
+      });
+    }
+
+    // Validate incidents structure
+    if (!incidents.length) {
+      return new Response(JSON.stringify({ 
+        error: "No incidents were identified in your notes. Please provide more detailed information." 
+      }), {
         status: 422,
         headers: CORS,
       });
