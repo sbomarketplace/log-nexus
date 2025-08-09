@@ -5,14 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
-import { AlertIcon, FileIcon } from '@/components/icons/CustomIcons';
+import { AlertIcon } from '@/components/icons/CustomIcons';
 import { useToast } from '@/hooks/use-toast';
-import { ImportNotesModal } from '@/components/ImportNotesModal';
+
 import jsPDF from 'jspdf';
 
 const Home = () => {
@@ -25,9 +22,6 @@ const Home = () => {
     setIncidents(storage.getIncidents());
   }, []);
 
-  const handleImportComplete = () => {
-    setIncidents(storage.getIncidents());
-  };
 
   const handleDeleteIncident = (id: string) => {
     storage.deleteIncident(id);
@@ -132,15 +126,12 @@ const Home = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mb-6 text-center space-y-3">
-          <div className="flex justify-center gap-3">
-            <Link to="/add">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
-                + New Incident
-              </Button>
-            </Link>
-            <ImportNotesModal onImportComplete={handleImportComplete} />
-          </div>
+        <div className="mb-6 text-center">
+          <Link to="/add">
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
+              + New Incident
+            </Button>
+          </Link>
         </div>
 
         {/* Incidents List */}
