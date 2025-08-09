@@ -9,6 +9,7 @@ import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { AlertIcon } from '@/components/icons/CustomIcons';
 import { useToast } from '@/hooks/use-toast';
+import { ImportNotesModal } from '@/components/ImportNotesModal';
 
 import jsPDF from 'jspdf';
 
@@ -21,6 +22,11 @@ const Home = () => {
   useEffect(() => {
     setIncidents(storage.getIncidents());
   }, []);
+
+  // TODO: Restore this handler when parser is rebuilt
+  const handleImportComplete = () => {
+    setIncidents(storage.getIncidents());
+  };
 
 
   const handleDeleteIncident = (id: string) => {
@@ -126,12 +132,15 @@ const Home = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mb-6 text-center">
-          <Link to="/add">
-            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
-              + New Incident
-            </Button>
-          </Link>
+        <div className="mb-6 text-center space-y-3">
+          <div className="flex justify-center gap-3">
+            <Link to="/add">
+              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
+                + New Incident
+              </Button>
+            </Link>
+            <ImportNotesModal onImportComplete={handleImportComplete} />
+          </div>
         </div>
 
         {/* Incidents List */}
