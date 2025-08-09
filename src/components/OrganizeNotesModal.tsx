@@ -97,8 +97,20 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         description: `Successfully organized ${incidents.length} incident${incidents.length !== 1 ? 's' : ''}.`,
       });
     } catch (error) {
-      console.error('Error organizing notes:', error);
-      const errorMessage = error instanceof Error ? error.message : 'We couldn\'t organize these notes. Please try again.';
+      console.error('Error organizing notes - Full payload:', error);
+      
+      // Check if it's a quota error
+      let errorMessage = 'We couldn\'t organize these notes. Please try again in a minute.';
+      
+      if (error instanceof Error) {
+        const message = error.message.toLowerCase();
+        if (message.includes('quota') || message.includes('insufficient_quota')) {
+          errorMessage = 'We couldn\'t organize notes because the AI quota is exhausted. Add credits or raise your OpenAI monthly limit, then try again.';
+        } else {
+          errorMessage = error.message;
+        }
+      }
+      
       setError(errorMessage);
       
       // Keep the raw notes in the textarea so nothing is lost
@@ -325,11 +337,16 @@ Notes: ${incident.notes}`;
               {error && (
                 <div className="mt-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                   <p className="text-destructive text-sm font-medium">
-                    {error.includes('quota') ? 
-                      "We couldn't organize these notes because the AI quota is exhausted. Please add credits and try again." : 
-                      error
-                    }
+                    {error}
                   </p>
+                  <a 
+                    href="https://supabase.com/dashboard/project/higuokkqenvesmexzozx/functions/organize-incidents/logs" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-xs text-muted-foreground hover:text-foreground underline mt-1 inline-block"
+                  >
+                    View function logs
+                  </a>
                 </div>
               )}
               

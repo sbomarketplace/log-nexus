@@ -10,12 +10,19 @@ export async function organizeNotes(rawNotes: string) {
   );
 
   if (error) {
-    // Surface server-provided details if present
+    console.error('Supabase function invocation error:', error);
     const message = error?.message || "We couldn't organize these notes. Please try again.";
     throw new Error(message);
   }
 
+  console.log('Organize response data:', data);
+
   if (!data?.ok) {
+    // Handle specific error codes
+    if (data?.code === 'quota_exceeded') {
+      throw new Error("OpenAI quota exceeded. Add credits or raise your monthly limit, then try again.");
+    }
+    
     const message = data?.message || "Organizer returned an error.";
     throw new Error(message);
   }
