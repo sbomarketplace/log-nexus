@@ -8,7 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { IncidentEvent } from '@/types/incidents';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
-import { X, Loader2 } from 'lucide-react';
+import { X, Loader2, FolderOpen } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
   onOrganizeComplete: () => void;
@@ -153,11 +153,12 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
   if (!open) {
     return (
       <Button 
-        variant="outline" 
-        className="border-primary text-primary hover:bg-primary/10"
+        className="bg-[hsl(214,100%,50%)] text-white hover:bg-[hsl(214,100%,45%)] active:bg-[hsl(214,100%,40%)] rounded-lg px-4 py-2 text-sm font-medium"
         onClick={() => setOpen(true)}
+        aria-label="Organize incident notes using AI"
       >
-        📝 Organize Notes
+        <FolderOpen className="w-4 h-4 mr-2" aria-hidden="true" />
+        Organize Notes
       </Button>
     );
   }
