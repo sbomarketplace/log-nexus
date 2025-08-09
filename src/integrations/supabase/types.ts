@@ -14,7 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      incidents: {
+        Row: {
+          created_at: string
+          events: Json
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          events: Json
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          events?: Json
+          id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
