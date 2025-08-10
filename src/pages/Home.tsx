@@ -201,10 +201,10 @@ const Home = () => {
               />
             </div>
             
-            {/* Filter and Sort Controls */}
-            <div className="flex gap-3">
+            {/* Filter Controls */}
+            <div>
               <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-[180px] rounded-lg">
+                <SelectTrigger className="w-full rounded-lg">
                   <SelectValue placeholder="Filter by category" />
                 </SelectTrigger>
                 <SelectContent>
@@ -214,16 +214,6 @@ const Home = () => {
                       {category}
                     </SelectItem>
                   ))}
-                </SelectContent>
-              </Select>
-
-              <Select value={sortBy} onValueChange={(value: 'date' | 'category') => setSortBy(value)}>
-                <SelectTrigger className="w-[130px] rounded-lg">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="date">Date</SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
                 </SelectContent>
               </Select>
             </div>
