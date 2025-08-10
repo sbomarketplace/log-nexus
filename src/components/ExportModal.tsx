@@ -78,7 +78,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm max-h-[80vh] rounded-xl shadow-2xl border-2 mx-6 my-4">
+      <DialogContent className="max-w-xs max-h-[80vh] rounded-xl shadow-2xl border-2 mx-8 my-4">
         <DialogHeader>
           <DialogTitle className="text-center">Export Incidents</DialogTitle>
         </DialogHeader>
