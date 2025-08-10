@@ -63,13 +63,13 @@ const Settings = () => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button variant="outline" onClick={handleExport} size="sm">
+              <Button variant="outline" onClick={handleExport} size="sm" className="justify-center text-center">
                 Export Data
               </Button>
-              <Button variant="outline" onClick={handleImport} size="sm">
+              <Button variant="outline" onClick={handleImport} size="sm" className="justify-center text-center">
                 Import Data
               </Button>
-              <Button variant="destructive" size="sm">
+              <Button variant="destructive" size="sm" className="justify-center text-center">
                 Clear All Data
               </Button>
             </div>
@@ -114,7 +114,7 @@ const Settings = () => {
                 variant="outline" 
                 onClick={() => openPolicyModal('terms')} 
                 size="sm"
-                className="justify-start"
+                className="justify-center text-center"
               >
                 View Terms & Conditions
               </Button>
@@ -122,7 +122,7 @@ const Settings = () => {
                 variant="outline" 
                 onClick={() => openPolicyModal('privacy')} 
                 size="sm"
-                className="justify-start"
+                className="justify-center text-center"
               >
                 View Privacy Policy
               </Button>
@@ -130,7 +130,7 @@ const Settings = () => {
                 variant="outline" 
                 onClick={() => openPolicyModal('cookies')} 
                 size="sm"
-                className="justify-start"
+                className="justify-center text-center"
               >
                 View Cookie Policy
               </Button>
@@ -142,11 +142,13 @@ const Settings = () => {
         </Card>
 
         {/* Save Button */}
-        <div className="flex justify-end">
-          <Button onClick={handleSave} size="sm">
-            Save Settings
-          </Button>
-        </div>
+        <Card>
+          <CardContent className="pt-6">
+            <Button onClick={handleSave} size="sm" className="w-full justify-center text-center">
+              Save Settings
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Policy Modal */}
         <PolicyModal
