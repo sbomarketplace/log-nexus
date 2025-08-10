@@ -5,11 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertIcon } from '@/components/icons/CustomIcons';
-import { SearchIcon, X } from 'lucide-react';
+import { SearchIcon, X, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { EditIncidentModal } from '@/components/EditIncidentModal';
@@ -28,6 +30,10 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  // Quick notes state
+  const [quickNotes, setQuickNotes] = useState('');
+  const [quickNotesError, setQuickNotesError] = useState('');
+  const [isOrganizing, setIsOrganizing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -78,10 +84,76 @@ const Home = () => {
 
   useEffect(() => {
     loadIncidents();
+    // Restore quick notes draft from localStorage
+    const saved = localStorage.getItem('quickNotesDraft');
+    if (saved) {
+      setQuickNotes(saved);
+    }
   }, []);
+
+  // Save quick notes draft to localStorage (throttled)
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (quickNotes.trim()) {
+        localStorage.setItem('quickNotesDraft', quickNotes);
+      } else {
+        localStorage.removeItem('quickNotesDraft');
+      }
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [quickNotes]);
 
   const handleOrganizeComplete = () => {
     loadIncidents();
+  };
+
+  const handleQuickNotesOrganize = async () => {
+    setQuickNotesError('');
+    
+    if (!quickNotes.trim()) {
+      setQuickNotesError('Please enter notes to organize.');
+      return;
+    }
+
+    setIsOrganizing(true);
+    try {
+      const results = await organizeIncidents(quickNotes);
+      if (!results?.length) {
+        setQuickNotesError('No incidents were identified. Please review your notes and try again.');
+      } else {
+        // Save all organized incidents
+        const incidentsToSave = results.map(incident => ({
+          id: crypto.randomUUID(),
+          date: incident.date,
+          categoryOrIssue: incident.categoryOrIssue,
+          who: incident.who,
+          what: incident.what,
+          where: incident.where,
+          when: incident.when,
+          witnesses: incident.witnesses,
+          notes: incident.notes,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }));
+        
+        organizedIncidentStorage.saveMultiple(incidentsToSave);
+        
+        // Clear the textarea and draft
+        setQuickNotes('');
+        localStorage.removeItem('quickNotesDraft');
+        loadIncidents();
+        
+        toast({
+          title: "Success",
+          description: `${results.length} incident${results.length === 1 ? '' : 's'} organized and saved.`,
+        });
+      }
+    } catch (error: any) {
+      setQuickNotesError(error?.message || 'Failed to organize notes. Please try again.');
+    } finally {
+      setIsOrganizing(false);
+    }
   };
 
   const handleDeleteIncident = async (id: string) => {
@@ -150,6 +222,39 @@ const Home = () => {
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
+              {/* Quick Notes Section */}
+              <section aria-labelledby="quick-notes-title">
+                <h2 id="quick-notes-title" className="sr-only">Quick Notes</h2>
+                
+                <div className="mb-4">
+                  <label htmlFor="quick-notes-input" className="sr-only">
+                    Quick Notes
+                  </label>
+                  <Textarea
+                    id="quick-notes-input"
+                    value={quickNotes}
+                    onChange={(e) => setQuickNotes(e.target.value)}
+                    placeholder="Paste raw incident notes here…"
+                    className="min-h-[80px] max-h-[200px] rounded-2xl border-border shadow-sm resize-none"
+                    aria-describedby={quickNotesError ? "quick-notes-error" : "quick-notes-hint"}
+                    onKeyDown={(e) => {
+                      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+                        e.preventDefault();
+                        handleQuickNotesOrganize();
+                      }
+                    }}
+                  />
+                  {quickNotesError && (
+                    <div 
+                      id="quick-notes-error" 
+                      className="mt-2 text-xs text-red-600 dark:text-red-400"
+                    >
+                      {quickNotesError}
+                    </div>
+                  )}
+                </div>
+              </section>
+
               <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center">
                 {/* New Incident */}
                 <div className="flex flex-col items-center w-full sm:w-44">
@@ -170,17 +275,36 @@ const Home = () => {
                   </span>
                 </div>
 
-                {/* Organize Notes */}
+                {/* Organize Quick Notes */}
                 <div className="flex flex-col items-center w-full sm:w-44">
-                  <div className="w-full">
-                    <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
-                  </div>
+                  <Button
+                    onClick={handleQuickNotesOrganize}
+                    disabled={isOrganizing}
+                    aria-label="Organize Quick Notes"
+                    className="w-full h-11 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
+                  >
+                    {isOrganizing ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Organizing...
+                      </>
+                    ) : (
+                      'Organize Quick Notes'
+                    )}
+                  </Button>
                   <span
-                    id="hint-organize-notes"
+                    id="quick-notes-hint"
                     className="mt-2 text-xs leading-5 text-muted-foreground text-center"
                   >
-                    Paste raw notes and AI will structure them into a report.
+                    Paste raw notes above and AI will structure them into a report.
                   </span>
+                </div>
+              </div>
+
+              {/* Advanced Options */}
+              <div className="mt-4 pt-4 border-t border-border">
+                <div className="flex justify-center">
+                  <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
                 </div>
               </div>
             </div>
