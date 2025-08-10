@@ -137,27 +137,4 @@ All colors MUST be HSL.
     overflow: hidden;
     line-height: 1.5;
   }
-
-  .line-clamp-5 {
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    line-height: 1.5;
-  }
-  
-  /* Compact text sizes */
-  .text-\[11px\] {
-    font-size: 11px;
-  }
-  
-  .text-\[12px\] {
-    font-size: 12px;
-  }
-  
-  /* Enhanced focus states for compact elements */
-  .compact-focus:focus-visible {
-    outline: 2px solid hsl(var(--ring));
-    outline-offset: 2px;
-  }
 }

@@ -15,15 +15,11 @@ import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { EditIncidentModal } from '@/components/EditIncidentModal';
-import { CompactIncidentCard } from '@/components/CompactIncidentCard';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
 
 import jsPDF from 'jspdf';
-
-// Feature flag for compact cards
-const useCompactHomeCards = true;
 
 const Home = () => {
   const [organizedIncidents, setOrganizedIncidents] = useState<OrganizedIncident[]>([]);
@@ -381,18 +377,7 @@ const Home = () => {
               </CardContent>
             </Card>
           ) : (
-            useCompactHomeCards ? (
-              filteredIncidents.map((incident) => (
-                <CompactIncidentCard
-                  key={incident.id}
-                  incident={incident}
-                  onEdit={setEditIncident}
-                  onExport={handleExport}
-                  onDelete={setDeleteId}
-                />
-              ))
-            ) : (
-              filteredIncidents.map((incident) => (
+            filteredIncidents.map((incident) => (
                 <Card key={incident.id} className="border rounded-lg">
                   <CardContent className="p-3">
                     <div className="space-y-2">
@@ -488,7 +473,6 @@ const Home = () => {
                   </CardContent>
                 </Card>
               ))
-            )
           )}
         </div>
 
