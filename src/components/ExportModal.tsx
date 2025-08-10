@@ -91,24 +91,39 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
               </div>
             ) : (
               incidents.map((incident) => (
-                <Card key={incident.id} className="border border-border">
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground text-sm leading-tight break-words">
+                <Card key={incident.id} className="border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-[130px]">
+                  <CardContent className="p-3 h-full flex flex-col justify-between">
+                    <div className="space-y-2">
+                      <div className="flex flex-wrap gap-1">
+                        <span className="px-2 py-1 text-[10px] font-medium bg-primary/10 text-primary rounded-full">
+                          {formatDate(incident.date)}
+                        </span>
+                        <span className="px-2 py-1 text-[10px] font-medium bg-secondary/10 text-secondary-foreground rounded-full">
+                          {incident.categoryOrIssue}
+                        </span>
+                      </div>
+                      
+                      <div className="space-y-1">
+                        <h3 className="text-[12px] font-semibold text-foreground line-clamp-2 leading-tight">
                           {incident.categoryOrIssue}
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          {formatDate(incident.date)}
+                        <p className="text-[11px] text-muted-foreground line-clamp-2">
+                          {incident.what || 'No details available'}
                         </p>
                       </div>
+                    </div>
+                    
+                    <div className="flex justify-end">
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleExportIncident(incident.id, incident.categoryOrIssue)}
-                        className="flex items-center gap-2 shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleExportIncident(incident.id, incident.categoryOrIssue);
+                        }}
+                        className="h-7 px-2 text-[10px] gap-1"
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-3 w-3" />
                         Export
                       </Button>
                     </div>
