@@ -9,8 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeNotes } from '@/services/organizer';
 import { StructuredIncident } from '@/types/structured-incidents';
 import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
-import { incidentService } from '@/services/incidents';
-import { IncidentRecord } from '@/types/incidents';
+import { organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
@@ -110,22 +109,23 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
 
   const handleSaveIncident = async (incident: StructuredIncident) => {
     try {
-      const incidentRecord: IncidentRecord = {
+      // Convert StructuredIncident to OrganizedIncident for home page storage
+      const organizedIncident = {
         id: crypto.randomUUID(),
-        created_at: new Date().toISOString(),
-        events: [{
-          date: incident.date || "Unknown",
-          category: incident.category,
-          who: Object.values(incident.who).flat().join(", "),
-          what: incident.whatHappened,
-          where: incident.where || "None noted",
-          when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
-          witnesses: incident.witnesses?.join(", ") || "",
-          notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`
-        }]
+        date: incident.date || "Unknown",
+        categoryOrIssue: incident.category,
+        who: Object.values(incident.who).flat().join(", "),
+        what: incident.whatHappened,
+        where: incident.where || "None noted",
+        when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
+        witnesses: incident.witnesses?.join(", ") || "",
+        notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       };
       
-      await incidentService.createIncident(incidentRecord);
+      // Save to the same storage system that home page uses
+      organizedIncidentStorage.save(organizedIncident);
       
       // Remove from preview
       setOrganizedIncidents(prev => prev.filter(inc => inc !== incident));
@@ -152,24 +152,22 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
 
   const handleSaveAllIncidents = async () => {
     try {
-      for (const incident of organizedIncidents) {
-        const incidentRecord: IncidentRecord = {
-          id: crypto.randomUUID(),
-          created_at: new Date().toISOString(),
-          events: [{
-            date: incident.date || "Unknown",
-            category: incident.category,
-            who: Object.values(incident.who).flat().join(", "),
-            what: incident.whatHappened,
-            where: incident.where || "None noted",
-            when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
-            witnesses: incident.witnesses?.join(", ") || "",
-            notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`
-          }]
-        };
-        
-        await incidentService.createIncident(incidentRecord);
-      }
+      const organizedIncidentsToSave = organizedIncidents.map(incident => ({
+        id: crypto.randomUUID(),
+        date: incident.date || "Unknown",
+        categoryOrIssue: incident.category,
+        who: Object.values(incident.who).flat().join(", "),
+        what: incident.whatHappened,
+        where: incident.where || "None noted",
+        when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
+        witnesses: incident.witnesses?.join(", ") || "",
+        notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      }));
+      
+      // Save all to the same storage system that home page uses
+      organizedIncidentStorage.saveMultiple(organizedIncidentsToSave);
       
       toast({
         title: "Incidents saved",
@@ -394,22 +392,22 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
               <div className="space-y-4 max-h-[400px] overflow-y-auto">
                 {organizedIncidents.map((incident, index) => (
                   <Card key={index} className="border rounded-xl">
-                    <CardContent className="p-4">
-                      <div className="space-y-3">
-                         {/* Header */}
-                         <div className="flex items-center gap-2 mb-4">
-                           <Badge variant="secondary" className="text-xs rounded-lg">
-                             📅 {incident.date || 'Unknown'}
-                           </Badge>
-                           <Badge variant="outline" className="text-xs rounded-lg">
-                             {incident.category}
-                           </Badge>
-                         </div>
-                         
-                         {/* Who Section */}
-                         <div className="mb-4">
-                           <h4 className="text-sm font-medium mb-2">Who:</h4>
-                           <div className="grid grid-cols-2 gap-2 text-xs">
+                     <CardContent className="p-4">
+                       <div className="space-y-3 text-left">
+                          {/* Header */}
+                          <div className="flex items-start gap-2 mb-4">
+                            <Badge variant="secondary" className="text-xs rounded-lg">
+                              📅 {incident.date || 'Unknown'}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs rounded-lg">
+                              {incident.category}
+                            </Badge>
+                          </div>
+                          
+                          {/* Who Section */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-2">Who:</h4>
+                            <div className="grid grid-cols-1 gap-2 text-xs">
                              {incident.who.accused?.length > 0 && (
                                <div><strong>Accused:</strong> {incident.who.accused.join(', ')}</div>
                              )}
