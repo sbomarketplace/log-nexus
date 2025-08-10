@@ -61,6 +61,7 @@ async function callOpenAI(prompt: string) {
         content: `Extract workplace incident information into JSON with maximum detail preservation. Return only clean JSON with these exact keys:
 
 - date: Date of incident (e.g., "7/22")
+
 - category: Choose the most specific category:
   * Harassment (Verbal, Physical, Sexual)
   * Discrimination (Race, Gender, Age, Disability, etc.)
@@ -83,40 +84,43 @@ async function callOpenAI(prompt: string) {
   * Other (Specify in Notes)
 
 - who: Detailed categorization of all people involved with their roles:
-  Format: "Managers: [names], Union Stewards: [names], Security: [names], Others: [names], Lab Technician: [names]"
+  ONLY include categories that have names. Do NOT include empty categories or empty brackets [].
+  Format: "Managers: Arthur Samora, Vincent Jessie, Seth Bentley; Union Stewards: Troy Denney, Jon Taylor; Security: Two unnamed officers; Others: Mark Cordell, Brian"
   Extract EVERY person mentioned and categorize them based on context clues.
 
-- what: Comprehensive description of what happened including:
-  * Main accusation or incident
-  * All key events in sequence
-  * Important statements made
-  * Policy violations mentioned
-  * Requests made and responses received
-  * Testing or evidence procedures
-  Use ALL details from the raw notes, don't summarize away important information.
+- what: CONCISE summary of the main incident and key facts only:
+  * Primary accusation or issue
+  * Essential outcome or resolution
+  * Critical statements (1-2 key quotes max)
+  Keep this brief - detailed timeline goes in "when" field.
 
 - where: Specific location details:
   * Primary location (e.g., "Tool box room (tool closet)")
   * Additional locations if communication occurred elsewhere
   * Communication methods if relevant (phone, in person)
 
-- when: Detailed chronological timeline with specific times:
-  Format each event as "TIME - EVENT DESCRIPTION"
-  Include ALL times mentioned and what happened at each time.
-  Preserve exact quotes when provided.
+- when: Time of incident only (e.g., "8:00 AM" or "Time unspecified")
+  Do NOT include event descriptions here - only the time.
 
-- witnesses: Array of all witness names (people who observed but weren't directly involved)
+- witnesses: Array of witness names only (people who observed but weren't directly involved)
 
-- notes: Comprehensive additional details including:
-  * Policy violations and procedural issues
-  * Denied requests (searches, tests, etc.)
-  * Inconsistencies in procedures
-  * Important quotes or statements
-  * Evidence collection details
-  * Any other relevant observations
-  * Personal statements or denials
+- notes: Comprehensive chronological timeline and additional details:
+  * "Timeline:" followed by detailed chronological events with times
+  * "Requests/Responses:" for denied/approved requests  
+  * "Policy Violations:" as bulleted list if any
+  * "Important Quotes:" for verbatim statements
+  * "Evidence/Testing:" for lab tests, searches, etc.
+  * "Additional Details:" for other relevant information
+  Use ALL details from raw notes. Preserve exact quotes and times.
 
-CRITICAL: Use ALL information from the raw notes. Only exclude truly redundant repetitions. Preserve all names, times, quotes, policy issues, and procedural details. The goal is maximum detail preservation and organization.` 
+FORMATTING RULES:
+- Never use empty brackets [] - omit empty categories entirely
+- Keep "what" concise (2-3 sentences max)
+- Put detailed timeline in "notes" section under "Timeline:"
+- Group similar information under clear headers in "notes"
+- Preserve all names, times, quotes, and procedural details
+
+CRITICAL: Use ALL information from the raw notes. The goal is maximum detail preservation with clean organization.`
       },
       { role: "user", content: prompt }
     ]
