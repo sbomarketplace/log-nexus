@@ -8,6 +8,10 @@ export interface OrganizedIncident {
   when: string;
   witnesses: string;
   notes: string;
+  timeline?: string;
+  requests?: string;
+  policy?: string;
+  evidence?: string;
   createdAt: string;
   updatedAt: string;
 }

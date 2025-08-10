@@ -30,6 +30,10 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
         when: incident.when,
         witnesses: incident.witnesses,
         notes: incident.notes,
+        timeline: incident.timeline || '',
+        requests: incident.requests || '',
+        policy: incident.policy || '',
+        evidence: incident.evidence || '',
       });
     }
   }, [incident]);
@@ -84,6 +88,10 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
         when: incident.when,
         witnesses: incident.witnesses,
         notes: incident.notes,
+        timeline: incident.timeline || '',
+        requests: incident.requests || '',
+        policy: incident.policy || '',
+        evidence: incident.evidence || '',
       });
     }
     onOpenChange(false);
@@ -189,9 +197,57 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
                 />
               </div>
 
+              {/* Timeline Field */}
+              <div className="space-y-2">
+                <Label htmlFor="timeline">Timeline</Label>
+                <Textarea
+                  id="timeline"
+                  value={formData.timeline || ''}
+                  onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
+                  placeholder="Timeline details"
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              {/* Requests Field */}
+              <div className="space-y-2">
+                <Label htmlFor="requests">Requests</Label>
+                <Textarea
+                  id="requests"
+                  value={formData.requests || ''}
+                  onChange={(e) => setFormData({ ...formData, requests: e.target.value })}
+                  placeholder="Requests made or received"
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              {/* Policy Field */}
+              <div className="space-y-2">
+                <Label htmlFor="policy">Policy</Label>
+                <Textarea
+                  id="policy"
+                  value={formData.policy || ''}
+                  onChange={(e) => setFormData({ ...formData, policy: e.target.value })}
+                  placeholder="Policy violations or references"
+                  className="min-h-[80px]"
+                />
+              </div>
+
+              {/* Evidence Field */}
+              <div className="space-y-2">
+                <Label htmlFor="evidence">Evidence</Label>
+                <Textarea
+                  id="evidence"
+                  value={formData.evidence || ''}
+                  onChange={(e) => setFormData({ ...formData, evidence: e.target.value })}
+                  placeholder="Evidence or testing information"
+                  className="min-h-[80px]"
+                />
+              </div>
+
               {/* Notes Field */}
               <div className="space-y-2">
-                <Label htmlFor="notes">Notes</Label>
+                <Label htmlFor="notes">Incident Summary</Label>
                 <Textarea
                   id="notes"
                   value={formData.notes || ''}

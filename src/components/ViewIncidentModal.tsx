@@ -70,6 +70,34 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
                   <p className="text-sm text-muted-foreground">{incident.witnesses}</p>
                 </div>
 
+                {incident.timeline && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Timeline:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.timeline}</p>
+                  </div>
+                )}
+
+                {incident.requests && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Requests:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.requests}</p>
+                  </div>
+                )}
+
+                {incident.policy && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Policy:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.policy}</p>
+                  </div>
+                )}
+
+                {incident.evidence && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Evidence:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.evidence}</p>
+                  </div>
+                )}
+
                 <div>
                   <h4 className="font-medium text-sm mb-1">Incident Summary:</h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.notes}</p>
