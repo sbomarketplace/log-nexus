@@ -476,7 +476,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                               <div className="space-y-2">
                                 {incident.timeline.map((event, eventIndex) => (
                                   <div key={eventIndex} className="text-xs">
-                                    <strong>{event.time || 'Time unspecified'}</strong> – {event.event}
+                                    <strong>{event.time || 'Time unspecified'}</strong> - {event.event}
                                     {event.quotes && event.quotes.length > 0 && (
                                       <div className="italic mt-1 ml-4 text-xs text-muted-foreground">
                                         "{event.quotes.join('; ')}"
@@ -488,7 +488,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                                   <>
                                     {incident.requestsAndResponses.map((req, reqIndex) => (
                                       <div key={`req-${reqIndex}`} className="text-xs">
-                                        <strong>Later</strong> – {req.request} {req.response === 'denied' ? 'denied' : req.response === 'approved' ? 'approved' : req.response}{req.byWhom ? ` by ${req.byWhom}` : ''}
+                                        <strong>Later</strong> - {req.request} {req.response === 'denied' ? 'denied' : req.response === 'approved' ? 'approved' : req.response}{req.byWhom ? ` by ${req.byWhom}` : ''}
                                       </div>
                                     ))}
                                   </>
@@ -497,7 +497,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                                   <>
                                     {incident.evidenceOrTests.map((evidence, evidenceIndex) => (
                                       <div key={`evidence-${evidenceIndex}`} className="text-xs">
-                                        <strong>Lab testing</strong> – {evidence.type}: {evidence.detail || ''} ({evidence.status || 'status unknown'})
+                                        <strong>Lab testing</strong> - {evidence.type}: {evidence.detail || ''} ({evidence.status || 'status unknown'})
                                       </div>
                                     ))}
                                   </>
