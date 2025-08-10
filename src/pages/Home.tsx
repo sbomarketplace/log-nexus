@@ -385,53 +385,37 @@ const Home = () => {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary" className="text-xs px-2 py-1">
+                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">
                               {incident.date}
                             </Badge>
-                            <Badge variant="outline" className="text-xs px-2 py-1">
+                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
                               {incident.categoryOrIssue}
                             </Badge>
                           </div>
-                          <h3 className="font-medium text-sm leading-tight mb-1 line-clamp-2">
+                          <h3 className="font-medium text-xs leading-tight mb-1 line-clamp-2">
                             {incident.what.length > 100 ? `${incident.what.substring(0, 100)}...` : incident.what}
                           </h3>
                         </div>
                       </div>
 
-                      {/* Event details summary */}
-                      <div className="text-xs text-muted-foreground space-y-1">
-                        <div className="flex flex-wrap gap-3">
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">Who:</span>
-                            <span className="truncate max-w-[140px]">{incident.who}</span>
+                      {/* Created timestamp */}
+                      <div className="text-[10px] text-muted-foreground opacity-75">
+                        Created: {new Date(incident.createdAt).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit'
+                        })}
+                        {incident.updatedAt !== incident.createdAt && (
+                          <span className="ml-2">
+                            • Updated: {new Date(incident.updatedAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              hour: 'numeric',
+                              minute: '2-digit'
+                            })}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">Where:</span>
-                            <span className="truncate max-w-[120px]">{incident.where}</span>
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <span className="font-medium">When:</span>
-                            <span className="truncate max-w-[100px]">{incident.when}</span>
-                          </span>
-                        </div>
-                        <div className="text-xs opacity-75">
-                          Created: {new Date(incident.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit'
-                          })}
-                          {incident.updatedAt !== incident.createdAt && (
-                            <span className="ml-2">
-                              • Updated: {new Date(incident.updatedAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                hour: 'numeric',
-                                minute: '2-digit'
-                              })}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
 
                       {/* Action buttons */}
@@ -439,7 +423,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-sm px-3 py-1"
+                          className="text-[10px] px-2 py-1"
                           onClick={() => setViewIncident(incident)}
                         >
                           View
@@ -447,7 +431,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-sm px-3 py-1"
+                          className="text-[10px] px-2 py-1"
                           onClick={() => setEditIncident(incident)}
                         >
                           Edit
@@ -455,7 +439,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-sm px-3 py-1"
+                          className="text-[10px] px-2 py-1"
                           onClick={() => handleExport(incident)}
                         >
                           Export
@@ -463,7 +447,7 @@ const Home = () => {
                         <Button 
                           variant="destructive" 
                           size="sm" 
-                          className="text-sm px-3 py-1"
+                          className="text-[10px] px-2 py-1"
                           onClick={() => setDeleteId(incident.id)}
                         >
                           Delete
