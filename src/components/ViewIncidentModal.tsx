@@ -1,10 +1,8 @@
 import { useState } from 'react';
-import { CompactModal } from '@/components/CompactModal';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
-import { Eye, Edit, Download, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -13,81 +11,115 @@ interface ViewIncidentModalProps {
 }
 
 export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncidentModalProps) => {
-  const [showFullSummary, setShowFullSummary] = useState(false);
-  const [timelineOpen, setTimelineOpen] = useState(false);
-  const [policyOpen, setPolicyOpen] = useState(false);
-
   if (!incident) return null;
 
-  const formatTime = (timeStr: string) => {
-    if (!timeStr || timeStr.toLowerCase().includes('unspecified')) return 'Time Unspecified';
-    return timeStr;
-  };
-
-  const truncateText = (text: string, maxLength: number = 150) => {
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
-  const footer = (
-    <div className="flex items-center justify-between gap-2">
-      <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs">
-          <Eye className="h-4 w-4" />
-          <span className="hidden sm:inline ml-1">View Full</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs">
-          <Edit className="h-4 w-4" />
-          <span className="hidden sm:inline ml-1">Edit</span>
-        </Button>
-      </div>
-      <div className="flex items-center gap-1">
-        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs">
-          <Download className="h-4 w-4" />
-          <span className="hidden sm:inline ml-1">Export</span>
-        </Button>
-        <Button variant="ghost" size="sm" className="h-9 px-2 text-xs text-destructive hover:text-destructive">
-          <Trash2 className="h-4 w-4" />
-          <span className="hidden sm:inline ml-1">Delete</span>
-        </Button>
-      </div>
-    </div>
-  );
-
   return (
-    <CompactModal
-      open={open}
-      onOpenChange={onOpenChange}
-      title="Incident Details"
-      footer={footer}
-    >
-      {/* Top row chips */}
-      <div className="flex flex-wrap items-center gap-2 mb-4">
-        <Badge variant="secondary" className="h-7 rounded-full px-3 text-xs font-medium">
-          {incident.date}
-        </Badge>
-        <Badge variant="outline" className="h-7 rounded-full px-3 text-xs font-medium">
-          {incident.categoryOrIssue}
-        </Badge>
-      </div>
+    <>
+      {/* Backdrop */}
+      {open && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          onClick={() => onOpenChange(false)}
+        />
+      )}
+      
+      {/* Modal Container */}
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4">
+          <div className="w-full max-w-2xl bg-background rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto transform transition-all">
+            {/* Header */}
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-semibold text-foreground">Incident Details</h2>
+            </div>
 
-      {/* Title/Summary */}
-      <div className="mb-6">
-        <p className="text-sm text-foreground leading-relaxed">
-          {incident.notes}
-        </p>
-      </div>
+            <div className="p-6 space-y-4">
+              {/* Header */}
+              <div className="flex items-center gap-2 mb-4">
+                <Badge variant="secondary" className="text-sm">
+                  {incident.date}
+                </Badge>
+                <Badge variant="outline" className="text-sm">
+                  {incident.categoryOrIssue}
+                </Badge>
+              </div>
 
-      {/* Created date */}
-      <div className="text-xs text-muted-foreground">
-        Created: {new Date(incident.createdAt).toLocaleDateString('en-US', { 
-          month: 'short', 
-          day: 'numeric',
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true 
-        })}
-      </div>
-    </CompactModal>
+              {/* Incident Details */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium text-sm mb-1">Who:</h4>
+                  <p className="text-sm text-muted-foreground">{incident.who}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-sm mb-1">What:</h4>
+                  <p className="text-sm text-muted-foreground">{incident.what}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-sm mb-1">Where:</h4>
+                  <p className="text-sm text-muted-foreground">{incident.where}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-sm mb-1">When:</h4>
+                  <p className="text-sm text-muted-foreground">{incident.when}</p>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-sm mb-1">Witnesses:</h4>
+                  <p className="text-sm text-muted-foreground">{incident.witnesses}</p>
+                </div>
+
+                {incident.timeline && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Timeline:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.timeline}</p>
+                  </div>
+                )}
+
+                {incident.requests && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Requests:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.requests}</p>
+                  </div>
+                )}
+
+                {incident.policy && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Policy:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.policy}</p>
+                  </div>
+                )}
+
+                {incident.evidence && (
+                  <div>
+                    <h4 className="font-medium text-sm mb-1">Evidence:</h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.evidence}</p>
+                  </div>
+                )}
+
+                <div>
+                  <h4 className="font-medium text-sm mb-1">Incident Summary:</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.notes}</p>
+                </div>
+              </div>
+
+              {/* Timestamps */}
+              <div className="border-t pt-4 text-xs text-muted-foreground">
+                <div>Created: {new Date(incident.createdAt).toLocaleString()}</div>
+                <div>Last Updated: {new Date(incident.updatedAt).toLocaleString()}</div>
+              </div>
+
+              {/* Close Button */}
+              <div className="flex justify-end pt-4 border-t">
+                <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-lg">
+                  Close
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
