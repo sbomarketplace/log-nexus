@@ -393,13 +393,13 @@ const AddIncident = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="what">What happened? *</Label>
-                <Textarea
-                  id="what"
-                  value={formData.what}
-                  onChange={(e) => handleInputChange('what', e.target.value)}
-                  placeholder="Describe what occurred in detail"
-                  rows={4}
-                  className={errors.what ? 'border-destructive' : ''}
+                 <Textarea
+                   id="what"
+                   value={formData.what}
+                   onChange={(e) => handleInputChange('what', e.target.value)}
+                   placeholder="Describe what occurred in detail"
+                   rows={8}
+                   className={errors.what ? 'border-destructive' : ''}
                 />
                  {errors.what && <p className="text-sm text-destructive">{errors.what}</p>}
                  {/* AI Rewrite button */}
