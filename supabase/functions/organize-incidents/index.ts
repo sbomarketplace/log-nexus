@@ -1,5 +1,10 @@
 import { z } from "./deps.ts"
-import { extractJsonFromText, splitNames, stripCodeFences } from "./deps.ts"
+import {
+  corsHeadersFor,
+  extractJsonFromText,
+  splitNames,
+  stripCodeFences,
+} from "./deps.ts"
 
 const incidentSchema = z.object({
   date: z.string().catch(""),
@@ -65,20 +70,28 @@ async function callOpenAI(prompt: string) {
   return json
 }
 
-function respond(body: unknown) {
+function respond(req: Request, body: unknown) {
+  const headers = corsHeadersFor(req.headers.get("Origin") ?? undefined)
   return new Response(JSON.stringify(body, null, 2), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...headers },
   })
 }
 
 Deno.serve(async (req) => {
+  const headers = corsHeadersFor(req.headers.get("Origin") ?? undefined)
+
+  // OPTIONS preflight
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers })
+  }
+
   const errors: string[] = []
   try {
     const { notes } = await req.json().catch(() => ({ notes: "" }))
     if (!notes || typeof notes !== "string") {
       errors.push("Missing notes string in request body")
-      return respond({ ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
+      return respond(req, { ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
     }
 
     const ai = await callOpenAI(notes).catch((e: Error) => {
@@ -117,7 +130,7 @@ Deno.serve(async (req) => {
       }]
     }
 
-    return respond({
+    return respond(req, {
       ok: Boolean(incidents.length),
       normalized: { incidents },
       errors,
@@ -125,6 +138,6 @@ Deno.serve(async (req) => {
     })
   } catch (e) {
     errors.push(`Unhandled error: ${String(e?.message || e)}`)
-    return respond({ ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
+    return respond(req, { ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
   }
 })

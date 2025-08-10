@@ -1,6 +1,11 @@
 POST body:
 { "notes": "raw notes pasted by the user" }
 
+CORS:
+- OPTIONS preflight is handled.
+- Every response includes Access-Control-Allow-Origin, Access-Control-Allow-Headers, and Access-Control-Allow-Methods.
+- Allowed origins are preview and production Lovable domains and localhost. Set env CORS_ALLOW_ALL=true to force wildcard during development.
+
 Response is always HTTP 200 with:
 {
   "ok": boolean,
@@ -16,17 +21,13 @@ Wiring:
 - No frontend changes required, but callers should rely on ok and errors rather than HTTP status.
 
 Testing:
-- Send prose notes and confirm 200 with ok:false and minimal incident.
-- Send valid JSON and confirm ok:true.
-- Verify there are no "Unexpected response structure" errors in logs.
+- Preflight check via OPTIONS returns 200 and CORS headers.
+- Browser POST from preview and production succeeds without CORS errors.
+- Notes with prose return ok:false with minimal incident and errors.
+- Valid JSON returns ok:true.
 
 SEO clause:
-This back end change does not modify any public facing pages or metadata.
+No public pages changed.
 
 Non-Destructive Requirement:
-All updates must not break any existing layouts or functionality anywhere in the app.
-If a change to layout or behavior is absolutely necessary, it must:
-* Be minimal
-* Be clearly documented with a note or comment
-* Not disrupt other user roles
-* The dashboard, navigation, and responsive behavior across roles must remain stable and consistent unless explicitly noted.
+All updates must not break any existing layouts or functionality anywhere in the app. If a change is necessary it must be minimal, documented, and not disrupt other roles or navigation.
