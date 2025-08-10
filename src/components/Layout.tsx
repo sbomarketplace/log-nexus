@@ -1,6 +1,7 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, PlusIcon, FileIcon, SettingsIcon, AlertIcon } from './icons/CustomIcons';
+import { Footer } from './Footer';
 
 interface LayoutProps {
   children: ReactNode;
@@ -51,12 +52,12 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-20 md:pb-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-32 md:pb-8">
         {children}
       </main>
 
       {/* Mobile navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-card border-t border-border">
+      <div className="md:hidden fixed bottom-8 left-0 right-0 bg-card border-t border-border z-40">
         <div className="flex justify-around py-2">
           {navItems.map(({ path, icon: Icon, label }) => (
             <Link
@@ -74,6 +75,8 @@ export const Layout = ({ children }: LayoutProps) => {
           ))}
         </div>
       </div>
+
+      <Footer />
     </div>
   );
 };
