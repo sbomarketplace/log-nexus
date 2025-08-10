@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertIcon } from '@/components/icons/CustomIcons';
-import { Search } from 'lucide-react';
+import { SearchIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
@@ -163,7 +163,7 @@ const Home = () => {
           <div className="mb-6 space-y-3">
             {/* Search Bar */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search incidents..."
                 value={searchTerm}
@@ -216,7 +216,7 @@ const Home = () => {
           ) : filteredIncidents.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <Search className="h-8 w-8 text-muted-foreground mb-3" />
+                <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
                 <h3 className="text-sm font-medium mb-1">No incidents found</h3>
                 <p className="text-xs text-muted-foreground text-center">
                   Try adjusting your search terms or filters.
