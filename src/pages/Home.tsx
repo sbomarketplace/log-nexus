@@ -248,26 +248,48 @@ const Home = () => {
           onSave={loadIncidents}
         />
 
-        {/* Delete Confirmation Dialog */}
-        <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Incident</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete this incident? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction 
-                onClick={() => deleteId && handleDeleteIncident(deleteId)}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        {/* Delete Confirmation Modal */}
+        {deleteId && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+              onClick={() => setDeleteId(null)}
+            />
+            
+            {/* Modal Container */}
+            <div className="fixed inset-0 z-50 grid place-items-center p-4">
+              <div className="w-full max-w-md bg-background rounded-2xl shadow-2xl p-6 transform transition-all">
+                {/* Header */}
+                <div className="text-center mb-6">
+                  <h2 className="text-xl font-semibold text-foreground mb-2">
+                    Delete Incident
+                  </h2>
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    Are you sure you want to delete this incident? This action cannot be undone.
+                  </p>
+                </div>
+                
+                {/* Actions */}
+                <div className="space-y-3">
+                  <Button 
+                    onClick={() => deleteId && handleDeleteIncident(deleteId)}
+                    className="w-full bg-destructive text-destructive-foreground hover:bg-destructive/90 rounded-xl py-3 font-medium"
+                  >
+                    Delete
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setDeleteId(null)}
+                    className="w-full rounded-xl py-3 font-medium"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </Layout>
   );
