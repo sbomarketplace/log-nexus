@@ -134,21 +134,21 @@ const Home = () => {
     <Layout>
       <div className="space-y-4">
         {/* Intro Description */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-4">
           <p className="text-sm text-muted-foreground">
             Use ClearCase to document workplace incidents, protect your rights, and stay organized.
           </p>
         </div>
 
         {/* Header */}
-        <div className="mb-6 text-center">
+        <div className="mb-4 text-center">
           <h1 className="text-lg font-medium text-foreground">Incidents</h1>
           <p className="text-xs text-muted-foreground">All workplace incidents</p>
         </div>
 
         {/* Action Buttons */}
-        <div className="mb-6">
-          <div className="mx-auto mt-4 w-full max-w-xl">
+        <div className="mb-4">
+          <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center">
                 {/* New Incident */}
