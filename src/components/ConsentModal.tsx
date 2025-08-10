@@ -276,14 +276,7 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
             </ScrollArea>
 
             {/* Footer Actions */}
-            <div className="p-6 border-t space-y-3">
-              <Button 
-                onClick={handleAcceptAndContinue}
-                className="w-full bg-[hsl(25,95%,53%)] text-white hover:bg-[hsl(25,95%,53%)]/90 rounded-xl py-3 font-medium"
-                role="button"
-              >
-                Accept and Continue
-              </Button>
+            <div className="p-6 border-t">
               <Button 
                 variant="outline" 
                 onClick={handleBackToConsent}
