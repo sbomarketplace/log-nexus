@@ -1,13 +1,16 @@
-const CONSENT_STORAGE_KEY = 'clearcase-user-consent';
+const CONSENT_STORAGE_KEY = 'userConsentRecord';
 
-export interface UserConsent {
-  userConsent: boolean;
+export const POLICIES_VERSION = "2025-08-09";
+
+export interface UserConsentRecord {
+  consentAccepted: boolean;
   consentAcceptedAt: string;
   policiesVersion: string;
+  source: string;
 }
 
 export const consentStorage = {
-  getConsent(): UserConsent | null {
+  getConsent(): UserConsentRecord | null {
     try {
       const stored = localStorage.getItem(CONSENT_STORAGE_KEY);
       if (!stored) return null;
@@ -18,7 +21,7 @@ export const consentStorage = {
     }
   },
 
-  setConsent(consent: UserConsent): void {
+  setConsent(consent: UserConsentRecord): void {
     try {
       localStorage.setItem(CONSENT_STORAGE_KEY, JSON.stringify(consent));
     } catch (error) {
@@ -34,8 +37,12 @@ export const consentStorage = {
     }
   },
 
-  hasValidConsent(): boolean {
+  needsConsent(currentVersion: string = POLICIES_VERSION): boolean {
     const consent = this.getConsent();
-    return consent?.userConsent === true && consent?.policiesVersion === '2025-08-09';
+    return !consent || !consent.consentAccepted || consent.policiesVersion !== currentVersion;
+  },
+
+  hasValidConsent(): boolean {
+    return !this.needsConsent();
   }
 };

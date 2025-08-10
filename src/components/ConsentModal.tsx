@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { consentStorage } from '@/utils/consentStorage';
+import { consentStorage, POLICIES_VERSION } from '@/utils/consentStorage';
 
 interface ConsentModalProps {
   onConsentGiven: () => void;
@@ -18,17 +18,18 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
     };
   }, []);
 
-  const handleAcceptAll = () => {
+  const handleAcceptAndContinue = () => {
     const consent = {
-      userConsent: true,
+      consentAccepted: true,
       consentAcceptedAt: new Date().toISOString(),
-      policiesVersion: '2025-08-09'
+      policiesVersion: POLICIES_VERSION,
+      source: 'initial_modal'
     };
     consentStorage.setConsent(consent);
     onConsentGiven();
   };
 
-  const handleManagePreferences = () => {
+  const handleLearnMore = () => {
     setShowLearnMore(true);
   };
 
@@ -277,10 +278,11 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
             {/* Footer Actions */}
             <div className="p-6 border-t space-y-3">
               <Button 
-                onClick={handleAcceptAll}
-                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-3 font-medium"
+                onClick={handleAcceptAndContinue}
+                className="w-full bg-[hsl(25,95%,53%)] text-white hover:bg-[hsl(25,95%,53%)]/90 rounded-xl py-3 font-medium"
+                role="button"
               >
-                Accept All Policies
+                Accept and Continue
               </Button>
               <Button 
                 variant="outline" 
@@ -302,44 +304,39 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
         <div className="w-full max-w-md bg-background rounded-2xl shadow-2xl p-6 transform transition-all">
           {/* Header */}
           <div className="text-center mb-6">
-            <h2 className="text-xl font-semibold text-foreground mb-2">
+            <h1 className="text-xl font-semibold text-[hsl(25,95%,53%)] mb-4">
               Welcome to ClearCase
-            </h2>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              To use ClearCase, you must accept our Terms & Conditions, Privacy Policy, and Cookie Policy. These policies explain how we handle your data and what you can expect from our service.
+            </h1>
+            <p className="text-muted-foreground text-sm leading-relaxed mb-4">
+              By continuing to use this app, you agree to share your app activity and crash data with ClearCase to help improve our apps and personalize your experience, as described in our Privacy Policy.
             </p>
-          </div>
-
-          {/* Learn More Link */}
-          <div className="mb-6">
-            <button 
-              onClick={handleManagePreferences}
-              className="text-primary hover:underline text-sm font-medium"
+            <a 
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                handleLearnMore();
+              }}
+              className="text-xs text-gray-500 underline underline-offset-2 hover:text-gray-400"
+              aria-label="View full Terms, Privacy, and Cookie Policy"
             >
               Learn More (View Full Policies)
-            </button>
+            </a>
           </div>
 
           {/* Actions */}
-          <div className="space-y-3">
+          <div className="space-y-4">
             <Button 
-              onClick={handleAcceptAll}
-              className="w-full bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl py-3 font-medium"
+              onClick={handleAcceptAndContinue}
+              className="w-full bg-[hsl(25,95%,53%)] text-white hover:bg-[hsl(25,95%,53%)]/90 rounded-full py-3 font-medium"
+              role="button"
             >
-              Accept All
-            </Button>
-            <Button 
-              variant="outline" 
-              onClick={handleManagePreferences}
-              className="w-full rounded-xl py-3 font-medium"
-            >
-              Manage Preferences
+              Accept and Continue
             </Button>
           </div>
 
           {/* Footer Note */}
-          <p className="text-xs text-muted-foreground text-center mt-4">
-            You must accept these policies to use ClearCase. Rejecting will prevent app access.
+          <p className="text-xs text-gray-500 text-center mt-4">
+            You must accept to use ClearCase.
           </p>
         </div>
       </div>
