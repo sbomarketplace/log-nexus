@@ -93,12 +93,12 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
               incidents.map((incident) => (
                 <Card key={incident.id} className="border border-border">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-foreground truncate">
+                        <h3 className="font-medium text-foreground text-sm leading-tight break-words">
                           {incident.categoryOrIssue}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground mt-1">
                           {formatDate(incident.date)}
                         </p>
                       </div>
@@ -106,7 +106,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                         size="sm"
                         variant="outline"
                         onClick={() => handleExportIncident(incident.id, incident.categoryOrIssue)}
-                        className="ml-3 flex items-center gap-2"
+                        className="flex items-center gap-2 shrink-0"
                       >
                         <Download className="h-4 w-4" />
                         Export
