@@ -12,6 +12,8 @@ import { Incident } from '@/types/incident';
 import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategoryOptions } from '@/utils/incidentCategories';
+import { supabase } from '@/integrations/supabase/client';
+import { Wand2, Loader2 } from 'lucide-react';
 
 
 interface Person {
@@ -49,6 +51,8 @@ const AddIncident = () => {
   
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState('');
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [rewriteError, setRewriteError] = useState<string>('');
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -171,6 +175,53 @@ const AddIncident = () => {
     });
 
     navigate('/');
+  };
+
+  const handleAIRewrite = async () => {
+    if (!formData.what.trim()) {
+      toast({
+        title: "Nothing to Rewrite",
+        description: "Please enter some content in the 'What happened?' field first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRewriting(true);
+    setRewriteError('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('rewrite-incident', {
+        body: { text: formData.what }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (data.rewritten) {
+        handleInputChange('what', data.rewritten);
+        toast({
+          title: "Content Rewritten",
+          description: "The incident description has been improved by AI.",
+        });
+      }
+    } catch (error) {
+      console.error('Error rewriting content:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Could not rewrite at this time. Please try again.';
+      setRewriteError(errorMessage);
+      toast({
+        title: "Rewrite Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsRewriting(false);
+  };
   };
 
   const renderPersonSection = (
@@ -350,13 +401,36 @@ const AddIncident = () => {
                   rows={4}
                   className={errors.what ? 'border-destructive' : ''}
                 />
-                {errors.what && <p className="text-sm text-destructive">{errors.what}</p>}
-                {/* AI Rewrite button hook-in point */}
-                <div className="flex justify-end">
-                  <Button type="button" variant="outline" size="sm" disabled>
-                    🤖 AI Rewrite (Coming Soon)
-                  </Button>
-                </div>
+                 {errors.what && <p className="text-sm text-destructive">{errors.what}</p>}
+                 {/* AI Rewrite button */}
+                 <div className="flex justify-end space-y-1">
+                   <div className="flex flex-col items-end">
+                     <Button 
+                       type="button" 
+                       variant="outline" 
+                       size="sm" 
+                       onClick={handleAIRewrite}
+                       disabled={isRewriting || !formData.what.trim()}
+                     >
+                       {isRewriting ? (
+                         <>
+                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                           Rewriting...
+                         </>
+                       ) : (
+                         <>
+                           <Wand2 className="h-4 w-4 mr-2" />
+                           AI Rewrite
+                         </>
+                       )}
+                     </Button>
+                     {rewriteError && (
+                       <p className="text-xs text-destructive mt-1 max-w-xs text-right">
+                         {rewriteError}
+                       </p>
+                     )}
+                   </div>
+                 </div>
               </div>
 
               <div className="space-y-2">
