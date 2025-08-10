@@ -262,7 +262,7 @@ const Home = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
                             <Badge variant="secondary" className="text-xs px-2 py-1">
-                              📅 {incident.date}
+                              {incident.date}
                             </Badge>
                             <Badge variant="outline" className="text-xs px-2 py-1">
                               {incident.categoryOrIssue}
@@ -311,7 +311,7 @@ const Home = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex gap-2 pt-2">
+                      <div className="flex gap-2 pt-2 justify-center">
                         <Button 
                           variant="outline" 
                           size="sm" 

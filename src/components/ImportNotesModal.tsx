@@ -363,7 +363,7 @@ Rules:
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary" className="text-xs">
-                          📅 {incident.date}
+                          {incident.date}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {incident.categoryOrIssue}
@@ -379,7 +379,7 @@ Rules:
                         <div><strong>Notes:</strong> {incident.notes}</div>
                       </div>
 
-                      <div className="flex gap-2 pt-2 border-t">
+                      <div className="flex gap-2 pt-2 border-t justify-center">
                         <Button 
                           size="sm"
                           onClick={() => handleSaveIncident(incident, index)}

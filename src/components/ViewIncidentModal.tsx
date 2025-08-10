@@ -36,7 +36,7 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
               {/* Header */}
               <div className="flex items-center gap-2 mb-4">
                 <Badge variant="secondary" className="text-sm">
-                  📅 {incident.date}
+                  {incident.date}
                 </Badge>
                 <Badge variant="outline" className="text-sm">
                   {incident.categoryOrIssue}

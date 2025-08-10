@@ -6,7 +6,7 @@ import { IncidentRecord } from "@/types/incidents";
 
 function exportText(inc: OrganizedIncident) {
   const lines = [
-    `📅 ${inc.date} — ${inc.categoryOrIssue}`,
+    `${inc.date} — ${inc.categoryOrIssue}`,
     `Who: ${inc.who}`,
     `What: ${inc.what}`,
     `Where: ${inc.where}`,
@@ -128,7 +128,7 @@ export default function OrganizeNotesDialog(props: { onClose: () => void; onSave
 
           {preview.map((inc, idx) => (
             <div key={idx} className="rounded-xl border p-3 shadow-sm">
-              <div className="font-semibold mb-1">📅 {inc.date} — {inc.categoryOrIssue}</div>
+              <div className="font-semibold mb-1">{inc.date} — {inc.categoryOrIssue}</div>
               <div className="text-sm leading-6">
                 <div><strong>Who:</strong> {inc.who}</div>
                 <div><strong>What:</strong> {inc.what}</div>

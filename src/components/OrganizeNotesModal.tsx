@@ -187,7 +187,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
   };
 
   const handleExportIncident = (incident: StructuredIncident) => {
-    const content = `📅 ${incident.date || 'Unknown'} — ${incident.category}
+    const content = `${incident.date || 'Unknown'} — ${incident.category}
 
 Who:
 - Accused: ${incident.who.accused?.join(', ') || 'None'}
@@ -537,7 +537,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                           </div>
 
                          {/* Action Buttons */}
-                         <div className="flex gap-2 pt-3 border-t">
+                         <div className="flex gap-2 pt-3 border-t justify-center">
                            <Button 
                              onClick={() => handleSaveIncident(incident)}
                              size="sm"

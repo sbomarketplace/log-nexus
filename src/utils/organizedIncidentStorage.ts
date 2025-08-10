@@ -99,8 +99,8 @@ export const organizedIncidentStorage = {
     return `INCIDENT REPORT
 =================
 
-📅 Date: ${incident.date}
-📋 Category/Issue: ${incident.categoryOrIssue}
+Date: ${incident.date}
+Category/Issue: ${incident.categoryOrIssue}
 
 WHO: ${incident.who}
 
