@@ -16,29 +16,19 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
   // Parse timeline events from when/what fields
   const timelineEvents: TimelineEvent[] = [];
   
-  // If we have a when field, try to extract timeline events
+  // Extract time only (no event details) from when field
+  let timeOnly = "Time unspecified";
   if (apiIncident.when) {
-    const timeEntries = apiIncident.when.split(/[,;]/).map(entry => entry.trim()).filter(Boolean);
-    timeEntries.forEach(entry => {
-      const timeMatch = entry.match(/(\d{1,2}:\d{2}\s?(?:AM|PM|am|pm)?)/);
-      if (timeMatch) {
-        const time = timeMatch[1];
-        const event = entry.replace(timeMatch[0], '').replace(/^[-–]\s*/, '').trim();
-        if (event) {
-          timelineEvents.push({
-            time,
-            event,
-            quotes: []
-          });
-        }
-      }
-    });
+    const timeMatch = apiIncident.when.match(/(\d{1,2}:\d{2}\s?(?:AM|PM|am|pm)?)/);
+    if (timeMatch) {
+      timeOnly = timeMatch[1];
+    }
   }
   
-  // Fallback: create a single timeline event from what field if no timeline parsed
-  if (timelineEvents.length === 0 && apiIncident.what) {
+  // Create timeline events from structured what/when data
+  if (apiIncident.what) {
     timelineEvents.push({
-      time: null,
+      time: timeOnly !== "Time unspecified" ? timeOnly : null,
       event: apiIncident.what,
       quotes: []
     });
@@ -85,31 +75,89 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
     }
   }
 
-  // Parse names from who array into categorized groups
+  // Parse explicit witnesses only (not just anyone mentioned)
+  const explicitWitnesses = [];
+  if (notes) {
+    const witnessMatches = notes.match(/witness(?:es)?:?\s*([^.]+)/gi);
+    if (witnessMatches) {
+      witnessMatches.forEach(match => {
+        const names = match.replace(/witness(?:es)?:?\s*/gi, '').split(/[,;&]/).map(n => n.trim()).filter(Boolean);
+        explicitWitnesses.push(...names);
+      });
+    }
+  }
+
+  // Parse who field with explicit roles only
+  const whoWithRoles = [];
+  apiIncident.who.forEach(person => {
+    // Check if role is explicitly mentioned in the notes for this person
+    const lowerNotes = notes.toLowerCase();
+    const lowerPerson = person.toLowerCase();
+    
+    let role = null;
+    if (lowerNotes.includes(`${lowerPerson}`) && lowerNotes.includes('manager')) {
+      const managerPattern = new RegExp(`${lowerPerson}[^.]*manager|manager[^.]*${lowerPerson}`, 'i');
+      if (managerPattern.test(notes)) role = 'Manager';
+    }
+    if (lowerNotes.includes(`${lowerPerson}`) && lowerNotes.includes('steward')) {
+      const stewardPattern = new RegExp(`${lowerPerson}[^.]*steward|steward[^.]*${lowerPerson}`, 'i');
+      if (stewardPattern.test(notes)) role = 'Union Steward';
+    }
+    if (lowerNotes.includes(`${lowerPerson}`) && lowerNotes.includes('security')) {
+      const securityPattern = new RegExp(`${lowerPerson}[^.]*security|security[^.]*${lowerPerson}`, 'i');
+      if (securityPattern.test(notes)) role = 'Security';
+    }
+    
+    whoWithRoles.push(role ? `${person} (${role})` : person);
+  });
+
+  // Determine location type
+  let whereLocation = apiIncident.where || "Location unspecified";
+  if (whereLocation.toLowerCase().includes('email')) {
+    whereLocation = "Email communication";
+  } else if (whereLocation.toLowerCase().includes('phone') || whereLocation.toLowerCase().includes('telephone')) {
+    whereLocation = "Telephone communication";
+  } else if (whereLocation.toLowerCase().includes('chat') || whereLocation.toLowerCase().includes('message')) {
+    whereLocation = "Digital chat platform";
+  }
+
+  // Generate unique incident summary
+  const summaryParts = [];
+  if (apiIncident.date) summaryParts.push(`On ${apiIncident.date}`);
+  if (whereLocation !== "Location unspecified") summaryParts.push(`at ${whereLocation}`);
+  if (timeOnly !== "Time unspecified") summaryParts.push(`around ${timeOnly}`);
+  
+  const mainEvent = additionalNotes.length > 0 ? additionalNotes[0] : apiIncident.what;
+  if (mainEvent) summaryParts.push(mainEvent);
+  
+  if (whoWithRoles.length > 0) {
+    summaryParts.push(`Individuals involved include ${whoWithRoles.join(', ')}`);
+  }
+  
+  const uniqueSummary = summaryParts.join(', ') + '.';
+
+  // Categorize people based on explicit mentions only
   const whoGroups = {
     accused: [],
     accusers: [],
-    managers: apiIncident.who.filter(name => name.toLowerCase().includes('manager')),
-    unionStewards: apiIncident.who.filter(name => name.toLowerCase().includes('steward')),
-    security: apiIncident.who.filter(name => name.toLowerCase().includes('security')),
-    others: apiIncident.who.filter(name => {
-      const lowerName = name.toLowerCase();
-      return !lowerName.includes('manager') && !lowerName.includes('steward') && !lowerName.includes('security');
-    })
+    managers: [],
+    unionStewards: [],
+    security: [],
+    others: whoWithRoles
   };
 
   return {
     date: apiIncident.date || null,
     category: apiIncident.category || "Uncategorized",
     who: whoGroups,
-    where: apiIncident.where || null,
+    where: whereLocation,
     timeline: timelineEvents,
-    whatHappened: apiIncident.what || "No description provided",
+    whatHappened: additionalNotes.length > 0 ? additionalNotes.join(' ') : apiIncident.what || "No description provided",
     requestsAndResponses,
     policyOrProcedure,
     evidenceOrTests,
-    witnesses: [], // Only include people explicitly mentioned as witnesses in the notes
+    witnesses: explicitWitnesses,
     outcomeOrNext: null,
-    notes: additionalNotes
+    notes: [uniqueSummary]
   };
 }

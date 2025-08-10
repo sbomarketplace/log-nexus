@@ -71,7 +71,7 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-sm mb-1">Notes:</h4>
+                  <h4 className="font-medium text-sm mb-1">Incident Summary:</h4>
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">{incident.notes}</p>
                 </div>
               </div>

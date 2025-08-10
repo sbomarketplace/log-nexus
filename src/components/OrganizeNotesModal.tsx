@@ -403,30 +403,13 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                              </h3>
                            </div>
                            
-                           {/* Who Section */}
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Who:</h4>
-                             <div className="space-y-1 text-xs">
-                              {incident.who.managers?.length > 0 && (
-                                <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
-                              )}
-                              {incident.who.unionStewards?.length > 0 && (
-                                <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
-                              )}
-                              {incident.who.accused?.length > 0 && (
-                                <div><strong>Accused:</strong> {incident.who.accused.join(', ')}</div>
-                              )}
-                              {incident.who.accusers?.length > 0 && (
-                                <div><strong>Accusers:</strong> {incident.who.accusers.join(', ')}</div>
-                              )}
-                              {incident.who.security?.length > 0 && (
-                                <div><strong>Security:</strong> {incident.who.security.join(', ')}</div>
-                              )}
-                              {incident.who.others?.length > 0 && (
-                                <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
-                              )}
+                            {/* Who Section */}
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium mb-2">Who:</h4>
+                              <div className="space-y-1 text-xs">
+                                <div>{incident.who.others?.join(', ') || 'No individuals specified'}</div>
+                              </div>
                             </div>
-                          </div>
 
                           {/* What */}
                           <div className="mb-4">
@@ -440,27 +423,23 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                             <p className="text-xs text-muted-foreground">{incident.where || 'None noted'}</p>
                           </div>
 
-                          {/* When */}
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium mb-1">When:</h4>
-                            {incident.timeline && incident.timeline.length > 0 ? (
-                              <p className="text-xs text-muted-foreground">
-                                {incident.timeline[0]?.time || 'Start time unspecified'} – {incident.timeline[incident.timeline.length - 1]?.time || 'End time unspecified'}
-                              </p>
-                            ) : (
-                              <p className="text-xs text-muted-foreground">Time unspecified</p>
-                            )}
-                          </div>
+                           {/* When */}
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-1">When:</h4>
+                             <p className="text-xs text-muted-foreground">
+                               {incident.timeline?.[0]?.time || 'Time unspecified'}
+                             </p>
+                           </div>
 
-                           {/* Witnesses */}
-                           {incident.witnesses && incident.witnesses.length > 0 && (
-                             <div className="mb-4">
-                               <h4 className="text-sm font-medium mb-2">Witnesses:</h4>
-                               <div className="space-y-1 text-xs">
-                                 <div><strong>Explicit Witnesses:</strong> {incident.witnesses.join(', ')}</div>
-                               </div>
-                             </div>
-                           )}
+                            {/* Witnesses */}
+                            {incident.witnesses && incident.witnesses.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm font-medium mb-2">Witnesses:</h4>
+                                <div className="space-y-1 text-xs">
+                                  <div>{incident.witnesses.join(', ')}</div>
+                                </div>
+                              </div>
+                            )}
 
                            {/* Timeline */}
                            {incident.timeline?.length > 0 && (
