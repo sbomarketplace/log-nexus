@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download } from 'lucide-react';
-import { storage } from '@/utils/storage';
+import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { useToast } from '@/hooks/use-toast';
 
 interface ExportModalProps {
@@ -14,11 +14,11 @@ interface ExportModalProps {
 
 export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
   const { toast } = useToast();
-  const [incidents] = useState(() => storage.getIncidents());
+  const [incidents] = useState(() => organizedIncidentStorage.getAll());
 
   const handleExportIncident = (incidentId: string, title: string) => {
     try {
-      const incident = storage.getIncident(incidentId);
+      const incident = organizedIncidentStorage.getById(incidentId);
       if (!incident) {
         toast({
           title: "Error",
@@ -28,13 +28,13 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
         return;
       }
 
-      const dataStr = JSON.stringify(incident, null, 2);
-      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const dataStr = organizedIncidentStorage.exportToText(incident);
+      const dataBlob = new Blob([dataStr], { type: 'text/plain' });
       const url = URL.createObjectURL(dataBlob);
       
       const link = document.createElement('a');
       link.href = url;
-      link.download = `incident-${title.replace(/[^a-zA-Z0-9]/g, '-')}-${incident.date}.json`;
+      link.download = `incident-${title.replace(/[^a-zA-Z0-9]/g, '-')}-${incident.date}.txt`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -85,7 +85,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                     <div className="flex items-center justify-between">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-foreground truncate">
-                          {incident.title}
+                          {incident.categoryOrIssue}
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           {formatDate(incident.date)}
@@ -94,7 +94,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => handleExportIncident(incident.id, incident.title)}
+                        onClick={() => handleExportIncident(incident.id, incident.categoryOrIssue)}
                         className="ml-3 flex items-center gap-2"
                       >
                         <Download className="h-4 w-4" />
