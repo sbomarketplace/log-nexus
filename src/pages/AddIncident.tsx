@@ -359,9 +359,9 @@ const AddIncident = () => {
                    <SelectContent className="max-h-[200px]">
                      {getCategoryOptions().map((group) => (
                        <div key={group.group}>
-                         <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                           🔹 {group.group}
-                         </div>
+                          <div className="px-2 py-1.5 text-sm font-bold text-primary">
+                            {group.group}
+                          </div>
                          {group.items.map((item) => (
                            <SelectItem key={item} value={item} className="pl-4">
                              {item}
