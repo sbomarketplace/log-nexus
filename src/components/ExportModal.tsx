@@ -55,21 +55,32 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
 
   const formatDate = (dateString: string) => {
     try {
-      return new Date(dateString).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-      });
-    } catch {
+      // Handle different date formats
+      if (!dateString) return 'No date';
+      
+      // If it's already in a readable format, return as is
+      if (dateString.includes('/') || dateString.includes('-')) {
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        }
+      }
+      
       return dateString;
+    } catch {
+      return 'Invalid date';
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh]">
+      <DialogContent className="max-w-2xl max-h-[80vh] rounded-xl shadow-2xl border-2">
         <DialogHeader>
-          <DialogTitle>Export Incidents</DialogTitle>
+          <DialogTitle className="text-center">Export Incidents</DialogTitle>
         </DialogHeader>
         
         <ScrollArea className="h-[60vh] pr-4">
