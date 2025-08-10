@@ -62,128 +62,31 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
       footer={footer}
     >
       {/* Top row chips */}
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <Badge variant="secondary" className="h-7 rounded-full px-2 text-xs">
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <Badge variant="secondary" className="h-7 rounded-full px-3 text-xs font-medium">
           {incident.date}
         </Badge>
-        <Badge variant="outline" className="h-7 rounded-full px-2 text-xs">
+        <Badge variant="outline" className="h-7 rounded-full px-3 text-xs font-medium">
           {incident.categoryOrIssue}
         </Badge>
       </div>
 
-      {/* Key facts grid */}
-      <div className="space-y-2">
-        <div className="grid grid-cols-1 sm:grid-cols-[96px_1fr] gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-foreground">Who:</h3>
-          <p className="text-xs text-muted-foreground break-words" title={incident.who}>
-            {truncateText(incident.who, 80)}
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-[96px_1fr] gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-foreground">What:</h3>
-          <p className="text-xs text-muted-foreground break-words" title={incident.what}>
-            {truncateText(incident.what, 80)}
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-[96px_1fr] gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-foreground">Where:</h3>
-          <p className="text-xs text-muted-foreground break-words" title={incident.where}>
-            {truncateText(incident.where, 80)}
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-[96px_1fr] gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-foreground">When:</h3>
-          <time className="text-xs text-muted-foreground">
-            {formatTime(incident.when)}
-          </time>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-[96px_1fr] gap-x-3 gap-y-1">
-          <h3 className="text-sm font-semibold text-foreground">Witnesses:</h3>
-          <p className="text-xs text-muted-foreground break-words" title={incident.witnesses}>
-            {truncateText(incident.witnesses, 80)}
-          </p>
-        </div>
+      {/* Title/Summary */}
+      <div className="mb-6">
+        <p className="text-sm text-foreground leading-relaxed">
+          {incident.notes}
+        </p>
       </div>
 
-      {/* Incident Summary */}
-      <div className="border-t border-border pt-3 mt-3">
-        <h3 className="text-sm font-semibold text-foreground mb-2">Incident Summary</h3>
-        <div className="space-y-2">
-          <p className={cn(
-            "text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed",
-            !showFullSummary && "line-clamp-3"
-          )}>
-            {incident.notes}
-          </p>
-          {incident.notes.length > 150 && (
-            <button
-              onClick={() => setShowFullSummary(!showFullSummary)}
-              className="text-xs text-accent hover:text-accent/80 font-medium"
-            >
-              {showFullSummary ? 'Show less' : 'Show more'}
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Timeline (collapsible) */}
-      {incident.timeline && (
-        <div className="border-t border-border pt-3 mt-3">
-          <button
-            onClick={() => setTimelineOpen(!timelineOpen)}
-            className="flex items-center justify-between w-full text-left"
-            aria-expanded={timelineOpen}
-          >
-            <h3 className="text-sm font-semibold text-foreground">Timeline</h3>
-            {timelineOpen ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-          {timelineOpen && (
-            <div className="mt-2 space-y-1">
-              <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {incident.timeline}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Policy Notes (collapsible) */}
-      {incident.policy && (
-        <div className="border-t border-border pt-3 mt-3">
-          <button
-            onClick={() => setPolicyOpen(!policyOpen)}
-            className="flex items-center justify-between w-full text-left"
-            aria-expanded={policyOpen}
-          >
-            <h3 className="text-sm font-semibold text-foreground">Policy Notes</h3>
-            {policyOpen ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
-            ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
-          {policyOpen && (
-            <div className="mt-2">
-              <p className="text-xs text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {incident.policy}
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Timestamps */}
-      <div className="border-t border-border pt-3 mt-3 text-xs text-muted-foreground space-y-1">
-        <div>Created: {new Date(incident.createdAt).toLocaleString()}</div>
-        <div>Last Updated: {new Date(incident.updatedAt).toLocaleString()}</div>
+      {/* Created date */}
+      <div className="text-xs text-muted-foreground">
+        Created: {new Date(incident.createdAt).toLocaleDateString('en-US', { 
+          month: 'short', 
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true 
+        })}
       </div>
     </CompactModal>
   );
