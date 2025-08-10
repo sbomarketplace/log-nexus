@@ -254,8 +254,8 @@ const Home = () => {
           ) : (
             filteredIncidents.map((incident) => (
                 <Card key={incident.id} className="border rounded-lg">
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
+                  <CardContent className="p-3">
+                    <div className="space-y-2">
                       {/* Enhanced header with date and category */}
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex-1 min-w-0">
@@ -267,7 +267,7 @@ const Home = () => {
                               {incident.categoryOrIssue}
                             </Badge>
                           </div>
-                          <h3 className="font-medium text-sm leading-tight mb-2 line-clamp-2">
+                          <h3 className="font-medium text-sm leading-tight mb-1 line-clamp-2">
                             {incident.what.length > 100 ? `${incident.what.substring(0, 100)}...` : incident.what}
                           </h3>
                         </div>
@@ -310,7 +310,7 @@ const Home = () => {
                       </div>
 
                       {/* Action buttons */}
-                      <div className="flex gap-2 pt-2 justify-center">
+                      <div className="flex gap-2 pt-1 justify-center">
                         <Button 
                           variant="outline" 
                           size="sm" 
