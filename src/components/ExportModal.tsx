@@ -91,7 +91,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
               </div>
             ) : (
               incidents.map((incident) => (
-                <Card key={incident.id} className="border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-[130px]">
+                <Card key={incident.id} className="border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-[140px]">
                   <CardContent className="p-3 h-full flex flex-col justify-between">
                     <div className="space-y-2">
                       <div className="flex flex-wrap gap-1">
