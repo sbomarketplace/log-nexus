@@ -255,28 +255,9 @@ const Home = () => {
                 </div>
               </section>
 
-              <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center">
-                {/* New Incident */}
-                <div className="flex flex-col items-center w-full sm:w-44">
-                  <Link to="/add" className="w-full">
-                    <Button
-                      id="btn-new-incident"
-                      aria-describedby="hint-new-incident"
-                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] text-white transition-all duration-200 hover:bg-[hsl(25,95%,53%)] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
-                    >
-                      + New Incident
-                    </Button>
-                  </Link>
-                  <span
-                    id="hint-new-incident"
-                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
-                  >
-                    Log a new workplace incident manually.
-                  </span>
-                </div>
-
+              <div className="flex flex-col gap-4 justify-center">
                 {/* Organize Quick Notes */}
-                <div className="flex flex-col items-center w-full sm:w-44">
+                <div className="flex flex-col items-center">
                   <Button
                     onClick={handleQuickNotesOrganize}
                     disabled={isOrganizing}
@@ -299,12 +280,24 @@ const Home = () => {
                     Paste raw notes above and AI will structure them into a report.
                   </span>
                 </div>
-              </div>
 
-              {/* Advanced Options */}
-              <div className="mt-4 pt-4 border-t border-border">
-                <div className="flex justify-center">
-                  <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
+                {/* New Incident */}
+                <div className="flex flex-col items-center">
+                  <Link to="/add" className="w-full">
+                    <Button
+                      id="btn-new-incident"
+                      aria-describedby="hint-new-incident"
+                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] text-white transition-all duration-200 hover:bg-[hsl(25,95%,53%)] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+                    >
+                      + New Incident
+                    </Button>
+                  </Link>
+                  <span
+                    id="hint-new-incident"
+                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
+                  >
+                    Log a new workplace incident manually.
+                  </span>
                 </div>
               </div>
             </div>
