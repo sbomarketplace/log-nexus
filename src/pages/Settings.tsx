@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { PolicyModal } from '@/components/PolicyModal';
+import { ExportModal } from '@/components/ExportModal';
 import { useToast } from '@/hooks/use-toast';
 
 const Settings = () => {
   const { toast } = useToast();
+  const [exportModal, setExportModal] = useState(false);
   const [policyModal, setPolicyModal] = useState<{ open: boolean; type: 'terms' | 'privacy' | 'cookies' | null }>({
     open: false,
     type: null
@@ -23,18 +23,9 @@ const Settings = () => {
   };
 
   const handleExport = () => {
-    toast({
-      title: "Export Started",
-      description: "Your data is being prepared for download.",
-    });
+    setExportModal(true);
   };
 
-  const handleImport = () => {
-    toast({
-      title: "Import Complete",
-      description: "Data has been successfully imported.",
-    });
-  };
 
   const openPolicyModal = (type: 'terms' | 'privacy' | 'cookies') => {
     setPolicyModal({ open: true, type });
@@ -66,16 +57,12 @@ const Settings = () => {
               <Button variant="outline" onClick={handleExport} size="sm" className="justify-center text-center">
                 Export Data
               </Button>
-              <Button variant="outline" onClick={handleImport} size="sm" className="justify-center text-center">
-                Import Data
-              </Button>
               <Button variant="destructive" size="sm" className="justify-center text-center">
                 Clear All Data
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">
-              Export your incident data to a JSON file for backup or transfer to another system.
-              Import allows you to restore from a previous backup.
+              Export your incident data to individual JSON files for backup or transfer to another system.
             </p>
           </CardContent>
         </Card>
@@ -150,7 +137,11 @@ const Settings = () => {
           </CardContent>
         </Card>
 
-        {/* Policy Modal */}
+        {/* Modals */}
+        <ExportModal
+          open={exportModal}
+          onOpenChange={setExportModal}
+        />
         <PolicyModal
           open={policyModal.open}
           onOpenChange={closePolicyModal}

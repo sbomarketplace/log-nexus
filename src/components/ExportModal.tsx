@@ -1,0 +1,113 @@
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Card, CardContent } from '@/components/ui/card';
+import { Download } from 'lucide-react';
+import { storage } from '@/utils/storage';
+import { useToast } from '@/hooks/use-toast';
+
+interface ExportModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
+  const { toast } = useToast();
+  const [incidents] = useState(() => storage.getIncidents());
+
+  const handleExportIncident = (incidentId: string, title: string) => {
+    try {
+      const incident = storage.getIncident(incidentId);
+      if (!incident) {
+        toast({
+          title: "Error",
+          description: "Incident not found",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const dataStr = JSON.stringify(incident, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `incident-${title.replace(/[^a-zA-Z0-9]/g, '-')}-${incident.date}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "Export Complete",
+        description: `${title} has been exported successfully.`
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "There was an error exporting the incident.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString;
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Export Incidents</DialogTitle>
+        </DialogHeader>
+        
+        <ScrollArea className="h-[60vh] pr-4">
+          <div className="space-y-3">
+            {incidents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No incidents found to export
+              </div>
+            ) : (
+              incidents.map((incident) => (
+                <Card key={incident.id} className="border border-border">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-foreground truncate">
+                          {incident.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {formatDate(incident.date)}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleExportIncident(incident.id, incident.title)}
+                        className="ml-3 flex items-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Export
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </div>
+        </ScrollArea>
+      </DialogContent>
+    </Dialog>
+  );
+};
