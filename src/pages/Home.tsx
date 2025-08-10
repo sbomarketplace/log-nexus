@@ -157,7 +157,7 @@ const Home = () => {
                     <Button
                       id="btn-new-incident"
                       aria-describedby="hint-new-incident"
-                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] hover:opacity-95 text-white"
+                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] text-white transition-all duration-200 hover:bg-[hsl(25,95%,53%)] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
                     >
                       + New Incident
                     </Button>
