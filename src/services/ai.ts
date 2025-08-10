@@ -1,28 +1,31 @@
+import { supabase } from "@/integrations/supabase/client";
 import type { OrganizedIncident } from "@/types/incidents";
 
-const FN_PATH = "/functions/v1/organize-incidents";
-
 export async function organizeIncidents(rawNotes: string): Promise<OrganizedIncident[]> {
-  const url = `${import.meta.env.VITE_SUPABASE_URL ?? ""}${FN_PATH}`;
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ rawNotes }),
+  const { data, error } = await supabase.functions.invoke("organize-incidents", {
+    body: { notes: rawNotes },
   });
 
-  if (!res.ok) {
-    let msg = "Service error";
-    try {
-      const j = await res.json();
-      if (j?.error) msg = j.error;
-    } catch {
-      /* ignore */
-    }
+  if (error) {
+    throw new Error(error.message || "Service error");
+  }
+
+  if (!data?.ok) {
+    const msg = data?.errors?.join("; ") || "Service returned error";
     throw new Error(msg);
   }
 
-  const data = await res.json();
-  const incidents = (data?.incidents ?? []) as OrganizedIncident[];
+  // Map normalized response to OrganizedIncident format
+  const incidents = (data?.normalized?.incidents ?? []).map((incident: any) => ({
+    date: incident.date || "",
+    categoryOrIssue: incident.category || "",
+    who: Array.isArray(incident.who) ? incident.who.join(", ") : incident.who || "",
+    what: incident.what || "",
+    where: incident.where || "",
+    when: incident.when || "",
+    witnesses: Array.isArray(incident.witnesses) ? incident.witnesses.join(", ") : incident.witnesses || "",
+    notes: incident.notes || ""
+  })) as OrganizedIncident[];
+  
   return incidents;
 }

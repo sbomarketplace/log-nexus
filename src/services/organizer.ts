@@ -42,11 +42,11 @@ export async function organizeNotes(rawNotes: string) {
       throw new Error(`${message}\n\n[View function logs](https://supabase.com/dashboard/project/higuokkqenvesmexzozx/functions/organize-incidents/logs)`);
     }
 
-    if (!data?.incidents || !Array.isArray(data.incidents)) {
+    if (!data?.normalized?.incidents || !Array.isArray(data.normalized.incidents)) {
       throw new Error(`Organizer returned unexpected format.\n\n[View function logs](https://supabase.com/dashboard/project/higuokkqenvesmexzozx/functions/organize-incidents/logs)`);
     }
 
-    return data.incidents;
+    return data.normalized.incidents;
   } catch (error) {
     // Re-throw with function logs link if not already included
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
