@@ -262,7 +262,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
       <Button 
         id="btn-organize-notes"
         aria-describedby="hint-organize-notes"
-        className="bg-[hsl(214,100%,50%)] text-white hover:bg-[hsl(214,100%,45%)] active:bg-[hsl(214,100%,40%)] rounded-lg px-4 py-2 text-sm font-medium"
+        className="w-full h-11 rounded-xl font-semibold bg-[hsl(214,100%,50%)] hover:opacity-95 text-white"
         onClick={() => setOpen(true)}
         aria-label="Organize incident notes using AI"
       >

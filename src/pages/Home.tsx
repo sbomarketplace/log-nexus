@@ -147,36 +147,42 @@ const Home = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mb-6 text-center space-y-3">
-          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 items-center">
-            {/* New Incident */}
-            <div className="flex flex-col items-center">
-              <Link to="/add">
-                <Button 
-                  id="btn-new-incident"
-                  aria-describedby="hint-new-incident"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium"
-                >
-                  + New Incident
-                </Button>
-              </Link>
-              <span
-                id="hint-new-incident"
-                className="mt-1 text-xs text-muted-foreground text-center"
-              >
-                Creates a blank form to log an incident manually.
-              </span>
-            </div>
+        <div className="mb-6">
+          <div className="mx-auto mt-4 w-full max-w-xl">
+            <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
+              <div className="flex flex-col sm:flex-row gap-5 sm:gap-8 justify-center">
+                {/* New Incident */}
+                <div className="flex flex-col items-center w-full sm:w-44">
+                  <Link to="/add" className="w-full">
+                    <Button
+                      id="btn-new-incident"
+                      aria-describedby="hint-new-incident"
+                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] hover:opacity-95 text-white"
+                    >
+                      + New Incident
+                    </Button>
+                  </Link>
+                  <span
+                    id="hint-new-incident"
+                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
+                  >
+                    Log a new workplace incident manually.
+                  </span>
+                </div>
 
-            {/* Organize Notes */}
-            <div className="flex flex-col items-center">
-              <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
-              <span
-                id="hint-organize-notes"
-                className="mt-1 text-xs text-muted-foreground text-center"
-              >
-                Paste raw notes and AI will structure them into a report.
-              </span>
+                {/* Organize Notes */}
+                <div className="flex flex-col items-center w-full sm:w-44">
+                  <div className="w-full">
+                    <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
+                  </div>
+                  <span
+                    id="hint-organize-notes"
+                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
+                  >
+                    Paste raw notes and AI will structure them into a report.
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
