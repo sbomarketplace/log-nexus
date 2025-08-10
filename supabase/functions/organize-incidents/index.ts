@@ -58,11 +58,13 @@ async function callOpenAI(prompt: string) {
     messages: [
       { 
         role: "system", 
-        content: `Extract workplace incident information into JSON. Return only clean JSON with these exact keys:
+        content: `Extract workplace incident information into JSON with maximum detail preservation. Return only clean JSON with these exact keys:
+
 - date: Date of incident (e.g., "7/22")
-- category: Choose from these predefined categories only:
+- category: Choose the most specific category:
   * Harassment (Verbal, Physical, Sexual)
   * Discrimination (Race, Gender, Age, Disability, etc.)
+  * Wrongful Accusation / Drug Use Allegation
   * Retaliation
   * Bullying / Intimidation
   * Threats / Violence
@@ -79,14 +81,42 @@ async function callOpenAI(prompt: string) {
   * Performance Issue
   * Miscommunication / Procedural Error
   * Other (Specify in Notes)
-- who: Array of all people mentioned by name
-- what: Brief description of the main incident
-- where: Location where incident occurred
-- when: Chronological timeline of events with times (e.g., "8:00 AM - Entered tool closet, 8:30 AM - Mark Cordell informs Brian needs to call Art")
-- witnesses: Array of witness names
-- notes: Additional details including policy violations, requests/denials, evidence/testing info, and other important notes
 
-For multiple incidents, return an array. Avoid repeating information across fields.` 
+- who: Detailed categorization of all people involved with their roles:
+  Format: "Managers: [names], Union Stewards: [names], Security: [names], Others: [names], Lab Technician: [names]"
+  Extract EVERY person mentioned and categorize them based on context clues.
+
+- what: Comprehensive description of what happened including:
+  * Main accusation or incident
+  * All key events in sequence
+  * Important statements made
+  * Policy violations mentioned
+  * Requests made and responses received
+  * Testing or evidence procedures
+  Use ALL details from the raw notes, don't summarize away important information.
+
+- where: Specific location details:
+  * Primary location (e.g., "Tool box room (tool closet)")
+  * Additional locations if communication occurred elsewhere
+  * Communication methods if relevant (phone, in person)
+
+- when: Detailed chronological timeline with specific times:
+  Format each event as "TIME - EVENT DESCRIPTION"
+  Include ALL times mentioned and what happened at each time.
+  Preserve exact quotes when provided.
+
+- witnesses: Array of all witness names (people who observed but weren't directly involved)
+
+- notes: Comprehensive additional details including:
+  * Policy violations and procedural issues
+  * Denied requests (searches, tests, etc.)
+  * Inconsistencies in procedures
+  * Important quotes or statements
+  * Evidence collection details
+  * Any other relevant observations
+  * Personal statements or denials
+
+CRITICAL: Use ALL information from the raw notes. Only exclude truly redundant repetitions. Preserve all names, times, quotes, policy issues, and procedural details. The goal is maximum detail preservation and organization.` 
       },
       { role: "user", content: prompt }
     ]
