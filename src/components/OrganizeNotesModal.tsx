@@ -393,146 +393,155 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                 {organizedIncidents.map((incident, index) => (
                   <Card key={index} className="border rounded-xl">
                      <CardContent className="p-4">
-                       <div className="space-y-3 text-left">
-                          {/* Header */}
-                          <div className="flex items-start gap-2 mb-4">
-                            <Badge variant="secondary" className="text-xs rounded-lg">
-                              📅 {incident.date || 'Unknown'}
-                            </Badge>
-                            <Badge variant="outline" className="text-xs rounded-lg">
-                              {incident.category}
-                            </Badge>
+                        <div className="space-y-4 text-left">
+                           {/* Header */}
+                           <div className="mb-4">
+                             <h3 className="text-sm font-semibold">
+                               Date — {incident.date || 'Unknown'} — {incident.category}
+                             </h3>
+                           </div>
+                           
+                           {/* Who Section */}
+                           <div className="mb-4">
+                             <h4 className="text-sm font-medium mb-2">Who:</h4>
+                             <div className="space-y-1 text-xs">
+                              {incident.who.managers?.length > 0 && (
+                                <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
+                              )}
+                              {incident.who.unionStewards?.length > 0 && (
+                                <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
+                              )}
+                              {incident.who.accused?.length > 0 && (
+                                <div><strong>Accused:</strong> {incident.who.accused.join(', ')}</div>
+                              )}
+                              {incident.who.accusers?.length > 0 && (
+                                <div><strong>Accusers:</strong> {incident.who.accusers.join(', ')}</div>
+                              )}
+                              {incident.who.security?.length > 0 && (
+                                <div><strong>Security:</strong> {incident.who.security.join(', ')}</div>
+                              )}
+                              {incident.who.others?.length > 0 && (
+                                <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
+                              )}
+                            </div>
                           </div>
-                          
-                          {/* Who Section */}
+
+                          {/* What */}
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium mb-2">Who:</h4>
-                            <div className="grid grid-cols-1 gap-2 text-xs">
-                             {incident.who.accused?.length > 0 && (
-                               <div><strong>Accused:</strong> {incident.who.accused.join(', ')}</div>
-                             )}
-                             {incident.who.accusers?.length > 0 && (
-                               <div><strong>Accusers:</strong> {incident.who.accusers.join(', ')}</div>
-                             )}
-                             {incident.who.managers?.length > 0 && (
-                               <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
-                             )}
-                             {incident.who.unionStewards?.length > 0 && (
-                               <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
-                             )}
-                             {incident.who.security?.length > 0 && (
-                               <div><strong>Security:</strong> {incident.who.security.join(', ')}</div>
-                             )}
-                             {incident.who.others?.length > 0 && (
-                               <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
-                             )}
-                           </div>
-                         </div>
+                            <h4 className="text-sm font-medium mb-2">What:</h4>
+                            <p className="text-xs text-muted-foreground">{incident.whatHappened}</p>
+                          </div>
 
-                         {/* What Happened */}
-                         <div className="mb-4">
-                           <h4 className="text-sm font-medium mb-2">What Happened:</h4>
-                           <p className="text-xs text-muted-foreground">{incident.whatHappened}</p>
-                         </div>
+                          {/* Where */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-1">Where:</h4>
+                            <p className="text-xs text-muted-foreground">{incident.where || 'None noted'}</p>
+                          </div>
 
-                         {/* Where */}
-                         <div className="mb-4">
-                           <h4 className="text-sm font-medium mb-1">Where:</h4>
-                           <p className="text-xs text-muted-foreground">{incident.where || 'None noted'}</p>
-                         </div>
-
-                          {/* Timeline */}
-                          {incident.timeline?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Timeline:</h4>
-                             <div className="space-y-1">
-                               {incident.timeline.map((event, eventIndex) => (
-                                 <div key={eventIndex} className="text-xs border-l-2 border-muted pl-3">
-                                   <div className="font-medium">{event.time || 'Time unspecified'}</div>
-                                   <div className="text-muted-foreground">{event.event}</div>
-                                   {event.quotes && event.quotes.length > 0 && (
-                                     <div className="italic mt-1 text-xs">"{event.quotes.join('; ')}"</div>
-                                   )}
-                                 </div>
-                               ))}
-                             </div>
-                           </div>
-                         )}
-
-                          {/* Requests & Responses */}
-                          {incident.requestsAndResponses?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Requests & Responses:</h4>
-                             <div className="space-y-1">
-                               {incident.requestsAndResponses.map((req, reqIndex) => (
-                                 <div key={reqIndex} className="text-xs">
-                                   <span className="font-medium">{req.request}</span> - 
-                                   <Badge variant={req.response === 'approved' ? 'default' : req.response === 'denied' ? 'destructive' : 'secondary'} className="mx-1 text-xs">
-                                     {req.response}
-                                   </Badge>
-                                   {req.byWhom && <span className="text-muted-foreground">by {req.byWhom}</span>}
-                                 </div>
-                               ))}
-                             </div>
-                           </div>
-                         )}
-
-                          {/* Policy/Procedure */}
-                          {incident.policyOrProcedure?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Policy/Procedure:</h4>
-                             <ul className="list-disc list-inside space-y-1">
-                               {incident.policyOrProcedure.map((policy, policyIndex) => (
-                                 <li key={policyIndex} className="text-xs text-muted-foreground">{policy}</li>
-                               ))}
-                             </ul>
-                           </div>
-                         )}
-
-                          {/* Evidence/Tests */}
-                          {incident.evidenceOrTests?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Evidence/Tests:</h4>
-                             <div className="space-y-1">
-                               {incident.evidenceOrTests.map((evidence, evidenceIndex) => (
-                                 <div key={evidenceIndex} className="text-xs">
-                                   <span className="font-medium">{evidence.type}:</span> {evidence.detail || ''} 
-                                   <Badge variant="secondary" className="ml-1 text-xs">
-                                     {evidence.status || 'unknown'}
-                                   </Badge>
-                                 </div>
-                               ))}
-                             </div>
-                           </div>
-                         )}
+                          {/* When */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-1">When:</h4>
+                            {incident.timeline && incident.timeline.length > 0 ? (
+                              <p className="text-xs text-muted-foreground">
+                                {incident.timeline[0]?.time || 'Start time unspecified'} – {incident.timeline[incident.timeline.length - 1]?.time || 'End time unspecified'}
+                              </p>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">Time unspecified</p>
+                            )}
+                          </div>
 
                           {/* Witnesses */}
-                          {incident.witnesses?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-1">Witnesses:</h4>
-                             <p className="text-xs text-muted-foreground">{incident.witnesses.join(', ')}</p>
-                           </div>
-                         )}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-2">Witnesses:</h4>
+                            <div className="space-y-1 text-xs">
+                              {incident.who.unionStewards?.length > 0 && (
+                                <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
+                              )}
+                              {incident.who.managers?.length > 0 && (
+                                <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
+                              )}
+                              {incident.witnesses && incident.witnesses.length > 0 && (
+                                <div><strong>Additional Witnesses:</strong> {incident.witnesses.join(', ')}</div>
+                              )}
+                              {incident.who.others?.length > 0 && (
+                                <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
+                              )}
+                            </div>
+                          </div>
 
-                         {/* Outcome/Next */}
-                         {incident.outcomeOrNext && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-1">Outcome/Next:</h4>
-                             <p className="text-xs text-muted-foreground">{incident.outcomeOrNext}</p>
-                           </div>
-                         )}
+                           {/* Timeline */}
+                           {incident.timeline?.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium mb-2">Timeline:</h4>
+                              <div className="space-y-2">
+                                {incident.timeline.map((event, eventIndex) => (
+                                  <div key={eventIndex} className="text-xs">
+                                    <strong>{event.time || 'Time unspecified'}</strong> – {event.event}
+                                    {event.quotes && event.quotes.length > 0 && (
+                                      <div className="italic mt-1 ml-4 text-xs text-muted-foreground">
+                                        "{event.quotes.join('; ')}"
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                                {incident.requestsAndResponses && incident.requestsAndResponses.length > 0 && (
+                                  <>
+                                    {incident.requestsAndResponses.map((req, reqIndex) => (
+                                      <div key={`req-${reqIndex}`} className="text-xs">
+                                        <strong>Later</strong> – {req.request} {req.response === 'denied' ? 'denied' : req.response === 'approved' ? 'approved' : req.response}{req.byWhom ? ` by ${req.byWhom}` : ''}
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                                {incident.evidenceOrTests && incident.evidenceOrTests.length > 0 && (
+                                  <>
+                                    {incident.evidenceOrTests.map((evidence, evidenceIndex) => (
+                                      <div key={`evidence-${evidenceIndex}`} className="text-xs">
+                                        <strong>Lab testing</strong> – {evidence.type}: {evidence.detail || ''} ({evidence.status || 'status unknown'})
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                                {incident.notes && incident.notes.length > 0 && (
+                                  <>
+                                    {incident.notes.map((note, noteIndex) => (
+                                      <div key={`note-${noteIndex}`} className="text-xs">
+                                        <strong>Note</strong> – {note}
+                                      </div>
+                                    ))}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          )}
 
-                          {/* Notes */}
-                          {incident.notes?.length > 0 && (
-                           <div className="mb-4">
-                             <h4 className="text-sm font-medium mb-2">Notes:</h4>
-                             <ul className="list-disc list-inside space-y-1">
-                               {incident.notes.map((note, noteIndex) => (
-                                 <li key={noteIndex} className="text-xs text-muted-foreground">{note}</li>
-                               ))}
-                             </ul>
-                           </div>
-                         )}
+                          {/* Notes Section */}
+                          <div className="mb-4">
+                            <h4 className="text-sm font-medium mb-2">Notes:</h4>
+                            <div className="space-y-1 text-xs text-muted-foreground">
+                              {incident.policyOrProcedure && incident.policyOrProcedure.length > 0 && (
+                                <>
+                                  {incident.policyOrProcedure.map((policy, policyIndex) => (
+                                    <div key={`policy-${policyIndex}`}>
+                                      Policy violation: {policy}
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                              {incident.outcomeOrNext && (
+                                <div>Outcome: {incident.outcomeOrNext}</div>
+                              )}
+                              {incident.notes && incident.notes.length > 0 && (
+                                <>
+                                  {incident.notes.map((note, noteIndex) => (
+                                    <div key={`note-${noteIndex}`}>
+                                      {note}
+                                    </div>
+                                  ))}
+                                </>
+                              )}
+                            </div>
+                          </div>
 
                          {/* Action Buttons */}
                          <div className="flex gap-2 pt-3 border-t">
