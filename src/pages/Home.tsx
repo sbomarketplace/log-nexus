@@ -148,13 +148,36 @@ const Home = () => {
 
         {/* Action Buttons */}
         <div className="mb-6 text-center space-y-3">
-          <div className="flex justify-center gap-3">
-            <Link to="/add">
-              <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium">
-                + New Incident
-              </Button>
-            </Link>
-            <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
+          <div className="flex flex-col sm:flex-row justify-center gap-3 sm:gap-4 items-start sm:items-center">
+            {/* New Incident */}
+            <div className="flex flex-col items-start">
+              <Link to="/add">
+                <Button 
+                  id="btn-new-incident"
+                  aria-describedby="hint-new-incident"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium"
+                >
+                  + New Incident
+                </Button>
+              </Link>
+              <span
+                id="hint-new-incident"
+                className="mt-1 text-xs text-muted-foreground"
+              >
+                Creates a blank form to log an incident manually.
+              </span>
+            </div>
+
+            {/* Organize Notes */}
+            <div className="flex flex-col items-start">
+              <OrganizeNotesModal onOrganizeComplete={handleOrganizeComplete} />
+              <span
+                id="hint-organize-notes"
+                className="mt-1 text-xs text-muted-foreground"
+              >
+                Paste raw notes and AI will structure them into a report.
+              </span>
+            </div>
           </div>
         </div>
 
