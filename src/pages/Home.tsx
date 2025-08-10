@@ -144,6 +144,14 @@ const Home = () => {
         localStorage.removeItem('quickNotesDraft');
         loadIncidents();
         
+        // Scroll to the top of the incidents list
+        setTimeout(() => {
+          const incidentsList = document.querySelector('#incidents-list');
+          if (incidentsList) {
+            incidentsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+        
         toast({
           title: "Success",
           description: `${results.length} incident${results.length === 1 ? '' : 's'} organized and saved.`,
@@ -347,7 +355,7 @@ const Home = () => {
         )}
 
         {/* Incidents List */}
-        <div className="space-y-3">
+        <div id="incidents-list" className="space-y-3">
           {organizedIncidents.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
