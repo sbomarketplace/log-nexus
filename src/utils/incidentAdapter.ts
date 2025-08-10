@@ -89,13 +89,12 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
   const whoGroups = {
     accused: [],
     accusers: [],
-    managers: apiIncident.who.filter(name => name.toLowerCase().includes('manager') || ['arthur', 'vincent', 'seth', 'andrew'].some(m => name.toLowerCase().includes(m))),
-    unionStewards: apiIncident.who.filter(name => name.toLowerCase().includes('steward') || ['troy', 'jon'].some(s => name.toLowerCase().includes(s))),
+    managers: apiIncident.who.filter(name => name.toLowerCase().includes('manager')),
+    unionStewards: apiIncident.who.filter(name => name.toLowerCase().includes('steward')),
     security: apiIncident.who.filter(name => name.toLowerCase().includes('security')),
     others: apiIncident.who.filter(name => {
       const lowerName = name.toLowerCase();
-      return !lowerName.includes('manager') && !lowerName.includes('steward') && !lowerName.includes('security') &&
-             !['arthur', 'vincent', 'seth', 'andrew', 'troy', 'jon'].some(known => lowerName.includes(known));
+      return !lowerName.includes('manager') && !lowerName.includes('steward') && !lowerName.includes('security');
     })
   };
 
