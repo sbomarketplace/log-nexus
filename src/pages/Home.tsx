@@ -234,8 +234,8 @@ const Home = () => {
                     id="quick-notes-input"
                     value={quickNotes}
                     onChange={(e) => setQuickNotes(e.target.value)}
-                    placeholder="Paste raw incident notes here…"
-                    className="min-h-[80px] max-h-[200px] rounded-2xl border-border shadow-sm resize-none"
+                    placeholder="Type or Paste raw incident notes here. Please add Who, What, When, Where, Why, and How to record the most detail..."
+                    className="min-h-[240px] max-h-[400px] rounded-2xl border-border shadow-sm resize-none"
                     aria-describedby={quickNotesError ? "quick-notes-error" : "quick-notes-hint"}
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
