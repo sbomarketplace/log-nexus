@@ -4,8 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
+import { getCategoryOptions } from '@/utils/incidentCategories';
+import { supabase } from '@/integrations/supabase/client';
+import { Upload, FileText, X } from 'lucide-react';
 
 interface EditIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -16,6 +20,8 @@ interface EditIncidentModalProps {
 
 export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: EditIncidentModalProps) => {
   const [formData, setFormData] = useState<Partial<OrganizedIncident>>({});
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [existingFiles, setExistingFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -35,8 +41,44 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
         policy: incident.policy || '',
         evidence: incident.evidence || '',
       });
+      setExistingFiles(incident.files || []);
+      setUploadedFiles([]);
     }
   }, [incident]);
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    setUploadedFiles(prev => [...prev, ...files]);
+  };
+
+  const removeUploadedFile = (index: number) => {
+    setUploadedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingFile = (fileName: string) => {
+    setExistingFiles(prev => prev.filter(file => file !== fileName));
+  };
+
+  const uploadFilesToStorage = async (): Promise<string[]> => {
+    if (uploadedFiles.length === 0) return [];
+    
+    const uploadPromises = uploadedFiles.map(async (file) => {
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `user-files/${fileName}`;
+      
+      const { error } = await supabase.storage
+        .from('incident-files')
+        .upload(filePath, file);
+      
+      if (error) {
+        throw new Error(`Failed to upload ${file.name}: ${error.message}`);
+      }
+      
+      return fileName;
+    });
+    
+    return Promise.all(uploadPromises);
+  };
 
   const handleSave = async () => {
     if (!incident || !formData.date || !formData.categoryOrIssue || !formData.what) {
@@ -50,9 +92,14 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
 
     setIsLoading(true);
     try {
+      // Upload new files if any
+      const newFileNames = await uploadFilesToStorage();
+      const allFiles = [...existingFiles, ...newFileNames];
+
       const updatedIncident: OrganizedIncident = {
         ...incident,
         ...formData,
+        files: allFiles,
         updatedAt: new Date().toISOString(),
       } as OrganizedIncident;
 
@@ -69,7 +116,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
       console.error('Error saving incident:', error);
       toast({
         title: "Save Failed",
-        description: "Failed to save changes. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to save changes. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -93,6 +140,8 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
         policy: incident.policy || '',
         evidence: incident.evidence || '',
       });
+      setExistingFiles(incident.files || []);
+      setUploadedFiles([]);
     }
     onOpenChange(false);
   };
@@ -133,12 +182,25 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
               {/* Category Field */}
               <div className="space-y-2">
                 <Label htmlFor="category">Category/Issue</Label>
-                <Input
-                  id="category"
-                  value={formData.categoryOrIssue || ''}
-                  onChange={(e) => setFormData({ ...formData, categoryOrIssue: e.target.value })}
-                  placeholder="Incident category"
-                />
+                <Select value={formData.categoryOrIssue || ''} onValueChange={(value) => setFormData({ ...formData, categoryOrIssue: value })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select incident category" />
+                  </SelectTrigger>
+                  <SelectContent className="max-h-[200px]">
+                    {getCategoryOptions().map((group) => (
+                      <div key={group.group}>
+                        <div className="px-2 py-1.5 text-sm font-bold text-primary">
+                          {group.group}
+                        </div>
+                        {group.items.map((item) => (
+                          <SelectItem key={item} value={item} className="pl-4">
+                            {item}
+                          </SelectItem>
+                        ))}
+                      </div>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               {/* Who Field */}
@@ -255,6 +317,83 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
                   placeholder="Additional details"
                   className="min-h-[100px]"
                 />
+              </div>
+
+              {/* Supporting Files */}
+              <div className="space-y-2">
+                <Label>Supporting Files</Label>
+                
+                {/* Existing Files */}
+                {existingFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Current files:</p>
+                    {existingFiles.map((fileName, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 border rounded-lg">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{fileName}</span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeExistingFile(fileName)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* New Files to Upload */}
+                {uploadedFiles.length > 0 && (
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">New files to upload:</p>
+                    {uploadedFiles.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 border rounded-lg bg-muted/50">
+                        <div className="flex items-center space-x-2">
+                          <FileText className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{file.name}</span>
+                          <span className="text-xs text-muted-foreground">
+                            ({(file.size / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeUploadedFile(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* File Upload */}
+                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-4">
+                  <input
+                    type="file"
+                    multiple
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="file-upload"
+                    accept="image/*,.pdf,.doc,.docx,.txt"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex flex-col items-center justify-center cursor-pointer"
+                  >
+                    <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                    <span className="text-sm text-muted-foreground text-center">
+                      Click to upload supporting documents
+                      <br />
+                      <span className="text-xs">Supports images, PDFs, and documents</span>
+                    </span>
+                  </label>
+                </div>
               </div>
 
               {/* Actions */}

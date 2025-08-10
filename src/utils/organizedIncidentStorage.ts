@@ -12,6 +12,7 @@ export interface OrganizedIncident {
   requests?: string;
   policy?: string;
   evidence?: string;
+  files?: string[];
   createdAt: string;
   updatedAt: string;
 }
