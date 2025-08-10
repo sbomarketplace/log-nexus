@@ -215,7 +215,7 @@ ${incident.evidenceOrTests?.map(e => `• ${e.type}: ${e.detail || ''} (${e.stat
 Witnesses: ${incident.witnesses?.join(', ') || 'None'}
 Outcome/Next: ${incident.outcomeOrNext || 'None noted'}
 
-Notes:
+Incident Summary:
 ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
 
     const blob = new Blob([content], { type: 'text/plain' });
@@ -452,24 +452,15 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                             )}
                           </div>
 
-                          {/* Witnesses */}
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium mb-2">Witnesses:</h4>
-                            <div className="space-y-1 text-xs">
-                              {incident.who.unionStewards?.length > 0 && (
-                                <div><strong>Union Stewards:</strong> {incident.who.unionStewards.join(', ')}</div>
-                              )}
-                              {incident.who.managers?.length > 0 && (
-                                <div><strong>Managers:</strong> {incident.who.managers.join(', ')}</div>
-                              )}
-                              {incident.witnesses && incident.witnesses.length > 0 && (
-                                <div><strong>Additional Witnesses:</strong> {incident.witnesses.join(', ')}</div>
-                              )}
-                              {incident.who.others?.length > 0 && (
-                                <div><strong>Others:</strong> {incident.who.others.join(', ')}</div>
-                              )}
-                            </div>
-                          </div>
+                           {/* Witnesses */}
+                           {incident.witnesses && incident.witnesses.length > 0 && (
+                             <div className="mb-4">
+                               <h4 className="text-sm font-medium mb-2">Witnesses:</h4>
+                               <div className="space-y-1 text-xs">
+                                 <div><strong>Explicit Witnesses:</strong> {incident.witnesses.join(', ')}</div>
+                               </div>
+                             </div>
+                           )}
 
                            {/* Timeline */}
                            {incident.timeline?.length > 0 && (
@@ -510,7 +501,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
 
                           {/* Notes Section */}
                           <div className="mb-4">
-                            <h4 className="text-sm font-medium mb-2">Notes:</h4>
+                            <h4 className="text-sm font-medium mb-2">Incident Summary:</h4>
                             <div className="space-y-1 text-xs text-muted-foreground">
                               {incident.policyOrProcedure && incident.policyOrProcedure.length > 0 && (
                                 <>

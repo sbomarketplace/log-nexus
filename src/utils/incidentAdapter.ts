@@ -108,7 +108,7 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
     requestsAndResponses,
     policyOrProcedure,
     evidenceOrTests,
-    witnesses: apiIncident.witnesses || [],
+    witnesses: [], // Only include people explicitly mentioned as witnesses in the notes
     outcomeOrNext: null,
     notes: additionalNotes
   };
