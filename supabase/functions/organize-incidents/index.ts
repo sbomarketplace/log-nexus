@@ -14,7 +14,7 @@ const incidentSchema = z.object({
   where: z.string().catch(""),
   when: z.string().catch(""),
   witnesses: z.array(z.string()).catch([]),
-  notes: z.string().catch(""),
+  notes: z.union([z.string(), z.object({}).passthrough()]).catch(""),
 })
 type Incident = z.infer<typeof incidentSchema>
 
@@ -38,7 +38,7 @@ function toIncident(x: unknown): Incident {
   const where = String(o.where ?? o.Where ?? "").trim()
   const when = String(o.when ?? o.When ?? "").trim()
   const witnesses = splitNames(o.witnesses ?? o.Witnesses ?? "")
-  const notes = String(o.notes ?? o.Notes ?? "").trim()
+  const notes = o.notes ?? o.Notes ?? ""
   return incidentSchema.parse({ date, category, who, what, where, when, witnesses, notes })
 }
 
@@ -53,8 +53,8 @@ async function callOpenAI(prompt: string) {
   if (!key) throw new Error("Missing OPENAI_API_KEY")
 
   const body = {
-    model: "gpt-4o-mini",
-    temperature: 0.2,
+    model: "gpt-4.1-2025-04-14",
+    temperature: 0.1,
     messages: [
       { 
         role: "system", 
