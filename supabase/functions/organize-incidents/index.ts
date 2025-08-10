@@ -56,7 +56,20 @@ async function callOpenAI(prompt: string) {
     model: "gpt-4o-mini",
     temperature: 0.2,
     messages: [
-      { role: "system", content: "Return only JSON. Use keys: date, category, who, what, where, when, witnesses, notes. For multiple incidents return an array of objects." },
+      { 
+        role: "system", 
+        content: `Extract workplace incident information into JSON. Return only clean JSON with these exact keys:
+- date: Date of incident (e.g., "7/22")
+- category: Type of incident (e.g., "Substance Abuse Allegation", "Harassment")  
+- who: Array of all people mentioned by name
+- what: Brief description of the main incident
+- where: Location where incident occurred
+- when: Chronological timeline of events with times (e.g., "8:00 AM - Entered tool closet, 8:30 AM - Mark Cordell informs Brian needs to call Art")
+- witnesses: Array of witness names
+- notes: Additional details including policy violations, requests/denials, evidence/testing info, and other important notes
+
+For multiple incidents, return an array. Avoid repeating information across fields.` 
+      },
       { role: "user", content: prompt }
     ]
   }

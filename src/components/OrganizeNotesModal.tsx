@@ -502,15 +502,6 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                                     ))}
                                   </>
                                 )}
-                                {incident.notes && incident.notes.length > 0 && (
-                                  <>
-                                    {incident.notes.map((note, noteIndex) => (
-                                      <div key={`note-${noteIndex}`} className="text-xs">
-                                        <strong>Note</strong> – {note}
-                                      </div>
-                                    ))}
-                                  </>
-                                )}
                               </div>
                             </div>
                           )}
