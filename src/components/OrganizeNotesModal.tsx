@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { organizeNotes } from '@/services/organizer';
 import { StructuredIncident } from '@/types/structured-incidents';
+import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
 import { incidentService } from '@/services/incidents';
 import { IncidentRecord } from '@/types/incidents';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
@@ -68,19 +69,20 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     setIsProcessing(true);
     setError(null);
     try {
-      const incidents = await organizeNotes(rawNotes.trim());
+      const apiIncidents = await organizeNotes(rawNotes.trim());
       
-      if (incidents.length === 0) {
+      if (apiIncidents.length === 0) {
         setError('No incidents could be organized. Please review your notes and try again.');
         return;
       }
       
-      setOrganizedIncidents(incidents);
+      const structuredIncidents = apiIncidents.map(adaptApiToStructuredIncident);
+      setOrganizedIncidents(structuredIncidents);
       setShowResults(true);
       
       toast({
         title: "Notes Organized",
-        description: `Successfully organized ${incidents.length} incident${incidents.length !== 1 ? 's' : ''}.`,
+        description: `Successfully organized ${structuredIncidents.length} incident${structuredIncidents.length !== 1 ? 's' : ''}.`,
       });
     } catch (error) {
       console.error('Error organizing notes - Full payload:', error);
@@ -117,9 +119,9 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
           who: Object.values(incident.who).flat().join(", "),
           what: incident.whatHappened,
           where: incident.where || "None noted",
-          when: incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; "),
-          witnesses: incident.witnesses.join(", "),
-          notes: `${incident.notes.join(" ")} | Timeline: ${incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ")} | Requests: ${incident.requestsAndResponses.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ")} | Policy: ${incident.policyOrProcedure.join("; ")} | Evidence: ${incident.evidenceOrTests.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ")}`
+          when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
+          witnesses: incident.witnesses?.join(", ") || "",
+          notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`
         }]
       };
       
@@ -160,9 +162,9 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
             who: Object.values(incident.who).flat().join(", "),
             what: incident.whatHappened,
             where: incident.where || "None noted",
-            when: incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; "),
-            witnesses: incident.witnesses.join(", "),
-            notes: `${incident.notes.join(" ")} | Timeline: ${incident.timeline.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ")} | Requests: ${incident.requestsAndResponses.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ")} | Policy: ${incident.policyOrProcedure.join("; ")} | Evidence: ${incident.evidenceOrTests.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ")}`
+            when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
+            witnesses: incident.witnesses?.join(", ") || "",
+            notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`
           }]
         };
         
@@ -201,22 +203,22 @@ What Happened: ${incident.whatHappened}
 Where: ${incident.where || 'None noted'}
 
 Timeline:
-${incident.timeline.map(t => `• ${t.time || 'Time unspecified'}: ${t.event}${t.quotes?.length ? `\n  Quotes: ${t.quotes.join('; ')}` : ''}`).join('\n')}
+${incident.timeline?.map(t => `• ${t.time || 'Time unspecified'}: ${t.event}${t.quotes?.length ? `\n  Quotes: ${t.quotes.join('; ')}` : ''}`).join('\n') || 'No timeline available'}
 
 Requests & Responses:
-${incident.requestsAndResponses.map(r => `• ${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join('\n')}
+${incident.requestsAndResponses?.map(r => `• ${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join('\n') || 'None'}
 
 Policy/Procedure:
-${incident.policyOrProcedure.map(p => `• ${p}`).join('\n')}
+${incident.policyOrProcedure?.map(p => `• ${p}`).join('\n') || 'None'}
 
 Evidence/Tests:
-${incident.evidenceOrTests.map(e => `• ${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join('\n')}
+${incident.evidenceOrTests?.map(e => `• ${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join('\n') || 'None'}
 
-Witnesses: ${incident.witnesses.join(', ') || 'None'}
+Witnesses: ${incident.witnesses?.join(', ') || 'None'}
 Outcome/Next: ${incident.outcomeOrNext || 'None noted'}
 
 Notes:
-${incident.notes.map(n => `• ${n}`).join('\n')}`;
+${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
 
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
@@ -441,8 +443,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            <p className="text-xs text-muted-foreground">{incident.where || 'None noted'}</p>
                          </div>
 
-                         {/* Timeline */}
-                         {incident.timeline.length > 0 && (
+                          {/* Timeline */}
+                          {incident.timeline?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-2">Timeline:</h4>
                              <div className="space-y-1">
@@ -459,8 +461,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            </div>
                          )}
 
-                         {/* Requests & Responses */}
-                         {incident.requestsAndResponses.length > 0 && (
+                          {/* Requests & Responses */}
+                          {incident.requestsAndResponses?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-2">Requests & Responses:</h4>
                              <div className="space-y-1">
@@ -477,8 +479,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            </div>
                          )}
 
-                         {/* Policy/Procedure */}
-                         {incident.policyOrProcedure.length > 0 && (
+                          {/* Policy/Procedure */}
+                          {incident.policyOrProcedure?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-2">Policy/Procedure:</h4>
                              <ul className="list-disc list-inside space-y-1">
@@ -489,8 +491,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            </div>
                          )}
 
-                         {/* Evidence/Tests */}
-                         {incident.evidenceOrTests.length > 0 && (
+                          {/* Evidence/Tests */}
+                          {incident.evidenceOrTests?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-2">Evidence/Tests:</h4>
                              <div className="space-y-1">
@@ -506,8 +508,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            </div>
                          )}
 
-                         {/* Witnesses */}
-                         {incident.witnesses.length > 0 && (
+                          {/* Witnesses */}
+                          {incident.witnesses?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-1">Witnesses:</h4>
                              <p className="text-xs text-muted-foreground">{incident.witnesses.join(', ')}</p>
@@ -522,8 +524,8 @@ ${incident.notes.map(n => `• ${n}`).join('\n')}`;
                            </div>
                          )}
 
-                         {/* Notes */}
-                         {incident.notes.length > 0 && (
+                          {/* Notes */}
+                          {incident.notes?.length > 0 && (
                            <div className="mb-4">
                              <h4 className="text-sm font-medium mb-2">Notes:</h4>
                              <ul className="list-disc list-inside space-y-1">
