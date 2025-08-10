@@ -4,22 +4,30 @@ import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertIcon } from '@/components/icons/CustomIcons';
+import { Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { EditIncidentModal } from '@/components/EditIncidentModal';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
+import { getAllCategories } from '@/utils/incidentCategories';
 
 import jsPDF from 'jspdf';
 
 const Home = () => {
   const [organizedIncidents, setOrganizedIncidents] = useState<OrganizedIncident[]>([]);
+  const [filteredIncidents, setFilteredIncidents] = useState<OrganizedIncident[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewIncident, setViewIncident] = useState<OrganizedIncident | null>(null);
   const [editIncident, setEditIncident] = useState<OrganizedIncident | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
+  const [filterCategory, setFilterCategory] = useState<string>('all');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -36,6 +44,37 @@ const Home = () => {
       });
     }
   };
+
+  // Filter and sort incidents based on search term, category filter, and sort option
+  useEffect(() => {
+    let filtered = organizedIncidents;
+
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(incident => 
+        incident.what.toLowerCase().includes(searchLower) ||
+        incident.who.toLowerCase().includes(searchLower) ||
+        incident.where.toLowerCase().includes(searchLower) ||
+        incident.categoryOrIssue.toLowerCase().includes(searchLower) ||
+        incident.notes.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply category filter
+    if (filterCategory !== 'all') {
+      filtered = filtered.filter(incident => incident.categoryOrIssue === filterCategory);
+    }
+
+    // Apply sorting
+    if (sortBy === 'date') {
+      filtered = filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    } else if (sortBy === 'category') {
+      filtered = filtered.sort((a, b) => a.categoryOrIssue.localeCompare(b.categoryOrIssue));
+    }
+
+    setFilteredIncidents(filtered);
+  }, [organizedIncidents, searchTerm, filterCategory, sortBy]);
 
   useEffect(() => {
     loadIncidents();
@@ -119,6 +158,49 @@ const Home = () => {
           </div>
         </div>
 
+        {/* Search and Filter Controls */}
+        {organizedIncidents.length > 0 && (
+          <div className="mb-6 space-y-3">
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search incidents..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 rounded-lg"
+              />
+            </div>
+            
+            {/* Filter and Sort Controls */}
+            <div className="flex gap-3">
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-[180px] rounded-lg">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {getAllCategories().map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={sortBy} onValueChange={(value: 'date' | 'category') => setSortBy(value)}>
+                <SelectTrigger className="w-[130px] rounded-lg">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Date</SelectItem>
+                  <SelectItem value="category">Category</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        )}
+
         {/* Incidents List */}
         <div className="space-y-3">
           {organizedIncidents.length === 0 ? (
@@ -131,10 +213,18 @@ const Home = () => {
                 </p>
               </CardContent>
             </Card>
+          ) : filteredIncidents.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <Search className="h-8 w-8 text-muted-foreground mb-3" />
+                <h3 className="text-sm font-medium mb-1">No incidents found</h3>
+                <p className="text-xs text-muted-foreground text-center">
+                  Try adjusting your search terms or filters.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
-            organizedIncidents
-              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-              .map((incident) => (
+            filteredIncidents.map((incident) => (
                 <Card key={incident.id} className="border rounded-lg">
                   <CardContent className="p-4">
                     <div className="space-y-3">

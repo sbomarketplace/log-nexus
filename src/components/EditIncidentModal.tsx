@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 
@@ -21,15 +21,24 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
 
   useEffect(() => {
     if (incident) {
-      setFormData(incident);
+      setFormData({
+        date: incident.date,
+        categoryOrIssue: incident.categoryOrIssue,
+        who: incident.who,
+        what: incident.what,
+        where: incident.where,
+        when: incident.when,
+        witnesses: incident.witnesses,
+        notes: incident.notes,
+      });
     }
   }, [incident]);
 
   const handleSave = async () => {
     if (!incident || !formData.date || !formData.categoryOrIssue || !formData.what) {
       toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields (Date, Category, and What).",
+        title: "Validation Error",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -56,7 +65,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
       console.error('Error saving incident:', error);
       toast({
         title: "Save Failed",
-        description: "Failed to save the incident. Please try again.",
+        description: "Failed to save changes. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -66,7 +75,16 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
 
   const handleCancel = () => {
     if (incident) {
-      setFormData(incident);
+      setFormData({
+        date: incident.date,
+        categoryOrIssue: incident.categoryOrIssue,
+        who: incident.who,
+        what: incident.what,
+        where: incident.where,
+        when: incident.when,
+        witnesses: incident.witnesses,
+        notes: incident.notes,
+      });
     }
     onOpenChange(false);
   };
@@ -74,112 +92,137 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
   if (!incident) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Incident</DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="date">Date *</Label>
-              <Input
-                id="date"
-                value={formData.date || ''}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                placeholder="e.g., 7/22 or Unknown"
-              />
+    <>
+      {/* Backdrop */}
+      {open && (
+        <div 
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+          onClick={() => handleCancel()}
+        />
+      )}
+      
+      {/* Modal Container */}
+      {open && (
+        <div className="fixed inset-0 z-50 grid place-items-center p-4">
+          <div className="w-full max-w-2xl bg-background rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto transform transition-all">
+            {/* Header */}
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-semibold text-foreground">Edit Incident</h2>
             </div>
-            <div>
-              <Label htmlFor="category">Category/Issue *</Label>
-              <Input
-                id="category"
-                value={formData.categoryOrIssue || ''}
-                onChange={(e) => setFormData({ ...formData, categoryOrIssue: e.target.value })}
-                placeholder="e.g., Harassment, Discrimination"
-              />
+
+            <div className="p-6 space-y-4">
+              {/* Date Field */}
+              <div className="space-y-2">
+                <Label htmlFor="date">Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date || ''}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                />
+              </div>
+
+              {/* Category Field */}
+              <div className="space-y-2">
+                <Label htmlFor="category">Category/Issue</Label>
+                <Input
+                  id="category"
+                  value={formData.categoryOrIssue || ''}
+                  onChange={(e) => setFormData({ ...formData, categoryOrIssue: e.target.value })}
+                  placeholder="Incident category"
+                />
+              </div>
+
+              {/* Who Field */}
+              <div className="space-y-2">
+                <Label htmlFor="who">Who</Label>
+                <Input
+                  id="who"
+                  value={formData.who || ''}
+                  onChange={(e) => setFormData({ ...formData, who: e.target.value })}
+                  placeholder="People involved"
+                />
+              </div>
+
+              {/* What Field */}
+              <div className="space-y-2">
+                <Label htmlFor="what">What</Label>
+                <Textarea
+                  id="what"
+                  value={formData.what || ''}
+                  onChange={(e) => setFormData({ ...formData, what: e.target.value })}
+                  placeholder="What happened"
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {/* Where Field */}
+              <div className="space-y-2">
+                <Label htmlFor="where">Where</Label>
+                <Input
+                  id="where"
+                  value={formData.where || ''}
+                  onChange={(e) => setFormData({ ...formData, where: e.target.value })}
+                  placeholder="Location"
+                />
+              </div>
+
+              {/* When Field */}
+              <div className="space-y-2">
+                <Label htmlFor="when">When</Label>
+                <Input
+                  id="when"
+                  value={formData.when || ''}
+                  onChange={(e) => setFormData({ ...formData, when: e.target.value })}
+                  placeholder="Time or timing details"
+                />
+              </div>
+
+              {/* Witnesses Field */}
+              <div className="space-y-2">
+                <Label htmlFor="witnesses">Witnesses</Label>
+                <Input
+                  id="witnesses"
+                  value={formData.witnesses || ''}
+                  onChange={(e) => setFormData({ ...formData, witnesses: e.target.value })}
+                  placeholder="Witnesses"
+                />
+              </div>
+
+              {/* Notes Field */}
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={formData.notes || ''}
+                  onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                  placeholder="Additional details"
+                  className="min-h-[100px]"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  onClick={handleCancel}
+                  disabled={isLoading}
+                  className="rounded-lg"
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className="rounded-lg"
+                >
+                  {isLoading ? 'Saving...' : 'Save Changes'}
+                </Button>
+              </div>
             </div>
-          </div>
-
-          <div>
-            <Label htmlFor="who">Who</Label>
-            <Input
-              id="who"
-              value={formData.who || ''}
-              onChange={(e) => setFormData({ ...formData, who: e.target.value })}
-              placeholder="Comma-separated names"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="what">What *</Label>
-            <Textarea
-              id="what"
-              value={formData.what || ''}
-              onChange={(e) => setFormData({ ...formData, what: e.target.value })}
-              placeholder="1-2 sentence neutral summary"
-              className="min-h-[80px]"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="where">Where</Label>
-              <Input
-                id="where"
-                value={formData.where || ''}
-                onChange={(e) => setFormData({ ...formData, where: e.target.value })}
-                placeholder="Location"
-              />
-            </div>
-            <div>
-              <Label htmlFor="when">When</Label>
-              <Input
-                id="when"
-                value={formData.when || ''}
-                onChange={(e) => setFormData({ ...formData, when: e.target.value })}
-                placeholder="Time of day"
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="witnesses">Witnesses</Label>
-            <Input
-              id="witnesses"
-              value={formData.witnesses || ''}
-              onChange={(e) => setFormData({ ...formData, witnesses: e.target.value })}
-              placeholder="Comma-separated witness names"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes || ''}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-              placeholder="Additional details"
-              className="min-h-[100px]"
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-4 border-t">
-            <Button 
-              onClick={handleSave}
-              disabled={isLoading}
-              className="bg-primary text-primary-foreground hover:bg-primary/90"
-            >
-              {isLoading ? 'Saving...' : 'Save Changes'}
-            </Button>
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel
-            </Button>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      )}
+    </>
   );
 };

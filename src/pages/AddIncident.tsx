@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getCategoryOptions } from '@/utils/incidentCategories';
 
 
 interface Person {
@@ -32,6 +34,7 @@ const AddIncident = () => {
     title: '',
     date: new Date().toISOString().split('T')[0],
     time: new Date().toTimeString().slice(0, 5),
+    category: '',
     what: '',
     where: '',
     why: '',
@@ -51,6 +54,7 @@ const AddIncident = () => {
     const newErrors: Record<string, string> = {};
     
     if (!formData.title.trim()) newErrors.title = 'Title is required';
+    if (!formData.category.trim()) newErrors.category = 'Category is required';
     if (!formData.what.trim()) newErrors.what = 'What happened is required';
     if (!formData.where.trim()) newErrors.where = 'Location is required';
     if (whoInvolved.filter(person => person.name.trim()).length === 0) {
@@ -146,7 +150,7 @@ const AddIncident = () => {
       time: formData.time,
       summary: formData.what, // Using 'what' as the main summary
       location: formData.where, // Enhanced: populate location field
-      category: undefined, // Enhanced: could be set later via categorization
+      category: formData.category, // Enhanced: now captured from form
       peopleInvolved: whoInvolved.filter(person => person.name.trim()).map(person => person.name), // Enhanced: extract names for quick display
       who: whoInvolved.filter(person => person.name.trim()),
       what: formData.what,
@@ -282,20 +286,44 @@ const AddIncident = () => {
                     required
                   />
                 </div>
-                <div className="space-y-1">
-                  <Label htmlFor="where">Location *</Label>
-                  <Input
-                    id="where"
-                    value={formData.where}
-                    onChange={(e) => handleInputChange('where', e.target.value)}
-                    placeholder="Where did this occur?"
-                    className={errors.where ? 'border-destructive' : ''}
-                  />
-                  {errors.where && <p className="text-xs text-destructive">{errors.where}</p>}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+                 <div className="space-y-1">
+                   <Label htmlFor="where">Location *</Label>
+                   <Input
+                     id="where"
+                     value={formData.where}
+                     onChange={(e) => handleInputChange('where', e.target.value)}
+                     placeholder="Where did this occur?"
+                     className={errors.where ? 'border-destructive' : ''}
+                   />
+                   {errors.where && <p className="text-xs text-destructive">{errors.where}</p>}
+                 </div>
+               </div>
+
+               <div className="space-y-2">
+                 <Label htmlFor="category">Category/Issue *</Label>
+                 <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                   <SelectTrigger className={errors.category ? 'border-destructive' : ''}>
+                     <SelectValue placeholder="Select incident category" />
+                   </SelectTrigger>
+                   <SelectContent className="max-h-[200px]">
+                     {getCategoryOptions().map((group) => (
+                       <div key={group.group}>
+                         <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                           🔹 {group.group}
+                         </div>
+                         {group.items.map((item) => (
+                           <SelectItem key={item} value={item} className="pl-4">
+                             {item}
+                           </SelectItem>
+                         ))}
+                       </div>
+                     ))}
+                   </SelectContent>
+                 </Select>
+                 {errors.category && <p className="text-sm text-destructive">{errors.category}</p>}
+               </div>
+             </CardContent>
+           </Card>
 
           {/* Who was involved */}
           {renderPersonSection(

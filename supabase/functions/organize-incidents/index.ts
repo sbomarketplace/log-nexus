@@ -60,7 +60,25 @@ async function callOpenAI(prompt: string) {
         role: "system", 
         content: `Extract workplace incident information into JSON. Return only clean JSON with these exact keys:
 - date: Date of incident (e.g., "7/22")
-- category: Type of incident (e.g., "Substance Abuse Allegation", "Harassment")  
+- category: Choose from these predefined categories only:
+  * Harassment (Verbal, Physical, Sexual)
+  * Discrimination (Race, Gender, Age, Disability, etc.)
+  * Retaliation
+  * Bullying / Intimidation
+  * Threats / Violence
+  * Substance Abuse / Drug or Alcohol Policy Violation
+  * Safety Violation (OSHA, PPE, Hazard Reporting)
+  * Attendance / Tardiness
+  * Insubordination / Refusal to Follow Instructions
+  * Policy Violation (General)
+  * Property Damage
+  * Equipment Misuse or Failure
+  * Unauthorized Access / Security Breach
+  * Theft / Missing Property
+  * Accident / Injury
+  * Performance Issue
+  * Miscommunication / Procedural Error
+  * Other (Specify in Notes)
 - who: Array of all people mentioned by name
 - what: Brief description of the main incident
 - where: Location where incident occurred
