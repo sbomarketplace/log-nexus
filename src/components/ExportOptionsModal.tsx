@@ -108,12 +108,12 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-md w-[calc(100vw-2rem)] max-h-[80vh] rounded-xl shadow-2xl border-2"
+        className="max-w-md w-[calc(100vw-2rem)] max-h-[85vh] rounded-xl shadow-2xl border-2 flex flex-col"
         role="dialog"
         aria-modal="true"
         aria-labelledby="export-title"
       >
-        <DialogHeader className="pb-4">
+        <DialogHeader className="pb-4 flex-shrink-0">
           <DialogTitle id="export-title" className="text-center">
             Export Incident
           </DialogTitle>
@@ -122,8 +122,10 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           </p>
         </DialogHeader>
         
-        {/* Incident Info */}
-        <div className="mb-4 p-3 bg-muted/30 rounded-lg">
+        {/* Main Content - Scrollable */}
+        <div className="flex-1 overflow-y-auto">
+          {/* Incident Info */}
+          <div className="mb-4 p-3 bg-muted/30 rounded-lg">
           <div className="flex flex-wrap gap-2 mb-2">
             <Badge variant="outline" className="text-xs">
               {formatDate(incident.date)}
@@ -170,9 +172,10 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
             );
           })}
         </div>
+        </div>
 
-        {/* Footer */}
-        <div className="flex justify-center pt-2 border-t">
+        {/* Footer - Fixed at bottom */}
+        <div className="flex justify-center pt-4 border-t flex-shrink-0">
           <Button 
             variant="ghost" 
             onClick={() => onOpenChange(false)}

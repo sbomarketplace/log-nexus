@@ -225,11 +225,80 @@ const Home = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
+    try {
+      // First try the original date
+      if (dateString && dateString !== 'Invalid Date') {
+        const date = new Date(dateString);
+        if (!isNaN(date.getTime())) {
+          return date.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric'
+          });
+        }
+      }
+      return 'No date';
+    } catch {
+      return 'No date';
+    }
+  };
+
+  const extractDateFromContent = (incident: OrganizedIncident): string => {
+    // If we have a valid date, use it
+    const formattedOriginal = formatDate(incident.date);
+    if (formattedOriginal !== 'No date') {
+      return formattedOriginal;
+    }
+
+    // Extract date from content using various patterns
+    const content = `${incident.what} ${incident.notes} ${incident.when}`.toLowerCase();
+    
+    // Look for month/day patterns like "aug 11", "august 11", "8/11", "8-11"
+    const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
+                       'july', 'august', 'september', 'october', 'november', 'december'];
+    const monthAbbr = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
+                      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
+    
+    // Try month name + day (e.g., "aug 11", "august 11")
+    for (let i = 0; i < monthNames.length; i++) {
+      const fullName = monthNames[i];
+      const abbr = monthAbbr[i];
+      
+      const fullMatch = content.match(new RegExp(`\\b${fullName}\\s+(\\d{1,2})\\b`, 'i'));
+      const abbrMatch = content.match(new RegExp(`\\b${abbr}\\s+(\\d{1,2})\\b`, 'i'));
+      
+      if (fullMatch || abbrMatch) {
+        const day = fullMatch ? fullMatch[1] : abbrMatch![1];
+        const currentYear = new Date().getFullYear();
+        const date = new Date(currentYear, i, parseInt(day));
+        
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+    }
+    
+    // Try numeric date patterns (M/D, M-D, M.D)
+    const numericMatch = content.match(/\b(\d{1,2})[\/\-\.](\d{1,2})\b/);
+    if (numericMatch) {
+      const month = parseInt(numericMatch[1]);
+      const day = parseInt(numericMatch[2]);
+      
+      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+        const currentYear = new Date().getFullYear();
+        const date = new Date(currentYear, month - 1, day);
+        
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      }
+    }
+    
+    return 'No date';
   };
 
   const getCategoryTagClass = (category: string) => {
@@ -472,7 +541,7 @@ const Home = () => {
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium shrink-0">
-                            {formatDate(incident.date)}
+                            {extractDateFromContent(incident)}
                           </Badge>
                           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${getCategoryTagClass(incident.categoryOrIssue)}`}>
                             {incident.categoryOrIssue}
