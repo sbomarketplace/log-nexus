@@ -219,25 +219,12 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[85vh] rounded-xl shadow-2xl border-2">
         <DialogHeader className="pb-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-primary" />
-              <DialogTitle className="text-lg font-semibold">
-                Emergency Contacts
-              </DialogTitle>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onOpenChange(false)}
-              className="h-8 w-8 p-0"
-            >
-              <X className="h-4 w-4" />
-            </Button>
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <DialogTitle className="text-lg font-semibold">
+              Emergency Contacts
+            </DialogTitle>
           </div>
-          <p className="text-xs text-muted-foreground">
-            Last updated: {new Date(data.updatedAt).toLocaleDateString()}
-          </p>
         </DialogHeader>
 
         {/* Search */}
