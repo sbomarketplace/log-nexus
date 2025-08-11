@@ -327,10 +327,6 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
             </Button>
           </div>
 
-          {/* Footer Note */}
-          <p className="text-xs text-gray-500 text-center mt-4">
-            You must accept to use ClearCase.
-          </p>
         </div>
       </div>
     </div>
