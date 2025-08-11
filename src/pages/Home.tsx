@@ -211,6 +211,21 @@ const Home = () => {
     });
   };
 
+  const getCategoryTagClass = (category: string) => {
+    const lowerCategory = category.toLowerCase();
+    if (lowerCategory.includes('safety') || lowerCategory.includes('accident') || lowerCategory.includes('injury')) {
+      return 'category-safety';
+    } else if (lowerCategory.includes('harassment') || lowerCategory.includes('discrimination') || lowerCategory.includes('bullying')) {
+      return 'category-harassment';
+    } else if (lowerCategory.includes('wrongful') || lowerCategory.includes('accusation') || lowerCategory.includes('false')) {
+      return 'category-accusation';
+    } else if (lowerCategory.includes('policy') || lowerCategory.includes('violation') || lowerCategory.includes('misconduct')) {
+      return 'category-policy';
+    } else {
+      return 'category-default';
+    }
+  };
+
 
 
   const handleExport = (incident: OrganizedIncident) => {
@@ -455,52 +470,52 @@ const Home = () => {
             </Card>
           ) : (
             filteredIncidents.map((incident) => (
-                <Card key={incident.id} className="border rounded-lg">
+                <Card key={incident.id} className="border rounded-lg shadow-sm hover:shadow-md transition-shadow">
                   <CardContent className="p-3">
                     <div className="space-y-2">
-                      {/* Enhanced header with date and category */}
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">
-                              {incident.date}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">
-                              {incident.categoryOrIssue}
-                            </Badge>
-                          </div>
-                          <h3 className="font-medium text-xs leading-tight mb-1 line-clamp-2">
-                            {incident.what.length > 100 ? `${incident.what.substring(0, 100)}...` : incident.what}
-                          </h3>
+                      {/* Compact header with date and gradient category tag */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium shrink-0">
+                            {formatDate(incident.date)}
+                          </Badge>
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${getCategoryTagClass(incident.categoryOrIssue)}`}>
+                            {incident.categoryOrIssue}
+                          </span>
                         </div>
                       </div>
 
-                      {/* Created timestamp */}
-                      <div className="text-[10px] text-muted-foreground opacity-75">
-                        Created: {new Date(incident.createdAt).toLocaleDateString('en-US', {
+                      {/* Title/Description - compact and clean */}
+                      <div className="min-h-[2.5rem]">
+                        <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2">
+                          {incident.what}
+                        </h3>
+                      </div>
+
+                      {/* Created timestamp - smaller and lighter */}
+                      <div className="text-[9px] text-muted-foreground">
+                        Created {new Date(incident.createdAt).toLocaleDateString('en-US', {
                           month: 'short',
                           day: 'numeric',
                           hour: 'numeric',
                           minute: '2-digit'
                         })}
                         {incident.updatedAt !== incident.createdAt && (
-                          <span className="ml-2">
-                            • Updated: {new Date(incident.updatedAt).toLocaleDateString('en-US', {
+                          <span className="ml-1">
+                            • Updated {new Date(incident.updatedAt).toLocaleDateString('en-US', {
                               month: 'short',
-                              day: 'numeric',
-                              hour: 'numeric',
-                              minute: '2-digit'
+                              day: 'numeric'
                             })}
                           </span>
                         )}
                       </div>
 
-                      {/* Action buttons */}
-                      <div className="flex gap-2 pt-1 justify-center">
+                      {/* Compact action bar */}
+                      <div className="flex gap-1.5 pt-1">
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-[10px] px-2 py-1"
+                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
                           onClick={() => setViewIncident(incident)}
                         >
                           View
@@ -508,7 +523,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-[10px] px-2 py-1"
+                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
                           onClick={() => setEditIncident(incident)}
                         >
                           Edit
@@ -516,7 +531,7 @@ const Home = () => {
                         <Button 
                           variant="outline" 
                           size="sm" 
-                          className="text-[10px] px-2 py-1"
+                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
                           onClick={() => handleExport(incident)}
                         >
                           Export
@@ -524,7 +539,7 @@ const Home = () => {
                         <Button 
                           variant="destructive" 
                           size="sm" 
-                          className="text-[10px] px-2 py-1"
+                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
                           onClick={() => setDeleteId(incident.id)}
                         >
                           Delete
