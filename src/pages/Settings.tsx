@@ -137,6 +137,16 @@ const Settings = () => {
           </CardContent>
         </Card>
 
+        {/* Footer Information */}
+        <div className="text-center pt-8 pb-4 border-t border-border mt-8">
+          <p className="text-xs text-muted-foreground">
+            © SBO Marketplace 2025
+          </p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Version 1.0.0 • ClearCase Workplace Incident Manager
+          </p>
+        </div>
+
         {/* Modals */}
         <ExportModal
           open={exportModal}

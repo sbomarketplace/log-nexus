@@ -57,20 +57,26 @@ export const Layout = ({ children }: LayoutProps) => {
       </main>
 
       {/* Mobile navigation */}
-      <div className="md:hidden fixed bottom-8 left-0 right-0 bg-card border-t border-border z-40">
-        <div className="flex justify-around py-2">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border/50 z-40 rounded-t-lg shadow-lg">
+        <div className="flex justify-around items-center px-4 py-3">
           {navItems.map(({ path, icon: Icon, label }) => (
             <Link
               key={path}
               to={path}
-              className={`flex flex-col items-center px-3 py-2 rounded-md text-xs transition-colors ${
+              className={`flex flex-col items-center justify-center min-h-[44px] px-2 transition-colors ${
                 location.pathname === path
                   ? 'text-primary'
                   : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Icon size={20} />
-              <span className="mt-1">{label}</span>
+              <Icon size={24} className="flex-shrink-0" />
+              <span className="text-xs font-medium mt-1.5 leading-none text-center">
+                {label}
+              </span>
+              {/* Active indicator dot */}
+              {location.pathname === path && (
+                <div className="w-1 h-1 bg-primary rounded-full mt-1.5"></div>
+              )}
             </Link>
           ))}
         </div>
