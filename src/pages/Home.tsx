@@ -130,6 +130,17 @@ const Home = () => {
     loadIncidents();
   };
 
+  const handleOrganizeCompleteWithScroll = () => {
+    loadIncidents();
+    // Scroll to incident reports section after modal closes
+    setTimeout(() => {
+      const incidentSection = document.querySelector('[data-incident-reports-section]');
+      if (incidentSection) {
+        incidentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
+  };
+
   const handleQuickNotesOrganize = async () => {
     setQuickNotesError('');
     
@@ -171,6 +182,14 @@ const Home = () => {
         toast({
           title: "Notes organized.",
         });
+
+        // Scroll to incident reports section after organizing
+        setTimeout(() => {
+          const incidentSection = document.querySelector('[data-incident-reports-section]');
+          if (incidentSection) {
+            incidentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
 
         // Navigate to the first incident's details
         if (incidentsToSave.length > 0) {
@@ -406,7 +425,7 @@ const Home = () => {
 
         {/* Section Title and Search/Filter Controls */}
         {organizedIncidents.length > 0 && (
-          <div className="mb-6 space-y-4">
+          <div className="mb-6 space-y-4" data-incident-reports-section>
             {/* Section Title */}
             <div className="space-y-1 text-center">
               <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
