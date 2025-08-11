@@ -408,7 +408,7 @@ const Home = () => {
         {organizedIncidents.length > 0 && (
           <div className="mb-6 space-y-4">
             {/* Section Title */}
-            <div className="space-y-1">
+            <div className="space-y-1 text-center">
               <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
               <p className="text-sm text-muted-foreground">View, edit, export, or delete any past incident reports</p>
             </div>
