@@ -158,4 +158,18 @@ All colors MUST be HSL.
   .category-default {
     @apply bg-gradient-to-r from-gray-500 to-gray-600 text-white;
   }
+
+  /* Overflow and word breaking utilities */
+  .break-words {
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .break-all {
+    word-break: break-all;
+  }
+
+  .phone-link {
+    @apply text-primary hover:underline transition-colors cursor-pointer;
+  }
 }

@@ -24,17 +24,22 @@ const Resources = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    workplace: true,
-    government: true,
-    safety: true,
-    advocacy: true
+    // All sections start closed by default
+    workplace: false,
+    government: false,
+    safety: false,
+    advocacy: false
   });
 
   const toggleSection = (section: string) => {
-    setOpenSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
+    setOpenSections(prev => {
+      // Close all other sections and toggle this one (accordion behavior)
+      const newState: Record<string, boolean> = {};
+      Object.keys(prev).forEach(key => {
+        newState[key] = key === section ? !prev[section] : false;
+      });
+      return newState;
+    });
   };
 
   const openResourceModal = (resource: any) => {
@@ -241,10 +246,10 @@ const Resources = () => {
                               }
                             }}
                           >
-                            <CardHeader className="pb-2">
+                            <CardHeader className="pb-2 overflow-hidden">
                               <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <CardTitle className="text-sm font-medium leading-tight">
+                                <div className="flex-1 min-w-0">
+                                  <CardTitle className="text-sm font-medium leading-tight break-words">
                                     {resource.title}
                                   </CardTitle>
                                 </div>
@@ -254,7 +259,7 @@ const Resources = () => {
                               </div>
                             </CardHeader>
                             <CardContent className="pt-0">
-                              <p className="text-xs text-muted-foreground line-clamp-2">
+                              <p className="text-xs text-muted-foreground line-clamp-2 break-words">
                                 {resource.description}
                               </p>
                             </CardContent>
