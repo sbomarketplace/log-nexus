@@ -270,14 +270,6 @@ const Resources = () => {
         </div>
 
 
-        {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground pt-4 border-t">
-          Last Updated: {new Date().toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long', 
-            day: 'numeric' 
-          })}
-        </div>
 
         {/* Resource Modal */}
         <ResourceModal
