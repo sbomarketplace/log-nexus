@@ -52,7 +52,17 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
   useEffect(() => {
     if (open) {
       loadData();
+      // Lock background scroll
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore background scroll
+      document.body.style.overflow = '';
     }
+    
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [open]);
 
   const loadData = () => {
@@ -217,291 +227,317 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[85vh] rounded-xl shadow-2xl border-2">
-        <DialogHeader className="pb-4">
+      <DialogContent className="cc-modal max-w-md w-[calc(100vw-2rem)] max-h-[min(72vh,720px)] rounded-xl shadow-2xl border-2 flex flex-col overflow-hidden p-0">
+        {/* Modal Header - Fixed */}
+        <header className="cc-modal__header flex-shrink-0 px-4 py-3 border-b border-border bg-background">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-primary" />
             <DialogTitle className="text-lg font-semibold">
               Emergency Contacts
             </DialogTitle>
           </div>
-        </DialogHeader>
+        </header>
 
-        {/* Search */}
-        <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search contacts..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-sm"
-          />
-        </div>
+        {/* Modal Body - Scrollable */}
+        <section className="cc-modal__body flex-1 overflow-y-auto px-4 py-3 bg-background" style={{ WebkitOverflowScrolling: 'touch' }}>
+          {/* Search */}
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search contacts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 text-sm"
+            />
+          </div>
 
-        {/* Content */}
-        <div className="space-y-3 overflow-y-auto max-h-[45vh] px-1">
-          {Object.entries(filteredRoles).map(([roleId, role]) => (
-            <div key={roleId} className="border border-border rounded-lg">
-              <Collapsible
-                open={expandedRoles[roleId]}
-                onOpenChange={() => toggleRole(roleId)}
-              >
-                <CollapsibleTrigger asChild>
-                  <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors rounded-t-lg">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-sm">{role.name}</h3>
-                      <Badge variant="secondary" className="text-xs">
-                        {role.contacts.length}
-                      </Badge>
-                    </div>
-                    <ChevronDown 
-                      className={`h-4 w-4 transition-transform duration-200 ${
-                        expandedRoles[roleId] ? 'rotate-180' : ''
-                      }`} 
-                    />
-                  </div>
-                </CollapsibleTrigger>
-
-                <CollapsibleContent>
-                  <div className="p-3 pt-0 space-y-2">
-                    {role.contacts.length === 0 ? (
-                      <div className="text-center py-4">
-                        <p className="text-xs text-muted-foreground mb-2">
-                          No contacts added yet
-                        </p>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => startAddContact(roleId)}
-                          className="h-8 text-xs"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add Contact
-                        </Button>
+          {/* Roles and Contacts */}
+          <div className="space-y-3 mb-4">
+            {Object.entries(filteredRoles).map(([roleId, role]) => (
+              <div key={roleId} className="border border-border rounded-lg">
+                <Collapsible
+                  open={expandedRoles[roleId]}
+                  onOpenChange={() => toggleRole(roleId)}
+                >
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-center justify-between p-3 cursor-pointer hover:bg-accent/50 transition-colors rounded-t-lg">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-medium text-sm">{role.name}</h3>
+                        <Badge variant="secondary" className="text-xs">
+                          {role.contacts.length}
+                        </Badge>
                       </div>
-                    ) : (
-                      <>
-                        {role.contacts
-                          .sort((a, b) => {
-                            if (a.primary && !b.primary) return -1;
-                            if (!a.primary && b.primary) return 1;
-                            return (a.priority || 1) - (b.priority || 1);
-                          })
-                          .map((contact) => (
-                            <div
-                              key={contact.id}
-                              className="flex items-center justify-between p-2 bg-background border border-border rounded-lg"
-                            >
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <h4 className="font-medium text-sm truncate">
-                                    {contact.name}
-                                  </h4>
-                                  {contact.primary && (
-                                    <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                      <ChevronDown 
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          expandedRoles[roleId] ? 'rotate-180' : ''
+                        }`} 
+                      />
+                    </div>
+                  </CollapsibleTrigger>
+
+                  <CollapsibleContent>
+                    <div className="p-3 pt-0 space-y-2">
+                      {role.contacts.length === 0 ? (
+                        <div className="text-center py-4">
+                          <p className="text-xs text-muted-foreground mb-2">
+                            No contacts added yet
+                          </p>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startAddContact(roleId)}
+                            className="h-8 text-xs"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Contact
+                          </Button>
+                        </div>
+                      ) : (
+                        <>
+                          {role.contacts
+                            .sort((a, b) => {
+                              if (a.primary && !b.primary) return -1;
+                              if (!a.primary && b.primary) return 1;
+                              return (a.priority || 1) - (b.priority || 1);
+                            })
+                            .map((contact) => (
+                              <div
+                                key={contact.id}
+                                className="flex items-center justify-between p-2 bg-background border border-border rounded-lg"
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <h4 className="font-medium text-sm truncate">
+                                      {contact.name}
+                                    </h4>
+                                    {contact.primary && (
+                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                    )}
+                                  </div>
+                                  {contact.title && (
+                                    <p className="text-xs text-muted-foreground truncate">
+                                      {contact.title}
+                                    </p>
                                   )}
+                                  <div className="flex items-center gap-3 mt-1">
+                                    {contact.phone && (
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleCall(contact.phone!)}
+                                          className="h-6 w-6 p-0 hover:bg-primary/10"
+                                        >
+                                          <Phone className="h-3 w-3 text-primary" />
+                                        </Button>
+                                        <button
+                                          onClick={() => copyToClipboard(contact.phone!, 'Phone')}
+                                          className="text-xs text-muted-foreground hover:text-foreground"
+                                        >
+                                          {formatPhone(contact.phone)}
+                                        </button>
+                                      </div>
+                                    )}
+                                    {contact.email && (
+                                      <div className="flex items-center gap-1">
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => handleEmail(contact.email!)}
+                                          className="h-6 w-6 p-0 hover:bg-primary/10"
+                                        >
+                                          <Mail className="h-3 w-3 text-primary" />
+                                        </Button>
+                                        <button
+                                          onClick={() => copyToClipboard(contact.email!, 'Email')}
+                                          className="text-xs text-muted-foreground hover:text-foreground truncate max-w-[100px]"
+                                        >
+                                          {contact.email}
+                                        </button>
+                                      </div>
+                                    )}
+                                  </div>
                                 </div>
-                                {contact.title && (
-                                  <p className="text-xs text-muted-foreground truncate">
-                                    {contact.title}
-                                  </p>
-                                )}
-                                <div className="flex items-center gap-3 mt-1">
-                                  {contact.phone && (
-                                    <div className="flex items-center gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleCall(contact.phone!)}
-                                        className="h-6 w-6 p-0 hover:bg-primary/10"
-                                      >
-                                        <Phone className="h-3 w-3 text-primary" />
-                                      </Button>
-                                      <button
-                                        onClick={() => copyToClipboard(contact.phone!, 'Phone')}
-                                        className="text-xs text-muted-foreground hover:text-foreground"
-                                      >
-                                        {formatPhone(contact.phone)}
-                                      </button>
-                                    </div>
-                                  )}
-                                  {contact.email && (
-                                    <div className="flex items-center gap-1">
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleEmail(contact.email!)}
-                                        className="h-6 w-6 p-0 hover:bg-primary/10"
-                                      >
-                                        <Mail className="h-3 w-3 text-primary" />
-                                      </Button>
-                                      <button
-                                        onClick={() => copyToClipboard(contact.email!, 'Email')}
-                                        className="text-xs text-muted-foreground hover:text-foreground truncate max-w-[100px]"
-                                      >
-                                        {contact.email}
-                                      </button>
-                                    </div>
-                                  )}
+                                
+                                <div className="flex items-center gap-1 ml-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => togglePrimary(roleId, contact.id)}
+                                    className="h-7 w-7 p-0"
+                                    title={contact.primary ? 'Remove primary' : 'Make primary'}
+                                  >
+                                    {contact.primary ? (
+                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
+                                    ) : (
+                                      <StarOff className="h-3 w-3 text-muted-foreground" />
+                                    )}
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => startEditContact(roleId, contact)}
+                                    className="h-7 w-7 p-0"
+                                  >
+                                    <Edit2 className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => deleteContact(roleId, contact.id, contact.name)}
+                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
                                 </div>
                               </div>
-                              
-                              <div className="flex items-center gap-1 ml-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => togglePrimary(roleId, contact.id)}
-                                  className="h-7 w-7 p-0"
-                                  title={contact.primary ? 'Remove primary' : 'Make primary'}
-                                >
-                                  {contact.primary ? (
-                                    <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                                  ) : (
-                                    <StarOff className="h-3 w-3 text-muted-foreground" />
-                                  )}
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => startEditContact(roleId, contact)}
-                                  className="h-7 w-7 p-0"
-                                >
-                                  <Edit2 className="h-3 w-3" />
-                                </Button>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => deleteContact(roleId, contact.id, contact.name)}
-                                  className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => startAddContact(roleId)}
-                          className="w-full h-8 text-xs mt-2"
-                        >
-                          <Plus className="h-3 w-3 mr-1" />
-                          Add Contact
-                        </Button>
-                      </>
+                            ))}
+                          
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => startAddContact(roleId)}
+                            className="w-full h-8 text-xs mt-2"
+                          >
+                            <Plus className="h-3 w-3 mr-1" />
+                            Add Contact
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))}
+          </div>
+
+          {/* Add/Edit Contact Form - Inline within modal body */}
+          {editingContact && (
+            <div className="border-t border-border pt-4 mt-4">
+              <fieldset className="space-y-3">
+                <legend className="font-medium text-sm mb-3">
+                  {editingContact.contact ? 'Edit Contact' : 'Add Contact'}
+                </legend>
+                
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="name" className="text-xs font-medium">
+                      Full Name *
+                    </Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      className="h-10 text-sm"
+                      placeholder="Enter full name"
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        }, 300);
+                      }}
+                    />
+                    {errors.name && (
+                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.name}</p>
                     )}
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          ))}
-        </div>
-
-        {/* Add/Edit Contact Form */}
-        {editingContact && (
-          <>
-            <Separator />
-            <div className="space-y-3">
-              <h3 className="font-medium text-sm">
-                {editingContact.contact ? 'Edit Contact' : 'Add Contact'}
-              </h3>
-              
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label htmlFor="name" className="text-xs font-medium">
-                    Full Name *
-                  </Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="h-8 text-sm"
-                    placeholder="Enter full name"
-                  />
-                  {errors.name && (
-                    <p className="text-xs text-destructive mt-1">{errors.name}</p>
-                  )}
+                  
+                  <div>
+                    <Label htmlFor="title" className="text-xs font-medium">
+                      Title/Role
+                    </Label>
+                    <Input
+                      id="title"
+                      value={formData.title}
+                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                      className="h-10 text-sm"
+                      placeholder="Job title"
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        }, 300);
+                      }}
+                    />
+                  </div>
                 </div>
-                
-                <div>
-                  <Label htmlFor="title" className="text-xs font-medium">
-                    Title/Role
-                  </Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    className="h-8 text-sm"
-                    placeholder="Job title"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label htmlFor="phone" className="text-xs font-medium">
+                      Phone
+                    </Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          setFormData(prev => ({ ...prev, phone: formatPhone(e.target.value) }));
+                        }
+                      }}
+                      className="h-10 text-sm"
+                      placeholder="(555) 123-4567"
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        }, 300);
+                      }}
+                    />
+                    {errors.phone && (
+                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.phone}</p>
+                    )}
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email" className="text-xs font-medium">
+                      Email
+                    </Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                      className="h-10 text-sm"
+                      placeholder="email@example.com"
+                      onFocus={(e) => {
+                        setTimeout(() => {
+                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                        }, 300);
+                      }}
+                    />
+                    {errors.email && (
+                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.email}</p>
+                    )}
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="phone" className="text-xs font-medium">
-                    Phone
+                  <Label htmlFor="notes" className="text-xs font-medium">
+                    Notes (optional)
                   </Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                    onBlur={(e) => {
-                      if (e.target.value) {
-                        setFormData(prev => ({ ...prev, phone: formatPhone(e.target.value) }));
-                      }
+                  <Textarea
+                    id="notes"
+                    value={formData.notes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                    className="h-16 max-h-[120px] text-sm resize-none"
+                    placeholder="Additional notes (120 chars max)"
+                    maxLength={120}
+                    onFocus={(e) => {
+                      setTimeout(() => {
+                        e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                      }, 300);
                     }}
-                    className="h-8 text-sm"
-                    placeholder="(555) 123-4567"
                   />
-                  {errors.phone && (
-                    <p className="text-xs text-destructive mt-1">{errors.phone}</p>
-                  )}
+                  <div className="flex justify-between mt-1">
+                    {errors.notes && (
+                      <p className="text-xs text-destructive leading-tight">{errors.notes}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground ml-auto">
+                      {formData.notes.length}/120
+                    </p>
+                  </div>
                 </div>
-                
-                <div>
-                  <Label htmlFor="email" className="text-xs font-medium">
-                    Email
-                  </Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    className="h-8 text-sm"
-                    placeholder="email@example.com"
-                  />
-                  {errors.email && (
-                    <p className="text-xs text-destructive mt-1">{errors.email}</p>
-                  )}
-                </div>
-              </div>
 
-              <div>
-                <Label htmlFor="notes" className="text-xs font-medium">
-                  Notes (optional)
-                </Label>
-                <Textarea
-                  id="notes"
-                  value={formData.notes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                  className="h-16 text-sm resize-none"
-                  placeholder="Additional notes (120 chars max)"
-                  maxLength={120}
-                />
-                <div className="flex justify-between mt-1">
-                  {errors.notes && (
-                    <p className="text-xs text-destructive">{errors.notes}</p>
-                  )}
-                  <p className="text-xs text-muted-foreground ml-auto">
-                    {formData.notes.length}/120
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -514,27 +550,32 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
                     Make primary contact
                   </Label>
                 </div>
-                
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingContact(null)}
-                    className="h-8 text-xs"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={saveContact}
-                    className="h-8 text-xs"
-                  >
-                    Save
-                  </Button>
-                </div>
-              </div>
+              </fieldset>
             </div>
-          </>
+          )}
+        </section>
+
+        {/* Modal Footer - Sticky */}
+        {editingContact && (
+          <footer className="cc-modal__footer flex-shrink-0 px-4 py-3 border-t border-border bg-background sticky bottom-0" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
+            <div className="flex gap-2 justify-end">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setEditingContact(null)}
+                className="h-10 text-sm px-6"
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                onClick={saveContact}
+                className="h-10 text-sm px-6"
+              >
+                Save
+              </Button>
+            </div>
+          </footer>
         )}
       </DialogContent>
     </Dialog>
