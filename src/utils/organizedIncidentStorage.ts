@@ -15,6 +15,11 @@ export interface OrganizedIncident {
   files?: string[];
   createdAt: string;
   updatedAt: string;
+  // Enhanced date fields
+  canonicalEventDate?: string; // ISO 8601 string
+  originalEventDateText?: string; // Original input
+  // Category consistency
+  incidentKey?: string; // For duplicate detection
 }
 
 export interface OrganizedIncidentStorage {

@@ -20,6 +20,7 @@ import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
+import { processIncident } from '@/services/incidentProcessor';
 
 import jsPDF from 'jspdf';
 
@@ -157,20 +158,28 @@ const Home = () => {
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
       } else {
-        // Save all organized incidents
-        const incidentsToSave = results.map(incident => ({
-          id: crypto.randomUUID(),
-          date: incident.date,
-          categoryOrIssue: incident.categoryOrIssue,
-          who: incident.who,
-          what: incident.what,
-          where: incident.where,
-          when: incident.when,
-          witnesses: incident.witnesses,
-          notes: incident.notes,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }));
+        // Save all organized incidents with processing
+        const incidentsToSave = results.map(incident => {
+          const baseIncident: OrganizedIncident = {
+            id: crypto.randomUUID(),
+            date: incident.date,
+            categoryOrIssue: incident.categoryOrIssue,
+            who: incident.who,
+            what: incident.what,
+            where: incident.where,
+            when: incident.when,
+            witnesses: incident.witnesses,
+            notes: incident.notes,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+          
+          // Process incident for enhanced features
+          return processIncident(baseIncident, {
+            authorPerspective: 'first_person',
+            rawNotes: quickNotes
+          });
+        });
         
         organizedIncidentStorage.saveMultiple(incidentsToSave);
         
@@ -224,92 +233,74 @@ const Home = () => {
     }
   };
 
-  const formatDate = (dateString: string) => {
-    try {
-      // First try the original date
-      if (dateString && dateString !== 'Invalid Date') {
-        // Handle various date formats including M/D, MM/DD, etc.
-        let date;
+  const formatDate = (incident: OrganizedIncident): string => {
+    // Use canonical date if available
+    if (incident.canonicalEventDate) {
+      try {
+        const date = new Date(incident.canonicalEventDate);
+        const hasTime = date.getHours() !== 12 || date.getMinutes() !== 0;
         
-        // If it looks like M/D or MM/DD format, parse it differently
-        if (/^\d{1,2}\/\d{1,2}$/.test(dateString.trim())) {
-          const [month, day] = dateString.split('/').map(num => parseInt(num));
-          const currentYear = new Date().getFullYear();
-          date = new Date(currentYear, month - 1, day);
-        } else {
-          date = new Date(dateString);
-        }
-        
-        if (!isNaN(date.getTime())) {
+        if (hasTime) {
           return date.toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
-            year: 'numeric'
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit'
           });
         }
+        
+        return date.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+      } catch {
+        // Fall through to legacy formatting
       }
+    }
+
+    const dateString = incident.date;
+    if (!dateString || dateString === 'No date' || dateString.trim() === '') {
       return 'No date';
+    }
+    
+    try {
+      // Handle various date formats
+      let date: Date;
+      
+      // Check if it's already in a good format like "Aug 11, 2024"
+      if (dateString.match(/^[A-Za-z]{3}\s+\d{1,2},\s+\d{4}$/)) {
+        return dateString;
+      }
+      
+      // Handle MM/DD/YYYY or similar formats
+      if (dateString.match(/^\d{1,2}\/\d{1,2}(\/\d{2,4})?$/)) {
+        const parts = dateString.split('/');
+        const currentYear = new Date().getFullYear();
+        const year = parts[2] ? (parts[2].length === 2 ? 2000 + parseInt(parts[2]) : parseInt(parts[2])) : currentYear;
+        date = new Date(year, parseInt(parts[0]) - 1, parseInt(parts[1]));
+      } else {
+        date = new Date(dateString);
+      }
+      
+      if (isNaN(date.getTime())) {
+        return 'No date';
+      }
+      
+      return date.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      });
     } catch {
       return 'No date';
     }
   };
 
   const extractDateFromContent = (incident: OrganizedIncident): string => {
-    // If we have a valid date, use it
-    const formattedOriginal = formatDate(incident.date);
-    if (formattedOriginal !== 'No date') {
-      return formattedOriginal;
-    }
-
-    // Extract date from content using various patterns
-    const content = `${incident.what} ${incident.notes} ${incident.when}`.toLowerCase();
-    
-    // Look for month/day patterns like "aug 11", "august 11", "8/11", "8-11"
-    const monthNames = ['january', 'february', 'march', 'april', 'may', 'june', 
-                       'july', 'august', 'september', 'october', 'november', 'december'];
-    const monthAbbr = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 
-                      'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-    
-    // Try month name + day (e.g., "aug 11", "august 11")
-    for (let i = 0; i < monthNames.length; i++) {
-      const fullName = monthNames[i];
-      const abbr = monthAbbr[i];
-      
-      const fullMatch = content.match(new RegExp(`\\b${fullName}\\s+(\\d{1,2})\\b`, 'i'));
-      const abbrMatch = content.match(new RegExp(`\\b${abbr}\\s+(\\d{1,2})\\b`, 'i'));
-      
-      if (fullMatch || abbrMatch) {
-        const day = fullMatch ? fullMatch[1] : abbrMatch![1];
-        const currentYear = new Date().getFullYear();
-        const date = new Date(currentYear, i, parseInt(day));
-        
-        return date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-      }
-    }
-    
-    // Try numeric date patterns (M/D, M-D, M.D)
-    const numericMatch = content.match(/\b(\d{1,2})[\/\-\.](\d{1,2})\b/);
-    if (numericMatch) {
-      const month = parseInt(numericMatch[1]);
-      const day = parseInt(numericMatch[2]);
-      
-      if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
-        const currentYear = new Date().getFullYear();
-        const date = new Date(currentYear, month - 1, day);
-        
-        return date.toLocaleDateString('en-US', {
-          month: 'short',
-          day: 'numeric',
-          year: 'numeric'
-        });
-      }
-    }
-    
-    return 'No date';
+    // Use the new formatDate function that handles canonical dates
+    return formatDate(incident);
   };
 
   const getCategoryTagClass = (category: string) => {
