@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { formatDisplayDate } from '@/utils/dateParser';
+import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -19,6 +20,12 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
     : incident.date !== 'No date' 
       ? incident.date 
       : 'No date';
+
+  // Function to render text with clickable phone numbers
+  const renderTextWithPhoneLinks = (text: string) => {
+    const htmlWithPhoneLinks = makePhoneNumbersClickable(text);
+    return <span dangerouslySetInnerHTML={{ __html: htmlWithPhoneLinks }} />;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -71,60 +78,60 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
               <div className="space-y-5">
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Who</h4>
-                  <p className="text-sm leading-relaxed">{incident.who}</p>
+                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.who)}</p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">What</h4>
-                  <p className="text-sm leading-relaxed">{incident.what}</p>
+                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.what)}</p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Where</h4>
-                  <p className="text-sm leading-relaxed">{incident.where}</p>
+                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.where)}</p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">When</h4>
-                  <p className="text-sm leading-relaxed">{incident.when}</p>
+                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.when)}</p>
                 </div>
 
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Witnesses</h4>
-                  <p className="text-sm leading-relaxed">{incident.witnesses}</p>
+                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.witnesses)}</p>
                 </div>
 
                 {incident.timeline && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground mb-2">Timeline</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{incident.timeline}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.timeline)}</p>
                   </div>
                 )}
 
                 {incident.requests && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground mb-2">Requests</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{incident.requests}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.requests)}</p>
                   </div>
                 )}
 
                 {incident.policy && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground mb-2">Policy</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{incident.policy}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.policy)}</p>
                   </div>
                 )}
 
                 {incident.evidence && (
                   <div>
                     <h4 className="font-medium text-sm text-muted-foreground mb-2">Evidence</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{incident.evidence}</p>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.evidence)}</p>
                   </div>
                 )}
 
                 <div>
                   <h4 className="font-medium text-sm text-muted-foreground mb-2">Incident Summary</h4>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{incident.notes}</p>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.notes)}</p>
                 </div>
               </div>
 

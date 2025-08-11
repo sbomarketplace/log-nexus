@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ExternalLink, Phone, Globe } from 'lucide-react';
+import { PhoneLink } from '@/components/PhoneLink';
 
 interface ResourceModalProps {
   open: boolean;
@@ -33,75 +34,100 @@ export const ResourceModal: React.FC<ResourceModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[80vh] rounded-xl shadow-2xl border-2">
-        <DialogHeader className="pb-4">
-          <DialogTitle className="text-center text-lg font-semibold">
-            {resource.title}
-          </DialogTitle>
-          <div className="text-center">
+      <DialogContent 
+        className="fixed left-[50%] top-[50%] z-50 w-[92%] max-w-[520px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border bg-background p-0 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:max-w-[600px]"
+        onPointerDownOutside={(e) => {
+          // Allow closing on outside click unless user is scrolling content
+          const target = e.target as Element;
+          const scrollContainer = target.closest('[data-scroll-container]');
+          if (!scrollContainer) {
+            onOpenChange(false);
+          }
+        }}
+      >
+        <div className="flex max-h-[85vh] flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b px-6 py-4 sm:px-8">
+            <DialogTitle className="text-lg font-semibold text-center flex-1">
+              {resource.title}
+            </DialogTitle>
+          </div>
+          
+          <div className="text-center px-6 py-2 border-b">
             <span className="text-xs bg-secondary text-secondary-foreground px-2 py-1 rounded">
               {resource.type}
             </span>
           </div>
-        </DialogHeader>
         
-        <div className="space-y-4 overflow-y-auto max-h-[50vh] px-1">
-          <div>
-            <h4 className="font-medium text-sm mb-2">Description</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {resource.fullDescription}
-            </p>
-          </div>
-          
-          <Separator />
-          
-          <div>
-            <h4 className="font-medium text-sm mb-2">Purpose</h4>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              {resource.purpose}
-            </p>
-          </div>
-          
-          {(resource.website || resource.phone) && (
-            <>
-              <Separator />
-              <div className="space-y-3">
-                <h4 className="font-medium text-sm">Contact Information</h4>
-                {resource.website && (
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Website:</span>
-                    <Button
-                      variant="link"
-                      className="p-0 h-auto text-xs text-primary hover:underline"
-                      onClick={handleWebsiteClick}
-                    >
-                      {resource.website.replace(/^https?:\/\//, '')}
-                      <ExternalLink className="h-3 w-3 ml-1" />
-                    </Button>
-                  </div>
-                )}
-                {resource.phone && (
-                  <div className="flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-primary" />
-                    <span className="text-xs text-muted-foreground">Phone:</span>
-                    <span className="text-xs font-medium">{resource.phone}</span>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
-        
-        <div className="pt-4 border-t">
-          <Button 
-            variant="outline" 
-            onClick={() => onOpenChange(false)}
-            className="w-full"
-            size="sm"
+          {/* Scrollable Content */}
+          <div 
+            className="flex-1 overflow-y-auto px-6 py-4 sm:px-8 space-y-4" 
+            data-scroll-container
           >
-            Close
-          </Button>
+            <div>
+              <h4 className="font-medium text-sm mb-2">Description</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed break-words">
+                {resource.fullDescription}
+              </p>
+            </div>
+            
+            <Separator />
+            
+            <div>
+              <h4 className="font-medium text-sm mb-2">Purpose</h4>
+              <p className="text-sm text-muted-foreground leading-relaxed break-words">
+                {resource.purpose}
+              </p>
+            </div>
+            
+            {(resource.website || resource.phone) && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Contact Information</h4>
+                  {resource.website && (
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Globe className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground flex-shrink-0">Website:</span>
+                      <Button
+                        variant="link"
+                        className="p-0 h-auto text-sm text-primary hover:underline min-w-0 truncate"
+                        onClick={handleWebsiteClick}
+                      >
+                        <span className="truncate">
+                          {resource.website.replace(/^https?:\/\//, '')}
+                        </span>
+                        <ExternalLink className="h-3 w-3 ml-1 flex-shrink-0" />
+                      </Button>
+                    </div>
+                  )}
+                  {resource.phone && (
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+                      <span className="text-sm text-muted-foreground flex-shrink-0">Phone:</span>
+                      <PhoneLink 
+                        phone={resource.phone} 
+                        className="text-sm font-medium text-primary hover:underline transition-colors break-all"
+                      />
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="border-t px-6 py-4 sm:px-8">
+            <div className="flex justify-end">
+              <Button 
+                variant="outline" 
+                onClick={() => onOpenChange(false)}
+                className="rounded-lg"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

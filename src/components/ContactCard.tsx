@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Phone, Mail, Edit2, Trash2, Star } from 'lucide-react';
 import { Contact } from '@/utils/contactsStorage';
+import { PhoneLink } from '@/components/PhoneLink';
 
 interface ContactCardProps {
   contact: Contact;
@@ -42,7 +43,7 @@ export const ContactCard = ({
   };
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2.5 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-2.5 hover:shadow-md transition-shadow duration-200 overflow-hidden">
       {/* Header Row - Name and Title */}
       <div className="flex items-start justify-between mb-2">
         <div className="flex-1 min-w-0">
@@ -101,16 +102,10 @@ export const ContactCard = ({
               className="h-4 w-4 text-gray-400 hover:text-primary transition-colors cursor-pointer flex-shrink-0" 
               onClick={handlePhoneClick}
             />
-            <a
-              href={`tel:${contact.phone}`}
-              onClick={(e) => {
-                e.preventDefault();
-                handlePhoneClick();
-              }}
-              className="text-xs text-gray-700 hover:text-primary transition-colors truncate"
-            >
-              {contact.phone}
-            </a>
+            <PhoneLink 
+              phone={contact.phone}
+              className="text-xs text-primary hover:underline transition-colors break-all"
+            />
           </div>
         )}
         
@@ -126,7 +121,7 @@ export const ContactCard = ({
                 e.preventDefault();
                 handleEmailClick();
               }}
-              className="text-xs text-gray-700 hover:text-primary transition-colors truncate"
+              className="text-xs text-primary hover:underline transition-colors break-all"
             >
               {contact.email}
             </a>
