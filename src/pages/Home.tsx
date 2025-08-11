@@ -243,11 +243,6 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Header */}
-        <div className="mb-4 text-center">
-          <h1 className="text-lg font-medium text-foreground">Incidents</h1>
-          <p className="text-xs text-muted-foreground">All workplace incidents</p>
-        </div>
 
         {/* Action Buttons */}
         <div className="mb-4">
