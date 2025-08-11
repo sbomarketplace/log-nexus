@@ -78,12 +78,12 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="!left-1/2 !top-1/2 !-translate-x-1/2 !-translate-y-1/2 max-w-xs max-h-[80vh] rounded-xl shadow-2xl border-2 !m-0">
-        <DialogHeader>
+      <DialogContent className="max-w-md w-full max-h-[80vh] rounded-xl shadow-2xl border-2 mx-4">
+        <DialogHeader className="pb-4">
           <DialogTitle className="text-center">Export Incidents</DialogTitle>
         </DialogHeader>
         
-        <ScrollArea className="h-[60vh] pr-4">
+        <ScrollArea className="max-h-[50vh] pr-2">
           <div className="space-y-3">
             {incidents.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
@@ -91,26 +91,24 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
               </div>
             ) : (
               incidents.map((incident) => (
-                <Card key={incident.id} className="border border-border rounded-2xl shadow-sm hover:shadow-md transition-shadow cursor-pointer h-[140px]">
-                  <CardContent className="p-3 h-full flex flex-col justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap gap-1">
-                        <span className="px-2 py-1 text-[10px] font-medium bg-primary/10 text-primary rounded-full">
-                          {formatDate(incident.date)}
-                        </span>
-                        <span className="px-2 py-1 text-[10px] font-medium bg-secondary/10 text-secondary-foreground rounded-full">
-                          {incident.categoryOrIssue}
-                        </span>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <h3 className="text-[12px] font-semibold text-foreground line-clamp-2 leading-tight">
-                          {incident.categoryOrIssue}
-                        </h3>
-                        <p className="text-[11px] text-muted-foreground line-clamp-2">
-                          {incident.what || 'No details available'}
-                        </p>
-                      </div>
+                <Card key={incident.id} className="border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
+                  <CardContent className="p-4 space-y-3">
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                        {formatDate(incident.date)}
+                      </span>
+                      <span className="px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full">
+                        {incident.categoryOrIssue}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2 mb-4">
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {incident.categoryOrIssue}
+                      </h3>
+                      <p className="text-xs text-muted-foreground line-clamp-2">
+                        {incident.what || 'No details available'}
+                      </p>
                     </div>
                     
                     <div className="flex justify-end">
@@ -121,9 +119,9 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                           e.stopPropagation();
                           handleExportIncident(incident.id, incident.categoryOrIssue);
                         }}
-                        className="h-7 px-2 text-[10px] gap-1"
+                        className="text-xs gap-1"
                       >
-                        <Download className="h-3 w-3" />
+                        <Download className="h-4 w-4" />
                         Export
                       </Button>
                     </div>
