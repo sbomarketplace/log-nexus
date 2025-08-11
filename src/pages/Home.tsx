@@ -168,17 +168,14 @@ const Home = () => {
         localStorage.removeItem('quickNotesDraft');
         loadIncidents();
         
-        // Scroll to the top of the incidents list
-        setTimeout(() => {
-          const incidentsList = document.querySelector('#incidents-list');
-          if (incidentsList) {
-            incidentsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }, 100);
-        
         toast({
           title: "Notes organized.",
         });
+
+        // Navigate to the first incident's details
+        if (incidentsToSave.length > 0) {
+          setViewIncident(incidentsToSave[0]);
+        }
       }
     } catch (error: any) {
       setQuickNotesError(error?.message || 'Failed to organize notes. Please try again.');
