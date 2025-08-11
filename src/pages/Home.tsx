@@ -272,7 +272,7 @@ const Home = () => {
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
-                <div className="mb-2">
+                <div className="mb-2 text-center">
                   <h2 id="quick-entry-title" className="text-sm font-semibold">Quick Incident Entry</h2>
                 </div>
 
