@@ -34,6 +34,10 @@ const Home = () => {
   // Quick notes state
   const [quickNotes, setQuickNotes] = useState('');
   const [quickNotesError, setQuickNotesError] = useState('');
+  const MAX_CHARS = 10000;
+  const WARN_THRESHOLD = 8000;
+  const [limitReached, setLimitReached] = useState(false);
+  const [limitAnnounce, setLimitAnnounce] = useState('');
   const [isOrganizing, setIsOrganizing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -159,6 +163,8 @@ const Home = () => {
         
         // Clear the textarea and draft
         setQuickNotes('');
+        setLimitReached(false);
+        setLimitAnnounce('');
         localStorage.removeItem('quickNotesDraft');
         loadIncidents();
         
@@ -271,18 +277,62 @@ const Home = () => {
                 </p>
 
                 <div className="mb-2">
-                  <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground mb-1 block">
-                    Notes
-                  </label>
+                  <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
+                    <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground block">
+                      Notes
+                    </label>
+                    <span
+                      id="quick-notes-counter"
+                      role="status"
+                      aria-live="polite"
+                      className={`text-xs ${quickNotes.length >= MAX_CHARS ? 'text-destructive' : quickNotes.length >= WARN_THRESHOLD ? 'text-primary' : 'text-muted-foreground'} ml-auto`}
+                    >
+                      {quickNotes.length} / 10,000
+                    </span>
+                  </div>
                   <Textarea
                     id="quick-notes-input"
                     ref={quickNotesRef}
                     value={quickNotes}
-                    onChange={(e) => setQuickNotes(e.target.value)}
-                    onInput={adjustTextareaHeight}
+                    onInput={(e) => {
+                      let v = (e.currentTarget as HTMLTextAreaElement).value;
+                      if (v.length > MAX_CHARS) {
+                        v = v.slice(0, MAX_CHARS);
+                        setLimitAnnounce("Character limit reached.");
+                        setLimitReached(true);
+                      } else {
+                        setLimitAnnounce("");
+                        setLimitReached(false);
+                      }
+                      setQuickNotes(v);
+                      adjustTextareaHeight();
+                    }}
+                    onPaste={(e) => {
+                      const el = e.currentTarget;
+                      const paste = e.clipboardData.getData("text");
+                      const start = el.selectionStart ?? el.value.length;
+                      const end = el.selectionEnd ?? el.value.length;
+                      const before = el.value.slice(0, start);
+                      const after = el.value.slice(end);
+                      const remaining = MAX_CHARS - (before.length + after.length);
+                      const insert = remaining > 0 ? paste.slice(0, remaining) : "";
+                      let next = before + insert + after;
+                      if (next.length >= MAX_CHARS) {
+                        setLimitAnnounce("Character limit reached.");
+                        setLimitReached(true);
+                      } else {
+                        setLimitAnnounce("");
+                        setLimitReached(false);
+                      }
+                      e.preventDefault();
+                      setQuickNotes(next);
+                      setTimeout(() => {
+                        adjustTextareaHeight();
+                      }, 0);
+                    }}
                     placeholder="Type or paste raw notes…"
                     className="rounded-2xl shadow-sm resize-none min-h-[136px] max-h-[220px] border border-border"
-                    aria-describedby={`quick-entry-guidance${quickNotesError ? ' quick-notes-error' : ''}`}
+                    aria-describedby={`quick-entry-guidance quick-notes-counter${quickNotesError ? ' quick-notes-error' : ''}${limitReached ? ' quick-notes-limit' : ''}`}
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                         e.preventDefault();
@@ -290,6 +340,12 @@ const Home = () => {
                       }
                     }}
                   />
+                  <div aria-live="polite" className="sr-only">{limitAnnounce}</div>
+                  {limitReached && (
+                    <div id="quick-notes-limit" className="mt-1 text-xs text-destructive">
+                      Limit reached (10,000 characters).
+                    </div>
+                  )}
                   {quickNotesError && (
                     <div
                       id="quick-notes-error"
@@ -334,6 +390,7 @@ const Home = () => {
                     </Link>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">AI will structure your notes into a report.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">≈1,700–1,800 words • about 3–4 pages (single-spaced)</p>
                 </div>
               </section>
             </div>
