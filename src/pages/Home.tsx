@@ -111,8 +111,8 @@ const Home = () => {
 
   // Auto-grow textarea up to max height
   const quickNotesRef = useRef<HTMLTextAreaElement | null>(null);
-  const MAX_QN_HEIGHT = 220;
-  const MIN_QN_HEIGHT = 136;
+  const MAX_QN_HEIGHT = 300;
+  const MIN_QN_HEIGHT = 180;
   const adjustTextareaHeight = () => {
     const el = quickNotesRef.current;
     if (!el) return;
@@ -266,7 +266,7 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-4">
+      <div className="space-y-2">
         {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
@@ -339,7 +339,7 @@ const Home = () => {
                       }, 0);
                     }}
                     placeholder="Type or paste raw notes…"
-                    className="rounded-2xl shadow-sm resize-none min-h-[136px] max-h-[220px] border border-border"
+                    className="rounded-2xl shadow-sm resize-none min-h-[180px] max-h-[300px] border border-border"
                     aria-describedby={`quick-entry-guidance quick-notes-counter${quickNotesError ? ' quick-notes-error' : ''}${limitReached ? ' quick-notes-limit' : ''}`}
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
