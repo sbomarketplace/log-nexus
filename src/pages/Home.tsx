@@ -267,14 +267,6 @@ const Home = () => {
   return (
     <Layout>
       <div className="space-y-4">
-        {/* Intro Description */}
-        <div className="text-center mb-4">
-          <p className="text-sm text-muted-foreground">
-            Use ClearCase to document workplace incidents, protect your rights, and stay organized.
-          </p>
-        </div>
-
-
         {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
@@ -297,6 +289,10 @@ const Home = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
+
+                <p className="text-xs text-muted-foreground mb-2">
+                  Use ClearCase to document workplace incidents, protect your rights, and stay organized.
+                </p>
 
                 <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-2">
                   Include Who, What, When, Where, Why, and How for best results.
