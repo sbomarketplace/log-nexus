@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ResourceModal } from '@/components/ResourceModal';
+import { EmergencyContactsModal } from '@/components/EmergencyContactsModal';
 import { 
   FileIcon, 
   ChevronDown, 
@@ -21,6 +22,7 @@ import {
 const Resources = () => {
   const [selectedResource, setSelectedResource] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [contactsModalOpen, setContactsModalOpen] = useState(false);
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     workplace: true,
     government: true,
@@ -54,11 +56,12 @@ const Resources = () => {
         },
         {
           title: 'Emergency Contact List',
-          description: 'Important phone numbers and contacts for emergency situations',
-          fullDescription: 'A comprehensive list of emergency contacts including local emergency services, company safety officers, HR department, legal team, and relevant external agencies.',
-          purpose: 'Provides immediate access to critical contacts during emergency situations and incident response procedures.',
-          type: 'Contact List',
-          phone: '911 (Emergency)'
+          description: 'Manage your workplace emergency contacts',
+          fullDescription: 'An interactive contact manager where you can add, edit, and organize emergency contacts by role. Supports click-to-call/email functionality and local storage.',
+          purpose: 'Provides quick access to emergency contacts with the ability to call or email directly. All data is stored locally on your device.',
+          type: 'Interactive Tool',
+          isInteractive: true,
+          action: () => setContactsModalOpen(true)
         },
         {
           title: 'Investigation Checklist',
@@ -230,7 +233,13 @@ const Resources = () => {
                           <Card 
                             key={index} 
                             className="cursor-pointer hover:shadow-md hover:border-primary/20 transition-all duration-200"
-                            onClick={() => openResourceModal(resource)}
+                            onClick={() => {
+                              if (resource.isInteractive && resource.action) {
+                                resource.action();
+                              } else {
+                                openResourceModal(resource);
+                              }
+                            }}
                           >
                             <CardHeader className="pb-2">
                               <div className="flex items-start justify-between">
@@ -275,6 +284,12 @@ const Resources = () => {
           open={modalOpen}
           onOpenChange={setModalOpen}
           resource={selectedResource}
+        />
+
+        {/* Emergency Contacts Modal */}
+        <EmergencyContactsModal
+          open={contactsModalOpen}
+          onOpenChange={setContactsModalOpen}
         />
       </div>
     </Layout>
