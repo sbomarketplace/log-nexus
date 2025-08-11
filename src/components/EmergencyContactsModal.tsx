@@ -23,6 +23,7 @@ import {
   Users
 } from 'lucide-react';
 import { contactsStorage, Contact, ContactsData } from '@/utils/contactsStorage';
+import { ContactCard } from '@/components/ContactCard';
 
 interface EmergencyContactsModalProps {
   open: boolean;
@@ -484,96 +485,16 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
                               return (a.priority || 1) - (b.priority || 1);
                             })
                             .map((contact) => (
-                              <div
+                              <ContactCard
                                 key={contact.id}
-                                className="flex items-center justify-between p-2 bg-background border border-border rounded-lg"
-                              >
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h4 className="font-medium text-sm truncate">
-                                      {contact.name}
-                                    </h4>
-                                    {contact.primary && (
-                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                                    )}
-                                  </div>
-                                  {contact.title && (
-                                    <p className="text-xs text-muted-foreground truncate">
-                                      {contact.title}
-                                    </p>
-                                  )}
-                                  <div className="flex items-center gap-3 mt-1">
-                                    {contact.phone && (
-                                      <div className="flex items-center gap-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleCall(contact.phone!)}
-                                          className="h-6 w-6 p-0 hover:bg-primary/10"
-                                        >
-                                          <Phone className="h-3 w-3 text-primary" />
-                                        </Button>
-                                        <button
-                                          onClick={() => copyToClipboard(contact.phone!, 'Phone')}
-                                          className="text-xs text-muted-foreground hover:text-foreground"
-                                        >
-                                          {formatPhone(contact.phone)}
-                                        </button>
-                                      </div>
-                                    )}
-                                    {contact.email && (
-                                      <div className="flex items-center gap-1">
-                                        <Button
-                                          variant="ghost"
-                                          size="sm"
-                                          onClick={() => handleEmail(contact.email!)}
-                                          className="h-6 w-6 p-0 hover:bg-primary/10"
-                                        >
-                                          <Mail className="h-3 w-3 text-primary" />
-                                        </Button>
-                                        <button
-                                          onClick={() => copyToClipboard(contact.email!, 'Email')}
-                                          className="text-xs text-muted-foreground hover:text-foreground truncate max-w-[100px]"
-                                        >
-                                          {contact.email}
-                                        </button>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                                
-                                <div className="flex items-center gap-1 ml-2">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => togglePrimary(roleId, contact.id)}
-                                    className="h-7 w-7 p-0"
-                                    title={contact.primary ? 'Remove primary' : 'Make primary'}
-                                  >
-                                    {contact.primary ? (
-                                      <Star className="h-3 w-3 text-yellow-500 fill-current" />
-                                    ) : (
-                                      <StarOff className="h-3 w-3 text-muted-foreground" />
-                                    )}
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => startEditContact(roleId, contact)}
-                                    className="h-7 w-7 p-0"
-                                  >
-                                    <Edit2 className="h-3 w-3" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => deleteContact(roleId, contact.id, contact.name)}
-                                    className="h-7 w-7 p-0 text-destructive hover:text-destructive"
-                                  >
-                                    <Trash2 className="h-3 w-3" />
-                                  </Button>
-                                </div>
-                              </div>
+                                contact={contact}
+                                roleId={roleId}
+                                onEdit={startEditContact}
+                                onDelete={deleteContact}
+                                onTogglePrimary={togglePrimary}
+                                onCall={handleCall}
+                                onEmail={handleEmail}
+                              />
                             ))}
                           
                           <Button
