@@ -66,6 +66,15 @@ export const ContactCard = ({
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => onTogglePrimary(roleId, contact.id)}
+            className="h-6 w-6 p-0 text-gray-400 hover:text-yellow-500"
+            title={contact.primary ? 'Remove primary' : 'Make primary'}
+          >
+            <Star className={`h-3 w-3 ${contact.primary ? 'text-yellow-500 fill-current' : ''}`} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => onEdit(roleId, contact)}
             className="h-6 w-6 p-0 text-gray-500 hover:text-gray-700 hover:bg-gray-100"
             title="Edit contact"
@@ -125,20 +134,6 @@ export const ContactCard = ({
         )}
       </div>
 
-      {/* Primary Toggle - Small indicator if needed */}
-      {!contact.primary && (
-        <div className="mt-2 flex justify-end">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onTogglePrimary(roleId, contact.id)}
-            className="h-5 w-5 p-0 text-gray-400 hover:text-yellow-500"
-            title="Make primary contact"
-          >
-            <Star className="h-3 w-3" />
-          </Button>
-        </div>
-      )}
     </div>
   );
 };
