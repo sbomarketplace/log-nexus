@@ -228,7 +228,18 @@ const Home = () => {
     try {
       // First try the original date
       if (dateString && dateString !== 'Invalid Date') {
-        const date = new Date(dateString);
+        // Handle various date formats including M/D, MM/DD, etc.
+        let date;
+        
+        // If it looks like M/D or MM/DD format, parse it differently
+        if (/^\d{1,2}\/\d{1,2}$/.test(dateString.trim())) {
+          const [month, day] = dateString.split('/').map(num => parseInt(num));
+          const currentYear = new Date().getFullYear();
+          date = new Date(currentYear, month - 1, day);
+        } else {
+          date = new Date(dateString);
+        }
+        
         if (!isNaN(date.getTime())) {
           return date.toLocaleDateString('en-US', {
             month: 'short',
