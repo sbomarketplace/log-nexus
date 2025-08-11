@@ -35,7 +35,8 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
 }) => {
   const [data, setData] = useState<ContactsData | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [editingContact, setEditingContact] = useState<{ roleId: string; contact?: Contact } | null>(null);
+  const [editingRoleId, setEditingRoleId] = useState<string | null>(null);
+  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [expandedRoles, setExpandedRoles] = useState<Record<string, boolean>>({});
   const [formData, setFormData] = useState({
     name: '',
@@ -94,8 +95,21 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
       priority: 1,
       primary: false,
     });
-    setEditingContact({ roleId });
+    setEditingRoleId(roleId);
+    setEditingContact(null);
     setErrors({});
+    
+    // Ensure the role is expanded
+    setExpandedRoles(prev => ({ ...prev, [roleId]: true }));
+    
+    // Auto-focus the first field after render
+    setTimeout(() => {
+      const nameInput = document.getElementById('name');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const startEditContact = (roleId: string, contact: Contact) => {
@@ -108,8 +122,21 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
       priority: contact.priority || 1,
       primary: contact.primary || false,
     });
-    setEditingContact({ roleId, contact });
+    setEditingRoleId(roleId);
+    setEditingContact(contact);
     setErrors({});
+    
+    // Ensure the role is expanded
+    setExpandedRoles(prev => ({ ...prev, [roleId]: true }));
+    
+    // Auto-focus the first field after render
+    setTimeout(() => {
+      const nameInput = document.getElementById('name');
+      if (nameInput) {
+        nameInput.focus();
+        nameInput.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      }
+    }, 100);
   };
 
   const validateForm = () => {
@@ -136,23 +163,25 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
   };
 
   const saveContact = () => {
-    if (!editingContact || !validateForm()) return;
+    if (!editingRoleId || !validateForm()) return;
     
-    const { roleId, contact } = editingContact;
+    const roleData = data?.roles[editingRoleId];
+    if (!roleData) return;
     
-    if (contact) {
+    if (editingContact) {
       // Update existing contact
-      contactsStorage.updateContact(roleId, contact.id, formData);
+      contactsStorage.updateContact(editingRoleId, editingContact.id, formData);
     } else {
       // Add new contact
-      contactsStorage.addContact(roleId, formData);
+      contactsStorage.addContact(editingRoleId, formData);
     }
     
     loadData();
+    setEditingRoleId(null);
     setEditingContact(null);
     toast({
-      title: contact ? 'Contact updated' : 'Contact added',
-      description: `${formData.name} has been ${contact ? 'updated' : 'added'} successfully.`,
+      title: editingContact ? 'Contact updated' : 'Contact added',
+      description: `${formData.name} has been ${editingContact ? 'updated' : 'added'} to ${roleData.name}.`,
     });
   };
 
@@ -277,6 +306,160 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
 
                   <CollapsibleContent>
                     <div className="p-3 pt-0 space-y-2">
+                      {/* Inline Editor - Rendered at top of role section */}
+                      {editingRoleId === roleId && (
+                        <div className="border border-border rounded-2xl p-4 bg-accent/30 mb-3">
+                          <fieldset className="space-y-3">
+                            <legend className="font-medium text-sm mb-3 flex items-center gap-2">
+                              {editingContact ? 'Edit Contact' : 'Add Contact'}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                  setEditingRoleId(null);
+                                  setEditingContact(null);
+                                }}
+                                className="h-6 w-6 p-0 ml-auto"
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </legend>
+                            
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor="name" className="text-xs font-medium">
+                                  Full Name *
+                                </Label>
+                                <Input
+                                  id="name"
+                                  value={formData.name}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                                  className="h-10 text-sm"
+                                  placeholder="Enter full name"
+                                />
+                                {errors.name && (
+                                  <p className="text-xs text-destructive mt-1 leading-tight">{errors.name}</p>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="title" className="text-xs font-medium">
+                                  Title/Role
+                                </Label>
+                                <Input
+                                  id="title"
+                                  value={formData.title}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                  className="h-10 text-sm"
+                                  placeholder="Job title"
+                                />
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor="phone" className="text-xs font-medium">
+                                  Phone
+                                </Label>
+                                <Input
+                                  id="phone"
+                                  type="tel"
+                                  value={formData.phone}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                                  onBlur={(e) => {
+                                    if (e.target.value) {
+                                      setFormData(prev => ({ ...prev, phone: formatPhone(e.target.value) }));
+                                    }
+                                  }}
+                                  className="h-10 text-sm"
+                                  placeholder="(555) 123-4567"
+                                />
+                                {errors.phone && (
+                                  <p className="text-xs text-destructive mt-1 leading-tight">{errors.phone}</p>
+                                )}
+                              </div>
+                              
+                              <div>
+                                <Label htmlFor="email" className="text-xs font-medium">
+                                  Email
+                                </Label>
+                                <Input
+                                  id="email"
+                                  type="email"
+                                  value={formData.email}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                                  className="h-10 text-sm"
+                                  placeholder="email@example.com"
+                                />
+                                {errors.email && (
+                                  <p className="text-xs text-destructive mt-1 leading-tight">{errors.email}</p>
+                                )}
+                              </div>
+                            </div>
+
+                            <div>
+                              <Label htmlFor="notes" className="text-xs font-medium">
+                                Notes (optional)
+                              </Label>
+                              <Textarea
+                                id="notes"
+                                value={formData.notes}
+                                onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+                                className="h-16 max-h-[120px] text-sm resize-none"
+                                placeholder="Additional notes (120 chars max)"
+                                maxLength={120}
+                              />
+                              <div className="flex justify-between mt-1">
+                                {errors.notes && (
+                                  <p className="text-xs text-destructive leading-tight">{errors.notes}</p>
+                                )}
+                                <p className="text-xs text-muted-foreground ml-auto">
+                                  {formData.notes.length}/120
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  id="primary"
+                                  checked={formData.primary}
+                                  onChange={(e) => setFormData(prev => ({ ...prev, primary: e.target.checked }))}
+                                  className="rounded border-gray-300"
+                                />
+                                <Label htmlFor="primary" className="text-xs">
+                                  Make primary contact
+                                </Label>
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setEditingRoleId(null);
+                                    setEditingContact(null);
+                                  }}
+                                  className="h-8 text-xs px-3"
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  onClick={saveContact}
+                                  disabled={!formData.name.trim() || Object.keys(errors).length > 0}
+                                  className="h-8 text-xs px-3"
+                                  aria-label={`Save contact to ${role.name}`}
+                                >
+                                  Save
+                                </Button>
+                              </div>
+                            </div>
+                          </fieldset>
+                        </div>
+                      )}
+
                       {role.contacts.length === 0 ? (
                         <div className="text-center py-4">
                           <p className="text-xs text-muted-foreground mb-2">
@@ -411,172 +594,8 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
             ))}
           </div>
 
-          {/* Add/Edit Contact Form - Inline within modal body */}
-          {editingContact && (
-            <div className="border-t border-border pt-4 mt-4">
-              <fieldset className="space-y-3">
-                <legend className="font-medium text-sm mb-3">
-                  {editingContact.contact ? 'Edit Contact' : 'Add Contact'}
-                </legend>
-                
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="name" className="text-xs font-medium">
-                      Full Name *
-                    </Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                      className="h-10 text-sm"
-                      placeholder="Enter full name"
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                        }, 300);
-                      }}
-                    />
-                    {errors.name && (
-                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.name}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="title" className="text-xs font-medium">
-                      Title/Role
-                    </Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                      className="h-10 text-sm"
-                      placeholder="Job title"
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                        }, 300);
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label htmlFor="phone" className="text-xs font-medium">
-                      Phone
-                    </Label>
-                    <Input
-                      id="phone"
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      onBlur={(e) => {
-                        if (e.target.value) {
-                          setFormData(prev => ({ ...prev, phone: formatPhone(e.target.value) }));
-                        }
-                      }}
-                      className="h-10 text-sm"
-                      placeholder="(555) 123-4567"
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                        }, 300);
-                      }}
-                    />
-                    {errors.phone && (
-                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.phone}</p>
-                    )}
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="email" className="text-xs font-medium">
-                      Email
-                    </Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                      className="h-10 text-sm"
-                      placeholder="email@example.com"
-                      onFocus={(e) => {
-                        setTimeout(() => {
-                          e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                        }, 300);
-                      }}
-                    />
-                    {errors.email && (
-                      <p className="text-xs text-destructive mt-1 leading-tight">{errors.email}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="notes" className="text-xs font-medium">
-                    Notes (optional)
-                  </Label>
-                  <Textarea
-                    id="notes"
-                    value={formData.notes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                    className="h-16 max-h-[120px] text-sm resize-none"
-                    placeholder="Additional notes (120 chars max)"
-                    maxLength={120}
-                    onFocus={(e) => {
-                      setTimeout(() => {
-                        e.target.scrollIntoView({ block: 'center', behavior: 'smooth' });
-                      }, 300);
-                    }}
-                  />
-                  <div className="flex justify-between mt-1">
-                    {errors.notes && (
-                      <p className="text-xs text-destructive leading-tight">{errors.notes}</p>
-                    )}
-                    <p className="text-xs text-muted-foreground ml-auto">
-                      {formData.notes.length}/120
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="primary"
-                    checked={formData.primary}
-                    onChange={(e) => setFormData(prev => ({ ...prev, primary: e.target.checked }))}
-                    className="rounded border-gray-300"
-                  />
-                  <Label htmlFor="primary" className="text-xs">
-                    Make primary contact
-                  </Label>
-                </div>
-              </fieldset>
-            </div>
-          )}
         </section>
 
-        {/* Modal Footer - Sticky */}
-        {editingContact && (
-          <footer className="cc-modal__footer flex-shrink-0 px-4 py-3 border-t border-border bg-background sticky bottom-0" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setEditingContact(null)}
-                className="h-10 text-sm px-6"
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                onClick={saveContact}
-                className="h-10 text-sm px-6"
-              >
-                Save
-              </Button>
-            </div>
-          </footer>
-        )}
       </DialogContent>
     </Dialog>
   );
