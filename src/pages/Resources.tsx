@@ -45,7 +45,7 @@ const Resources = () => {
 
   return (
     <Layout>
-      <div className="space-y-4">
+      <div className="space-y-4 -mt-4">
         {/* Header */}
         <div>
           <h1 className="text-lg font-medium text-foreground">Resources</h1>

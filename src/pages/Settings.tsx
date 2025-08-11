@@ -37,7 +37,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-4">
+      <div className="max-w-4xl mx-auto space-y-4 -mt-4">
         {/* Header */}
         <div>
           <h1 className="text-lg font-medium text-foreground">Settings</h1>
