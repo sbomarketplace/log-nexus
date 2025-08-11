@@ -404,9 +404,15 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Search and Filter Controls */}
+        {/* Section Title and Search/Filter Controls */}
         {organizedIncidents.length > 0 && (
-          <div className="mb-6 space-y-3">
+          <div className="mb-6 space-y-4">
+            {/* Section Title */}
+            <div className="space-y-1">
+              <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
+              <p className="text-sm text-muted-foreground">View, edit, export, or delete any past incident reports</p>
+            </div>
+
             {/* Search Bar */}
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
