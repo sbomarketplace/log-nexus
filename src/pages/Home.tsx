@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { AlertIcon } from '@/components/icons/CustomIcons';
-import { SearchIcon, X, Loader2 } from 'lucide-react';
+import { SearchIcon, X, Loader2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
@@ -104,6 +105,23 @@ const Home = () => {
     return () => clearTimeout(timeoutId);
   }, [quickNotes]);
 
+  // Auto-grow textarea up to max height
+  const quickNotesRef = useRef<HTMLTextAreaElement | null>(null);
+  const MAX_QN_HEIGHT = 220;
+  const MIN_QN_HEIGHT = 136;
+  const adjustTextareaHeight = () => {
+    const el = quickNotesRef.current;
+    if (!el) return;
+    el.style.height = 'auto';
+    const newHeight = Math.min(Math.max(el.scrollHeight, MIN_QN_HEIGHT), MAX_QN_HEIGHT);
+    el.style.height = `${newHeight}px`;
+    el.style.overflowY = el.scrollHeight > MAX_QN_HEIGHT ? 'auto' : 'hidden';
+  };
+
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [quickNotes]);
+
   const handleOrganizeComplete = () => {
     loadIncidents();
   };
@@ -153,8 +171,7 @@ const Home = () => {
         }, 100);
         
         toast({
-          title: "Success",
-          description: `${results.length} incident${results.length === 1 ? '' : 's'} organized and saved.`,
+          title: "Notes organized.",
         });
       }
     } catch (error: any) {
@@ -230,21 +247,42 @@ const Home = () => {
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
-              {/* Quick Notes Section */}
-              <section aria-labelledby="quick-notes-title">
-                <h2 id="quick-notes-title" className="sr-only">Quick Notes</h2>
-                
-                <div className="mb-4">
-                  <label htmlFor="quick-notes-input" className="sr-only">
-                    Quick Notes
+              <section aria-labelledby="quick-entry-title">
+                <div className="mb-2 flex items-center justify-between">
+                  <h2 id="quick-entry-title" className="text-sm font-semibold">Quick Incident Entry</h2>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Tips for quick entry"
+                        className="inline-flex items-center text-muted-foreground hover:text-foreground"
+                      >
+                        <Info className="h-4 w-4" />
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="text-xs max-w-xs">
+                      Include Who, What, When, Where, Why, and How for best results.
+                    </PopoverContent>
+                  </Popover>
+                </div>
+
+                <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-2">
+                  Include Who, What, When, Where, Why, and How for best results.
+                </p>
+
+                <div className="mb-2">
+                  <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground mb-1 block">
+                    Notes
                   </label>
                   <Textarea
                     id="quick-notes-input"
+                    ref={quickNotesRef}
                     value={quickNotes}
                     onChange={(e) => setQuickNotes(e.target.value)}
-                    placeholder="Type or Paste raw incident notes here. Please add Who, What, When, Where, Why, and How to record the most detail..."
-                    className="min-h-[240px] max-h-[400px] rounded-2xl border-border shadow-sm resize-none"
-                    aria-describedby={quickNotesError ? "quick-notes-error" : "quick-notes-hint"}
+                    onInput={adjustTextareaHeight}
+                    placeholder="Type or paste raw notes…"
+                    className="rounded-2xl shadow-sm resize-none min-h-[136px] max-h-[220px] border border-border"
+                    aria-describedby={`quick-entry-guidance${quickNotesError ? ' quick-notes-error' : ''}`}
                     onKeyDown={(e) => {
                       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
                         e.preventDefault();
@@ -253,61 +291,51 @@ const Home = () => {
                     }}
                   />
                   {quickNotesError && (
-                    <div 
-                      id="quick-notes-error" 
-                      className="mt-2 text-xs text-red-600 dark:text-red-400"
+                    <div
+                      id="quick-notes-error"
+                      className="mt-1 text-xs text-red-600 dark:text-red-400"
                     >
                       {quickNotesError}
                     </div>
                   )}
                 </div>
-              </section>
 
-              <div className="flex flex-col gap-4 justify-center">
-                {/* Organize Quick Notes */}
-                <div className="flex flex-col items-center">
-                  <Button
-                    onClick={handleQuickNotesOrganize}
-                    disabled={isOrganizing}
-                    aria-label="Organize Quick Notes"
-                    className="w-full h-11 rounded-xl font-semibold bg-blue-600 hover:bg-blue-700 text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
-                  >
-                    {isOrganizing ? (
-                      <>
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Organizing...
-                      </>
-                    ) : (
-                      'Organize Quick Notes'
-                    )}
-                  </Button>
-                  <span
-                    id="quick-notes-hint"
-                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
-                  >
-                    Paste raw notes above and AI will structure them into a report.
-                  </span>
-                </div>
-
-                {/* New Incident */}
-                <div className="flex flex-col items-center">
-                  <Link to="/add" className="w-full">
+                <div className="mt-2">
+                  <div className="flex flex-wrap gap-2">
                     <Button
-                      id="btn-new-incident"
-                      aria-describedby="hint-new-incident"
-                      className="w-full h-11 rounded-xl font-semibold bg-[hsl(25,95%,53%)] text-white transition-all duration-200 hover:bg-[hsl(25,95%,53%)] hover:scale-[1.02] hover:shadow-lg active:scale-[0.98]"
+                      onClick={handleQuickNotesOrganize}
+                      disabled={isOrganizing}
+                      aria-label="Organize Quick Notes"
+                      className="flex-1 min-w-[150px] h-11 rounded-xl"
                     >
-                      + New Incident
+                      {isOrganizing ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Organizing...
+                        </>
+                      ) : (
+                        'Organize Quick Notes'
+                      )}
                     </Button>
-                  </Link>
-                  <span
-                    id="hint-new-incident"
-                    className="mt-2 text-xs leading-5 text-muted-foreground text-center"
-                  >
-                    Log a new workplace incident manually.
-                  </span>
+
+                    <Link
+                      to="/add"
+                      onClick={(e) => { if (isOrganizing) e.preventDefault(); }}
+                      className="flex-1 min-w-[150px]"
+                    >
+                      <Button
+                        variant="outline"
+                        disabled={isOrganizing}
+                        aria-label="Log Manually"
+                        className="w-full h-11 rounded-xl"
+                      >
+                        Log Manually
+                      </Button>
+                    </Link>
+                  </div>
+                  <p className="mt-2 text-xs text-muted-foreground">AI will structure your notes into a report.</p>
                 </div>
-              </div>
+              </section>
             </div>
           </div>
         </div>
