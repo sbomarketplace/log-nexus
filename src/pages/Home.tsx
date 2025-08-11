@@ -272,22 +272,8 @@ const Home = () => {
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
-                <div className="mb-2 flex items-center justify-between">
+                <div className="mb-2">
                   <h2 id="quick-entry-title" className="text-sm font-semibold">Quick Incident Entry</h2>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button
-                        type="button"
-                        aria-label="Tips for quick entry"
-                        className="inline-flex items-center text-muted-foreground hover:text-foreground"
-                      >
-                        <Info className="h-4 w-4" />
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent align="end" className="text-xs max-w-xs">
-                      Include Who, What, When, Where, Why, and How for best results.
-                    </PopoverContent>
-                  </Popover>
                 </div>
 
                 <p className="text-xs text-muted-foreground mb-2">
@@ -412,7 +398,6 @@ const Home = () => {
                     </Link>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">AI will structure your notes into a report.</p>
-                  <p className="mt-1 text-xs text-muted-foreground">≈1,700–1,800 words • about 3–4 pages (single-spaced)</p>
                 </div>
               </section>
             </div>
