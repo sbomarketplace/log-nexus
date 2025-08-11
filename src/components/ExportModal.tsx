@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Download } from 'lucide-react';
 import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { useToast } from '@/hooks/use-toast';
+import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
 interface ExportModalProps {
   open: boolean;
@@ -15,42 +16,19 @@ interface ExportModalProps {
 export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
   const { toast } = useToast();
   const [incidents] = useState(() => organizedIncidentStorage.getAll());
+  const [selectedIncident, setSelectedIncident] = useState<OrganizedIncident | null>(null);
 
-  const handleExportIncident = (incidentId: string, title: string) => {
-    try {
-      const incident = organizedIncidentStorage.getById(incidentId);
-      if (!incident) {
-        toast({
-          title: "Error",
-          description: "Incident not found",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      const dataStr = organizedIncidentStorage.exportToText(incident);
-      const dataBlob = new Blob([dataStr], { type: 'text/plain' });
-      const url = URL.createObjectURL(dataBlob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `incident-${title.replace(/[^a-zA-Z0-9]/g, '-')}-${incident.date}.txt`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-
+  const handleExportIncident = (incidentId: string) => {
+    const incident = organizedIncidentStorage.getById(incidentId);
+    if (!incident) {
       toast({
-        title: "Export Complete",
-        description: `${title} has been exported successfully.`
-      });
-    } catch (error) {
-      toast({
-        title: "Export Failed",
-        description: "There was an error exporting the incident.",
+        title: "Error",
+        description: "Incident not found",
         variant: "destructive"
       });
+      return;
     }
+    setSelectedIncident(incident);
   };
 
   const formatDate = (dateString: string) => {
@@ -117,7 +95,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                         variant="outline"
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleExportIncident(incident.id, incident.categoryOrIssue);
+                          handleExportIncident(incident.id);
                         }}
                         className="text-xs gap-1"
                       >
@@ -132,6 +110,12 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
           </div>
         </ScrollArea>
       </DialogContent>
+      
+      <ExportOptionsModal 
+        incident={selectedIncident}
+        open={!!selectedIncident}
+        onOpenChange={(open) => !open && setSelectedIncident(null)}
+      />
     </Dialog>
   );
 };

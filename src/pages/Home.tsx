@@ -16,6 +16,7 @@ import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { EditIncidentModal } from '@/components/EditIncidentModal';
+import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
@@ -28,6 +29,7 @@ const Home = () => {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [viewIncident, setViewIncident] = useState<OrganizedIncident | null>(null);
   const [editIncident, setEditIncident] = useState<OrganizedIncident | null>(null);
+  const [exportIncident, setExportIncident] = useState<OrganizedIncident | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
   const [filterCategory, setFilterCategory] = useState<string>('all');
@@ -248,20 +250,7 @@ const Home = () => {
 
 
   const handleExport = (incident: OrganizedIncident) => {
-    try {
-      organizedIncidentStorage.downloadAsFile(incident);
-      toast({
-        title: "Export Successful",
-        description: "Incident has been downloaded as a text file.",
-      });
-    } catch (error) {
-      console.error('Error exporting incident:', error);
-      toast({
-        title: "Export Failed",
-        description: "Failed to export incident. Please try again.",
-        variant: "destructive",
-      });
-    }
+    setExportIncident(incident);
   };
 
   return (
@@ -571,6 +560,13 @@ const Home = () => {
           open={!!editIncident}
           onOpenChange={(open) => !open && setEditIncident(null)}
           onSave={loadIncidents}
+        />
+
+        {/* Export Options Modal */}
+        <ExportOptionsModal 
+          incident={exportIncident}
+          open={!!exportIncident}
+          onOpenChange={(open) => !open && setExportIncident(null)}
         />
 
         {/* Delete Confirmation Modal */}
