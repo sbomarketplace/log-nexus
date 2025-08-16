@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ExternalLink, Phone, Globe } from 'lucide-react';
+import { ExternalLink, Phone, Globe, X } from 'lucide-react';
 import { PhoneLink } from '@/components/PhoneLink';
 
 interface ResourceModalProps {
@@ -51,6 +51,15 @@ export const ResourceModal: React.FC<ResourceModalProps> = ({
             <DialogTitle className="text-lg font-semibold text-center flex-1">
               {resource.title}
             </DialogTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onOpenChange(false)}
+              className="h-8 w-8 p-0 rounded-full"
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </Button>
           </div>
           
           <div className="text-center px-6 py-2 border-b">
@@ -116,18 +125,7 @@ export const ResourceModal: React.FC<ResourceModalProps> = ({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="border-t px-6 py-4 sm:px-8">
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => onOpenChange(false)}
-                className="rounded-lg"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
+           {/* Close button handled in header - no footer needed */}
         </div>
       </DialogContent>
     </Dialog>

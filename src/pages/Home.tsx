@@ -540,24 +540,24 @@ const Home = () => {
                 <Card key={incident.id} className="border rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <CardContent className="p-3">
                     <div className="space-y-2">
-                      {/* Compact header with date and gradient category tag */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 flex-1 min-w-0 overflow-hidden">
+                      {/* Date and category badges in responsive layout - category wraps below date if needed */}
+                      <div className="flex flex-col gap-1 mb-2">
+                        <div className="flex flex-wrap items-center gap-2">
                           <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium shrink-0">
                             {extractDateFromContent(incident)}
                           </Badge>
-                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold shrink-0 ${getCategoryTagClass(incident.categoryOrIssue)}`}>
-                            <span className="break-all">{incident.categoryOrIssue}</span>
+                          <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-[10px] font-bold break-words overflow-wrap-anywhere text-center min-w-0 ${getCategoryTagClass(incident.categoryOrIssue)}`}>
+                            {incident.categoryOrIssue}
                           </span>
                         </div>
                       </div>
 
-                      {/* Title/Description - compact and clean */}
-                      <div className="min-h-[2.5rem]">
-                        <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words">
-                          {incident.what}
-                        </h3>
-                      </div>
+                       {/* Title/Description - compact and clean, with phone number support */}
+                       <div className="min-h-[2.5rem]">
+                         <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
+                           <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
+                         </h3>
+                       </div>
 
                       {/* Created timestamp - smaller and lighter */}
                       <div className="text-[9px] text-muted-foreground">

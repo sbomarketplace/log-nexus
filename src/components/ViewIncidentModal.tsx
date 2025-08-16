@@ -65,12 +65,14 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
 
             <div className="space-y-4">
               {/* Header Badges */}
-              <div className="flex items-center gap-2 mb-6">
-                <Badge variant="secondary" className="text-sm font-medium">
+              <div className="flex items-center gap-2 mb-6 flex-wrap">
+                <Badge variant="secondary" className="text-sm font-medium shrink-0">
                   {displayDate}
                 </Badge>
-                <Badge variant="outline" className="text-sm">
-                  {incident.categoryOrIssue}
+                <Badge variant="outline" className="text-sm break-words overflow-wrap-anywhere text-center min-w-0 flex-1">
+                  <span className="block w-full px-2 py-1">
+                    {incident.categoryOrIssue}
+                  </span>
                 </Badge>
               </div>
 
@@ -148,18 +150,7 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
             </div>
           </div>
 
-          {/* Footer */}
-          <div className="border-t px-6 py-4 sm:px-8">
-            <div className="flex justify-end">
-              <Button 
-                variant="outline" 
-                onClick={() => onOpenChange(false)} 
-                className="rounded-lg"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
+          {/* Remove redundant footer close button - close functionality handled by X button in header */}
         </div>
       </DialogContent>
     </Dialog>

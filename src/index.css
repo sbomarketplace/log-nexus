@@ -159,10 +159,15 @@ All colors MUST be HSL.
     @apply bg-gradient-to-r from-gray-500 to-gray-600 text-white;
   }
 
-  /* Overflow and word breaking utilities */
+  /* Overflow and word breaking utilities for content containment */
   .break-words {
     word-break: break-word;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .break-all {

@@ -59,15 +59,41 @@ export function processIncident(
     saveCategoryMapping(incidentKey, categoryOrIssue, false);
   }
   
-  // Normalize voice perspective
+  // Normalize voice perspective for all text fields
   const normalizedNotes = normalizeToFirstPerson(incident.notes, { authorPerspective });
   const normalizedWhat = normalizeToFirstPerson(incident.what, { authorPerspective });
+  const normalizedWho = normalizeToFirstPerson(incident.who, { authorPerspective });
+  const normalizedWhere = normalizeToFirstPerson(incident.where, { authorPerspective });
+  const normalizedWhen = normalizeToFirstPerson(incident.when, { authorPerspective });
+  const normalizedWitnesses = normalizeToFirstPerson(incident.witnesses, { authorPerspective });
+  
+  // Apply to optional fields as well
+  const normalizedTimeline = incident.timeline 
+    ? normalizeToFirstPerson(incident.timeline, { authorPerspective })
+    : incident.timeline;
+  const normalizedRequests = incident.requests 
+    ? normalizeToFirstPerson(incident.requests, { authorPerspective })
+    : incident.requests;
+  const normalizedPolicy = incident.policy 
+    ? normalizeToFirstPerson(incident.policy, { authorPerspective })
+    : incident.policy;
+  const normalizedEvidence = incident.evidence 
+    ? normalizeToFirstPerson(incident.evidence, { authorPerspective })
+    : incident.evidence;
   
   return {
     ...incident,
     categoryOrIssue,
     notes: normalizedNotes,
     what: normalizedWhat,
+    who: normalizedWho,
+    where: normalizedWhere,
+    when: normalizedWhen, 
+    witnesses: normalizedWitnesses,
+    timeline: normalizedTimeline,
+    requests: normalizedRequests,
+    policy: normalizedPolicy,
+    evidence: normalizedEvidence,
     canonicalEventDate,
     originalEventDateText,
     incidentKey

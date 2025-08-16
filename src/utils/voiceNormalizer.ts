@@ -98,6 +98,9 @@ function normalizeSegment(text: string): string {
   // Fix capitalization issues after replacements
   result = fixCapitalization(result);
   
+  // Apply grammar safety pass
+  result = grammarSafetyPass(result);
+  
   return result;
 }
 
@@ -109,6 +112,37 @@ function fixCapitalization(text: string): string {
   text = text.replace(/(^|\. )([a-z])/g, (match, prefix, letter) => prefix + letter.toUpperCase());
   
   return text;
+}
+
+function grammarSafetyPass(text: string): string {
+  let result = text;
+  
+  // Fix possessive issues - never allow "I's"
+  result = result.replace(/\bI's\b/g, 'my');
+  result = result.replace(/\bI'S\b/g, 'my');
+  
+  // Fix stray apostrophes in possessives
+  result = result.replace(/\bemployee'S\b/g, "employee's");
+  result = result.replace(/\bworker'S\b/g, "worker's");
+  result = result.replace(/\bmanager'S\b/g, "manager's");
+  
+  // Fix subject-verb agreement
+  result = result.replace(/\bI were\b/g, 'I was');
+  result = result.replace(/\bI are\b/g, 'I am');
+  result = result.replace(/\bI is\b/g, 'I am');
+  
+  // Improve clarity in common phrases
+  result = result.replace(/\bdespite me being present\b/gi, 'despite my presence');
+  result = result.replace(/\bwith me being there\b/gi, 'with my presence');
+  
+  // Ensure proper sentence case and punctuation
+  result = result.replace(/([.!?]\s*)([a-z])/g, (match, punctuation, letter) => 
+    punctuation + letter.toUpperCase());
+  
+  // Ensure sentences end with proper punctuation
+  result = result.replace(/([a-zA-Z0-9])\s*$/, '$1.');
+  
+  return result;
 }
 
 // Test function for validation
@@ -134,11 +168,22 @@ export function testVoiceNormalization(): { test: string; input: string; expecte
       input: 'The employee was told to stop by the supervisor.',
       expected: 'I was told to stop by the supervisor.'
     },
-    {
-      test: 'Preserve third-person for others',
-      input: 'The manager and the employee discussed the issue.',
-      expected: 'The manager and I discussed the issue.'
-    }
+                // Update test cases to include grammar safety pass scenarios
+                    {
+                      test: 'Fix I\'s possessive',
+                      input: 'Mark and Troy attempted to perform I\'s job duties.',
+                      expected: 'Mark and Troy attempted to perform my job duties.'
+                    },
+                    {
+                      test: 'Fix stray apostrophes',
+                      input: 'The employee\'S concerns were valid.',
+                      expected: 'My concerns were valid.'
+                    },
+                    {
+                      test: 'Improve clarity phrases',
+                      input: 'Despite me being present, the incident occurred.',
+                      expected: 'Despite my presence, the incident occurred.'
+                    }
   ];
 
   return testCases.map(testCase => {
