@@ -159,6 +159,23 @@ All colors MUST be HSL.
     @apply bg-gradient-to-r from-gray-500 to-gray-600 text-white;
   }
 
+  /* Subtle category tint colors for accents */
+  :root {
+    --safety-tint: 0 84% 95%;
+    --harassment-tint: 25 95% 95%;
+    --accusation-tint: 214 100% 95%;
+    --policy-tint: 142 76% 95%;
+    --default-tint: 220 13% 95%;
+  }
+
+  .dark {
+    --safety-tint: 0 84% 15%;
+    --harassment-tint: 25 95% 15%;
+    --accusation-tint: 214 100% 15%;
+    --policy-tint: 142 76% 15%;
+    --default-tint: 220 9% 15%;
+  }
+
   /* Overflow and word breaking utilities for content containment */
   .break-words {
     word-break: break-word;

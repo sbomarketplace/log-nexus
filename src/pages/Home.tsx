@@ -540,15 +540,19 @@ const Home = () => {
                 <Card key={incident.id} className="border rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <CardContent className="p-3">
                     <div className="space-y-2">
-                      {/* Date and category badges in responsive layout - category wraps below date if needed */}
+                      {/* Date and category badges in responsive header row - category wraps below date if needed */}
                       <div className="flex flex-col gap-1 mb-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <Badge variant="secondary" className="text-[10px] px-2 py-0.5 font-medium shrink-0">
+                          <Badge 
+                            variant="secondary" 
+                            className="text-xs px-2 py-1 font-medium shrink-0 h-7 flex items-center bg-muted text-muted-foreground border"
+                          >
                             {extractDateFromContent(incident)}
                           </Badge>
-                          <span className={`inline-flex items-center justify-center px-2 py-1 rounded-full text-[10px] font-bold break-words overflow-wrap-anywhere text-center min-w-0 ${getCategoryTagClass(incident.categoryOrIssue)}`}>
+                          <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-7 px-2 rounded-full flex items-center justify-center break-words min-w-0 flex-1`}
+                               style={{ fontSize: 'clamp(10px, 1.6vw, 12px)' }}>
                             {incident.categoryOrIssue}
-                          </span>
+                          </div>
                         </div>
                       </div>
 

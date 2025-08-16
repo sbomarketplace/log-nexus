@@ -1,4 +1,4 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
@@ -21,6 +21,24 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
       ? incident.date 
       : 'No date';
 
+  // Get category class for subtle tinting
+  const getCategoryClass = (category: string) => {
+    const lowerCategory = category.toLowerCase();
+    if (lowerCategory.includes('safety') || lowerCategory.includes('accident') || lowerCategory.includes('injury')) {
+      return 'category-safety';
+    } else if (lowerCategory.includes('harassment') || lowerCategory.includes('discrimination') || lowerCategory.includes('bullying')) {
+      return 'category-harassment';
+    } else if (lowerCategory.includes('wrongful') || lowerCategory.includes('accusation') || lowerCategory.includes('false')) {
+      return 'category-accusation';
+    } else if (lowerCategory.includes('policy') || lowerCategory.includes('violation') || lowerCategory.includes('misconduct')) {
+      return 'category-policy';
+    } else {
+      return 'category-default';
+    }
+  };
+
+  const categoryClass = getCategoryClass(incident.categoryOrIssue);
+
   // Function to render text with clickable phone numbers
   const renderTextWithPhoneLinks = (text: string) => {
     const htmlWithPhoneLinks = makePhoneNumbersClickable(text);
@@ -41,104 +59,129 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
         }}
       >
         <div className="flex max-h-[85vh] flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4 sm:px-8">
-            <DialogTitle className="text-lg font-semibold text-center flex-1">
+          {/* Header with single close control */}
+          <div className="flex items-center justify-between px-5 py-4 border-b">
+            <h2 className="text-base font-semibold text-center flex-1">
               Incident Details
-            </DialogTitle>
+            </h2>
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onOpenChange(false)}
-              className="h-8 w-8 p-0 rounded-full"
+              className="h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+              aria-label="Close incident details"
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
             </Button>
           </div>
 
           {/* Scrollable Content */}
           <div 
-            className="flex-1 overflow-y-auto px-6 py-4 sm:px-8" 
+            className="flex-1 overflow-y-auto px-5 py-4" 
             data-scroll-container
           >
-
-            <div className="space-y-4">
-              {/* Header Badges */}
-              <div className="flex items-center gap-2 mb-6 flex-wrap">
-                <Badge variant="secondary" className="text-sm font-medium shrink-0">
-                  {displayDate}
-                </Badge>
-                <Badge variant="outline" className="text-sm break-words overflow-wrap-anywhere text-center min-w-0 flex-1">
-                  <span className="block w-full px-2 py-1">
-                    {incident.categoryOrIssue}
-                  </span>
-                </Badge>
+            {/* Header row with date chip and category pill */}
+            <div className="flex items-start gap-2 mb-4 flex-wrap">
+              <Badge 
+                variant="secondary" 
+                className="text-xs font-medium shrink-0 h-8 px-3 flex items-center bg-muted text-muted-foreground border"
+              >
+                {displayDate}
+              </Badge>
+              <div className={`${categoryClass} text-white text-xs font-medium h-8 px-3 rounded-full flex items-center justify-center break-words min-w-0 flex-1`} 
+                   style={{ fontSize: 'clamp(10px, 1.6vw, 12px)' }}>
+                {incident.categoryOrIssue}
               </div>
+            </div>
 
-              {/* Incident Details */}
-              <div className="space-y-5">
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Who</h4>
-                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.who)}</p>
+            <div className="border-t border-border mb-4"></div>
+
+            <div className="space-y-3">{/* Reduced from space-y-5 to space-y-3 for compact spacing */}
+
+              <div className="space-y-3">{/* Compact spacing */}
+                <div className="border-l-[3px] pl-3" style={{ borderColor: `var(--${categoryClass.split('-')[1]}-tint, hsl(var(--muted)))` }}>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">Who</h4>
+                  <p className="text-sm leading-relaxed break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.who)}</p>
                 </div>
 
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">What</h4>
-                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.what)}</p>
+                <div className="border-t border-border my-2"></div>
+
+                <div className="border-l-[3px] pl-3" style={{ borderColor: `var(--${categoryClass.split('-')[1]}-tint, hsl(var(--muted)))` }}>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">What</h4>
+                  <p className="text-sm leading-relaxed break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.what)}</p>
                 </div>
 
-                <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Where</h4>
-                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.where)}</p>
-                </div>
+                <div className="border-t border-border my-2"></div>
 
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">When</h4>
-                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.when)}</p>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">Where</h4>
+                  <p className="text-sm leading-relaxed break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.where)}</p>
                 </div>
 
+                <div className="border-t border-border my-2"></div>
+
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Witnesses</h4>
-                  <p className="text-sm leading-relaxed break-words">{renderTextWithPhoneLinks(incident.witnesses)}</p>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">When</h4>
+                  <p className="text-sm leading-relaxed break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.when)}</p>
+                </div>
+
+                <div className="border-t border-border my-2"></div>
+
+                <div>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">Witnesses</h4>
+                  <p className="text-sm leading-relaxed break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.witnesses)}</p>
                 </div>
 
                 {incident.timeline && (
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Timeline</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.timeline)}</p>
-                  </div>
+                  <>
+                    <div className="border-t border-border my-2"></div>
+                    <div>
+                      <h4 className="text-xs font-medium text-muted-foreground mb-1">Timeline</h4>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.timeline)}</p>
+                    </div>
+                  </>
                 )}
 
                 {incident.requests && (
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Requests</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.requests)}</p>
-                  </div>
+                  <>
+                    <div className="border-t border-border my-2"></div>
+                    <div>
+                      <h4 className="text-xs font-medium text-muted-foreground mb-1">Requests</h4>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.requests)}</p>
+                    </div>
+                  </>
                 )}
 
                 {incident.policy && (
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Policy</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.policy)}</p>
-                  </div>
+                  <>
+                    <div className="border-t border-border my-2"></div>
+                    <div>
+                      <h4 className="text-xs font-medium text-muted-foreground mb-1">Policy</h4>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.policy)}</p>
+                    </div>
+                  </>
                 )}
 
                 {incident.evidence && (
-                  <div>
-                    <h4 className="font-medium text-sm text-muted-foreground mb-2">Evidence</h4>
-                    <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.evidence)}</p>
-                  </div>
+                  <>
+                    <div className="border-t border-border my-2"></div>
+                    <div>
+                      <h4 className="text-xs font-medium text-muted-foreground mb-1">Evidence</h4>
+                      <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.evidence)}</p>
+                    </div>
+                  </>
                 )}
 
+                <div className="border-t border-border my-2"></div>
+
                 <div>
-                  <h4 className="font-medium text-sm text-muted-foreground mb-2">Incident Summary</h4>
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{renderTextWithPhoneLinks(incident.notes)}</p>
+                  <h4 className="text-xs font-medium text-muted-foreground mb-1">Incident Summary</h4>
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap break-words overflow-wrap-anywhere text-foreground">{renderTextWithPhoneLinks(incident.notes)}</p>
                 </div>
               </div>
 
               {/* Timestamps */}
-              <div className="border-t pt-4 mt-6 text-xs text-muted-foreground">
+              <div className="border-t pt-3 mt-4 text-xs text-muted-foreground">
                 <div className="space-y-1">
                   <div>Created: {new Date(incident.createdAt).toLocaleString()}</div>
                   <div>Last Updated: {new Date(incident.updatedAt).toLocaleString()}</div>
@@ -149,8 +192,6 @@ export const ViewIncidentModal = ({ incident, open, onOpenChange }: ViewIncident
               </div>
             </div>
           </div>
-
-          {/* Remove redundant footer close button - close functionality handled by X button in header */}
         </div>
       </DialogContent>
     </Dialog>
