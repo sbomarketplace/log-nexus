@@ -6,6 +6,12 @@ import {
   stripCodeFences,
 } from "./deps.ts"
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+}
+
 const incidentSchema = z.object({
   date: z.string().catch(""),
   category: z.string().catch(""),
@@ -141,33 +147,28 @@ CRITICAL: Use ALL information from the raw notes while maintaining the reporter'
   return json
 }
 
-function respond(req: Request, body: unknown) {
-  const headers = corsHeadersFor(req.headers.get("Origin") ?? undefined)
-  return new Response(JSON.stringify(body, null, 2), {
-    status: 200,
-    headers: { "Content-Type": "application/json", ...headers },
-  })
-}
-
 Deno.serve(async (req) => {
-  const headers = corsHeadersFor(req.headers.get("Origin") ?? undefined)
-
-  // OPTIONS preflight
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
-    return new Response("ok", { status: 200, headers })
+    return new Response("ok", { headers: corsHeaders });
   }
 
-  const errors: string[] = []
   try {
     const { notes } = await req.json().catch(() => ({ notes: "" }))
     if (!notes || typeof notes !== "string") {
-      errors.push("Missing notes string in request body")
-      return respond(req, { ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
+      return new Response(JSON.stringify({ 
+        ok: false, 
+        normalized: null, 
+        errors: ["Missing notes string in request body"], 
+        meta: { model: null, usage: null, rawPreview: "" } 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const ai = await callOpenAI(notes).catch((e: Error) => {
-      errors.push(`OpenAI error: ${e.message}`)
-      return null
+      throw new Error(`OpenAI error: ${e.message}`)
     })
 
     const rawPreview = ai?.choices?.[0]?.message?.content ? String(ai.choices[0].message.content) : ""
@@ -186,29 +187,39 @@ Deno.serve(async (req) => {
 
     let parsed: unknown = null
     if (jsonText) {
-      try { parsed = JSON.parse(jsonText) } catch (e) { errors.push(`JSON parse failed: ${String(e)}`) }
+      try { parsed = JSON.parse(jsonText) } catch (e) { 
+        throw new Error(`JSON parse failed: ${String(e)}`)
+      }
     } else {
-      errors.push("No valid JSON found in model content")
+      throw new Error("No valid JSON found in model content")
     }
 
     let incidents = normalizeIncidents(parsed)
 
     if (!incidents.length && rawPreview) {
-      errors.push("Falling back to minimal incident")
       incidents = [{
         date: "", category: "", who: [], where: "", when: "", witnesses: [],
         what: rawPreview.slice(0, 2000), notes: ""
       }]
     }
 
-    return respond(req, {
-      ok: Boolean(incidents.length),
+    return new Response(JSON.stringify({
+      ok: true,
       normalized: { incidents },
-      errors,
+      errors: [],
       meta: { model, usage, rawPreview: rawPreview.slice(0, 4000) }
-    })
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (e) {
-    errors.push(`Unhandled error: ${String(e?.message || e)}`)
-    return respond(req, { ok: false, normalized: null, errors, meta: { model: null, usage: null, rawPreview: "" } })
+    return new Response(JSON.stringify({ 
+      ok: false, 
+      normalized: null, 
+      errors: [String(e?.message || e)], 
+      meta: { model: null, usage: null, rawPreview: "" } 
+    }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   }
 })

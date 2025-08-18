@@ -2,7 +2,7 @@ export { z } from "https://deno.land/x/zod@v3.23.8/mod.ts"
 
 export const ALLOWED_ORIGINS = [
   "https://preview--log-nexus.lovable.app",
-  "https://log-nexus.lovable.app",
+  "https://log-nexus.lovable.app", 
   "http://localhost:3000",
   "http://localhost:5173",
 ]
@@ -19,7 +19,7 @@ export function corsHeadersFor(origin?: string) {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Headers":
       "authorization, x-client-info, apikey, content-type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
   }
 }
 
