@@ -168,13 +168,17 @@ export const ViewIncidentModal = ({
     setIsSaving(true);
 
     try {
-      // Parse the date
+      // Calculate the updated date and time values directly
+      const updatedDate = dateInput ? formatDateForStorage(dateInput) : getDateSafely(incident, '');
+      const updatedTime = timeInput || incident.when;
+      
+      // Update canonical date info if date changed
       let canonicalEventDate = incident.canonicalEventDate;
       let originalEventDateText = incident.originalEventDateText;
       
       if (dateInput !== toDateInputValue(incident.date)) {
         originalEventDateText = dateInput;
-        setParsedDate({ date: formatDateForStorage(dateInput), confidence: 'high' });
+        canonicalEventDate = updatedDate;
       }
 
       // Apply first-person normalization and grammar pass to text fields
@@ -197,8 +201,8 @@ export const ViewIncidentModal = ({
         ...normalizedData,
         canonicalEventDate,
         originalEventDateText,
-        date: parsedDate?.date || formatDateForStorage(dateInput) || getDateSafely(incident, ''),
-        when: timeInput || incident.when,
+        date: updatedDate,
+        when: updatedTime,
         updatedAt: new Date().toISOString()
       };
 
@@ -208,6 +212,11 @@ export const ViewIncidentModal = ({
       // Update parent component
       onIncidentUpdate?.(updatedIncident);
       
+      // Update parsed date state for UI consistency
+      if (dateInput !== toDateInputValue(incident.date)) {
+        setParsedDate({ date: updatedDate, confidence: 'high' });
+      }
+
       // Update local state
       setFormData(updatedIncident);
       setIsEditMode(false);
