@@ -234,6 +234,27 @@ const Home = () => {
   };
 
   const formatDate = (incident: OrganizedIncident): string => {
+    // First check for preferred date from original text
+    if (incident.originalEventDateText || incident.timeline) {
+      const { getPreferredDateTime } = require('@/utils/timelineParser');
+      const preferred = getPreferredDateTime(incident);
+      
+      if (preferred.date) {
+        try {
+          const date = new Date(preferred.date);
+          if (!isNaN(date.getTime())) {
+            return date.toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric',
+              year: 'numeric'
+            });
+          }
+        } catch {
+          // Fall through to canonical date
+        }
+      }
+    }
+    
     // Use canonical date if available
     if (incident.canonicalEventDate) {
       try {

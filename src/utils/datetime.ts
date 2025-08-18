@@ -224,6 +224,43 @@ export function formatTimeOnlyFromParts(timePart: string): string {
  * Get formatted display for incident date/time based on data precedence
  */
 export function getIncidentDisplayDate(incident: any): string {
+  // First check for preferred date/time from original text and timeline
+  if (incident.originalEventDateText || incident.timeline) {
+    const { getPreferredDateTime } = require('@/utils/timelineParser');
+    const preferred = getPreferredDateTime(incident);
+    
+    if (preferred.date && preferred.time) {
+      try {
+        const date = new Date(preferred.date).toLocaleDateString([], { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        const [hours, minutes] = preferred.time.split(':');
+        const hour12 = parseInt(hours) % 12 || 12;
+        const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+        const time = `${hour12}:${minutes} ${ampm}`;
+        return `${date} at ${time}`;
+      } catch {
+        // Fall through to other methods
+      }
+    }
+    
+    if (preferred.date) {
+      try {
+        const date = new Date(preferred.date).toLocaleDateString([], { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        return date;
+      } catch {
+        // Fall through to other methods
+      }
+    }
+  }
+  
+  // Fallback to existing logic
   if (incident.dateTime) {
     return formatHeader(incident.dateTime);
   }
@@ -254,6 +291,24 @@ export function getIncidentDisplayDate(incident: any): string {
  * Get formatted time display for incident based on data precedence
  */
 export function getIncidentDisplayTime(incident: any): string {
+  // First check for preferred time from timeline
+  if (incident.timeline) {
+    const { getPreferredDateTime } = require('@/utils/timelineParser');
+    const preferred = getPreferredDateTime(incident);
+    
+    if (preferred.time) {
+      try {
+        const [hours, minutes] = preferred.time.split(':');
+        const hour12 = parseInt(hours) % 12 || 12;
+        const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+        return `${hour12}:${minutes} ${ampm}`;
+      } catch {
+        // Fall through to other methods
+      }
+    }
+  }
+  
+  // Fallback to existing logic
   if (incident.dateTime) {
     return formatTimeOnly(incident.dateTime);
   }

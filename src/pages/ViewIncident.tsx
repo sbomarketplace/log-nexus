@@ -52,6 +52,52 @@ const ViewIncident = () => {
     });
   };
 
+  const getIncidentDisplayInfo = (incident: any) => {
+    // First check for preferred date/time from original text and timeline
+    if (incident.originalEventDateText || incident.timeline) {
+      const { getPreferredDateTime } = require('@/utils/timelineParser');
+      const preferred = getPreferredDateTime(incident);
+      
+      if (preferred.date && preferred.time) {
+        try {
+          const date = new Date(preferred.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          const [hours, minutes] = preferred.time.split(':');
+          const hour12 = parseInt(hours) % 12 || 12;
+          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+          const time = `${hour12}:${minutes} ${ampm}`;
+          return { date, time };
+        } catch {
+          // Fall through to original logic
+        }
+      }
+      
+      if (preferred.date) {
+        try {
+          const date = new Date(preferred.date).toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          return { date, time: null };
+        } catch {
+          // Fall through to original logic
+        }
+      }
+    }
+    
+    // Fallback to original logic
+    return {
+      date: formatDate(getDateSafely(incident, '')),
+      time: formatTime(incident.time)
+    };
+  };
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-4">
@@ -63,7 +109,10 @@ const ViewIncident = () => {
           <div className="flex-1">
             <h1 className="text-lg font-medium text-foreground">{incident.title}</h1>
             <p className="text-xs text-muted-foreground">
-              {formatDate(getDateSafely(incident, ''))} at {formatTime(incident.time)}
+              {(() => {
+                const info = getIncidentDisplayInfo(incident);
+                return info.time ? `${info.date} at ${info.time}` : info.date;
+              })()}
             </p>
           </div>
         </div>
