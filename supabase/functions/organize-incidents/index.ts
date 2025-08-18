@@ -58,7 +58,7 @@ async function callOpenAI(prompt: string) {
     messages: [
       { 
         role: "system", 
-        content: `Extract workplace incident information into JSON with maximum detail preservation. Return only clean JSON with these exact keys:
+        content: `Extract workplace incident information into JSON with maximum detail preservation. MAINTAIN FIRST-PERSON PERSPECTIVE throughout. Return only clean JSON with these exact keys:
 
 - date: Date of incident (e.g., "7/22")
 
@@ -88,11 +88,11 @@ async function callOpenAI(prompt: string) {
   Format: "Managers: Arthur Samora, Vincent Jessie, Seth Bentley; Union Stewards: Troy Denney, Jon Taylor; Security: Two unnamed officers; Others: Mark Cordell, Brian"
   Extract EVERY person mentioned and categorize them based on context clues.
 
-- what: CONCISE summary of the main incident and key facts only:
-  * Primary accusation or issue
+- what: CONCISE summary of the main incident and key facts only from first-person perspective:
+  * Primary accusation or issue as experienced by the reporter
   * Essential outcome or resolution
   * Critical statements (1-2 key quotes max)
-  Keep this brief - detailed timeline goes in "when" field.
+  Keep this brief - detailed timeline goes in "notes" field.
 
 - where: Specific location details:
   * Primary location (e.g., "Tool box room (tool closet)")
@@ -104,14 +104,20 @@ async function callOpenAI(prompt: string) {
 
 - witnesses: Array of witness names only (people who observed but weren't directly involved)
 
-- notes: Comprehensive chronological timeline and additional details:
-  * "Timeline:" followed by detailed chronological events with times
+- notes: Comprehensive chronological timeline and additional details in FIRST-PERSON perspective:
+  * "Timeline:" followed by detailed chronological events with times (e.g., "I saw...", "I told...", "Mark said to me...")
   * "Requests/Responses:" for denied/approved requests  
   * "Policy Violations:" as bulleted list if any
   * "Important Quotes:" for verbatim statements
   * "Evidence/Testing:" for lab tests, searches, etc.
   * "Additional Details:" for other relevant information
   Use ALL details from raw notes. Preserve exact quotes and times.
+
+PERSPECTIVE RULES:
+- If notes are in first-person (I, me, my), KEEP THEM in first-person throughout
+- Never convert "I saw" to "the employee saw" or "the reporter observed"
+- Maintain the reporter's voice and perspective in all sections
+- Only use third-person for OTHER people mentioned in the incident
 
 FORMATTING RULES:
 - Never use empty brackets [] - omit empty categories entirely
@@ -120,7 +126,7 @@ FORMATTING RULES:
 - Group similar information under clear headers in "notes"
 - Preserve all names, times, quotes, and procedural details
 
-CRITICAL: Use ALL information from the raw notes. The goal is maximum detail preservation with clean organization.`
+CRITICAL: Use ALL information from the raw notes while maintaining the reporter's first-person perspective. The goal is maximum detail preservation with clean organization and natural voice.`
       },
       { role: "user", content: prompt }
     ]
