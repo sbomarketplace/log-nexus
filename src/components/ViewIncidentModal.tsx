@@ -27,7 +27,6 @@ import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
 import { toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
-import '../styles/incident-modal.css';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
