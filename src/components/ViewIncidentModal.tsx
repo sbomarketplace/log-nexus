@@ -26,7 +26,7 @@ import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
-import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
+import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 
 interface ViewIncidentModalProps {
@@ -55,7 +55,7 @@ export const ViewIncidentModal = ({
   const [parsedDate, setParsedDate] = useState<{ date: string; confidence: string } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
-  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
   const [caseNumber, setCaseNumber] = useState('');
   const firstEditFieldRef = useRef<HTMLInputElement>(null);
 
@@ -73,21 +73,23 @@ export const ViewIncidentModal = ({
         ...incident
       });
       
-      // Use unified dateTime field with fallback to legacy fields
+      // Use unified dateTime field with fallback to legacy fields for initialization
       const effectiveDateTime = getOrganizedDateTime(incident);
       if (effectiveDateTime) {
-        const dateObj = parseFromISO(effectiveDateTime);
+        const dateObj = parseISOToLocalDate(effectiveDateTime);
         if (dateObj) {
           setDateInput(toDateInputValue(dateObj.toISOString()));
           setTimeInput(toTimeInputValue(dateObj.toTimeString().slice(0, 5)));
           setSelectedDateTime(dateObj);
+        } else {
+          setSelectedDateTime(null);
         }
       } else {
-        // Fallback to legacy fields
-        setDateInput(toDateInputValue(incident.date));
-        setTimeInput(toTimeInputValue(incident.when));
-        const legacyDateTime = parseFromISO(incident.date);
-        setSelectedDateTime(legacyDateTime || new Date());
+        // Initialize with current date/time if no existing data
+        const now = new Date();
+        setSelectedDateTime(now);
+        setDateInput(toDateInputValue(now.toISOString()));
+        setTimeInput(toTimeInputValue(now.toTimeString().slice(0, 5)));
       }
       
       setCaseNumber(incident.caseNumber || '');
@@ -133,14 +135,14 @@ export const ViewIncidentModal = ({
 
   // Derived display values
   const displayDate = (() => {
-    if (isEditMode) {
+    if (isEditMode && selectedDateTime) {
       return selectedDateTime.toLocaleDateString();
     }
     return effectiveDateTime ? formatHeader(effectiveDateTime) : 'No date';
   })();
 
   const displayTime = (() => {
-    if (isEditMode) {
+    if (isEditMode && selectedDateTime) {
       return selectedDateTime.toTimeString().slice(0, 5);
     }
     return effectiveDateTime ? formatTimeOnly(effectiveDateTime) : 'No time';
@@ -153,8 +155,8 @@ export const ViewIncidentModal = ({
     if (value.trim()) {
       const newDate = new Date(value);
       if (!isNaN(newDate.getTime())) {
-        const updatedDateTime = new Date(selectedDateTime);
-        updatedDateTime.setFullYear(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
+        const currentTime = selectedDateTime || new Date();
+        const updatedDateTime = combineDateAndTime(newDate, currentTime);
         setSelectedDateTime(updatedDateTime);
       }
     }
@@ -172,8 +174,10 @@ export const ViewIncidentModal = ({
     if (value.trim()) {
       const [hours, minutes] = value.split(':').map(Number);
       if (!isNaN(hours) && !isNaN(minutes)) {
-        const updatedDateTime = new Date(selectedDateTime);
-        updatedDateTime.setHours(hours, minutes, 0, 0);
+        const currentDate = selectedDateTime || new Date();
+        const timeOnlyDate = new Date();
+        timeOnlyDate.setHours(hours, minutes, 0, 0);
+        const updatedDateTime = combineDateAndTime(currentDate, timeOnlyDate);
         setSelectedDateTime(updatedDateTime);
       }
     }
@@ -221,8 +225,12 @@ export const ViewIncidentModal = ({
     setIsSaving(true);
 
     try {
-      // Calculate the updated date and time values using the unified selectedDateTime approach
-      const updatedDateTime = selectedDateTime.toISOString(); // Store as unified dateTime
+      // Preserve dateTime properly - use selectedDateTime if changed, otherwise keep original
+      const resolvedDateTimeISO = selectedDateTime 
+        ? toUTCISO(selectedDateTime)
+        : incident.dateTime ?? null;
+      
+      // Legacy field updates for backward compatibility
       const updatedDate = dateInput ? formatDateForStorage(dateInput) : getDateSafely(incident, '');
       const updatedTime = timeInput || incident.when;
       
@@ -257,7 +265,7 @@ export const ViewIncidentModal = ({
         originalEventDateText,
         date: updatedDate, // Keep for backward compatibility
         when: updatedTime, // Keep for backward compatibility
-        dateTime: updatedDateTime, // New unified field
+        dateTime: resolvedDateTimeISO, // Unified field - preserve existing if not changed
         caseNumber: caseNumber.trim() || undefined, // Add case number field
         updatedAt: new Date().toISOString()
       };
@@ -520,18 +528,22 @@ export const ViewIncidentModal = ({
                       )}
                     </div>
                   
-                  {/* Case Number Field */}
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      id="incident-case-number"
-                      value={caseNumber}
-                      onChange={(e) => setCaseNumber(e.target.value)}
-                      placeholder="Case # (Optional)"
-                      maxLength={50}
-                      className="text-base h-9"
-                      aria-label="Case number"
-                    />
-                  </div>
+                   <div className="flex-1 min-w-0">
+                     <Input
+                       id="incident-case-number"
+                       value={caseNumber}
+                       onChange={(e) => {
+                         const value = e.target.value;
+                         if (value.length <= 50) {
+                           setCaseNumber(value);
+                         }
+                       }}
+                       placeholder="Case # (Optional)"
+                       maxLength={50}
+                       className="text-base h-9"
+                       aria-label="Case number"
+                     />
+                   </div>
 
                   {/* Category Select */}
                   <div className="flex-1 min-w-0">

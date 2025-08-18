@@ -1,5 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { StructuredIncidentResponse } from "@/types/structured-incidents";
+import { showToast } from "@/components/SuccessToast";
 
 export async function organizeNotes(rawNotes: string) {
   try {
@@ -46,6 +47,13 @@ export async function organizeNotes(rawNotes: string) {
       throw new Error(`Organizer returned unexpected format.\n\n[View function logs](https://supabase.com/dashboard/project/higuokkqenvesmexzozx/functions/organize-incidents/logs)`);
     }
 
+    // Show success toast
+    showToast({ 
+      message: "Notes organized.", 
+      type: "success", 
+      durationMs: 2500 
+    });
+    
     return data.normalized.incidents;
   } catch (error) {
     // Re-throw with function logs link if not already included

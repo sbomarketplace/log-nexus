@@ -162,6 +162,15 @@ export function validateCaseNumber(caseNumber: string): boolean {
 }
 
 /**
+ * Parse ISO string to local Date object for form initialization
+ */
+export function parseISOToLocalDate(iso: string): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
  * Migration utility: combine legacy date and time into unified dateTime
  */
 export function migrateLegacyDateTime(legacyDate?: string, legacyTime?: string): string | null {
