@@ -192,9 +192,7 @@ const Home = () => {
         localStorage.removeItem('quickNotesDraft');
         loadIncidents();
         
-        toast({
-          title: "Notes organized.",
-        });
+        // Success toast is already shown by organizer.ts
 
         // Scroll to incident reports section after organizing
         setTimeout(() => {
