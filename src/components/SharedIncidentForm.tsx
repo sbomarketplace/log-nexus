@@ -14,6 +14,7 @@ import {
   toUTCISO,
   validateCaseNumber 
 } from '@/utils/datetime';
+import { getPreferredDateTime } from '@/utils/timelineParser';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -57,17 +58,18 @@ export const SharedIncidentForm = ({
 }: SharedIncidentFormProps) => {
   // Initialize form state based on incident data precedence
   const initializeFormData = (): FormData => {
-    // Build initial values once and do not fall back to new Date()
+    // Get preferred date and time from original date text and timeline
+    const preferred = getPreferredDateTime(incident);
+    
+    // Build initial values with preference for original date text and timeline time
     const hasDateTime = Boolean(incident.dateTime);
     const dtLocal = hasDateTime ? parseISOToLocal(incident.dateTime!) : null;
     
     return {
-      dateValue: dtLocal 
-        ? formatYYYYMMDD(dtLocal)
-        : incident.datePart ?? null,
-      timeValue: dtLocal 
-        ? formatHHmm(dtLocal)
-        : incident.timePart ?? null,
+      dateValue: preferred.date || 
+                 (dtLocal ? formatYYYYMMDD(dtLocal) : incident.datePart) || null,
+      timeValue: preferred.time || 
+                 (dtLocal ? formatHHmm(dtLocal) : incident.timePart) || null,
       caseNumber: incident.caseNumber ?? "",
       categoryOrIssue: incident.categoryOrIssue || "",
       who: incident.who || "",

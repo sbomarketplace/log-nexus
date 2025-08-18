@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { X, Edit3, Save, Loader2 } from 'lucide-react';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { formatDisplayDate, parseIncidentDate } from '@/utils/dateParser';
+import { getPreferredDateTime } from '@/utils/timelineParser';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
@@ -73,7 +74,10 @@ export const ViewIncidentModal = ({
         ...incident
       });
       
-      // Use unified dateTime field with fallback to legacy fields for initialization
+      // Get preferred date/time from original date text and timeline
+      const preferred = getPreferredDateTime(incident);
+      
+      // Use unified dateTime field with fallback to legacy fields, then preferred values
       const effectiveDateTime = getOrganizedDateTime(incident);
       if (effectiveDateTime) {
         const dateObj = parseISOToLocalDate(effectiveDateTime);
@@ -83,6 +87,21 @@ export const ViewIncidentModal = ({
           setSelectedDateTime(dateObj);
         } else {
           setSelectedDateTime(null);
+        }
+      } else if (preferred.date || preferred.time) {
+        // Use preferred values from original date text and timeline
+        const now = new Date();
+        setDateInput(preferred.date || toDateInputValue(now.toISOString()));
+        setTimeInput(preferred.time || toTimeInputValue(now.toTimeString().slice(0, 5)));
+        
+        // Create combined date object if we have both
+        if (preferred.date && preferred.time) {
+          const [hours, minutes] = preferred.time.split(':').map(Number);
+          const dateObj = new Date(preferred.date + 'T00:00:00');
+          dateObj.setHours(hours, minutes, 0, 0);
+          setSelectedDateTime(dateObj);
+        } else {
+          setSelectedDateTime(now);
         }
       } else {
         // Initialize with current date/time if no existing data
@@ -137,6 +156,10 @@ export const ViewIncidentModal = ({
   const displayDate = (() => {
     if (isEditMode && selectedDateTime) {
       return selectedDateTime.toLocaleDateString();
+    }
+    // Use original date text if available, otherwise formatted datetime
+    if (incident?.originalEventDateText && !isEditMode) {
+      return incident.originalEventDateText;
     }
     return effectiveDateTime ? formatHeader(effectiveDateTime) : 'No date';
   })();
