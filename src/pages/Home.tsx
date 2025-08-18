@@ -545,12 +545,12 @@ const Home = () => {
                         <div className="flex flex-wrap items-center gap-2">
                           <Badge 
                             variant="secondary" 
-                            className="text-xs px-2 py-1 font-medium shrink-0 h-7 flex items-center bg-muted text-muted-foreground border"
+                            className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-muted text-muted-foreground border rounded-full"
                           >
                             {extractDateFromContent(incident)}
                           </Badge>
-                          <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-7 px-2 rounded-full flex items-center justify-center break-words min-w-0 flex-1`}
-                               style={{ fontSize: 'clamp(10px, 1.6vw, 12px)' }}>
+                          <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
+                               style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
                             {incident.categoryOrIssue}
                           </div>
                         </div>

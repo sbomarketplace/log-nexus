@@ -176,6 +176,48 @@ All colors MUST be HSL.
     --default-tint: 220 9% 15%;
   }
 
+  /* Category tint border classes */
+  .category-tint-safety {
+    border-left-color: hsl(var(--safety-tint));
+  }
+
+  .category-tint-harassment {
+    border-left-color: hsl(var(--harassment-tint));
+  }
+
+  .category-tint-accusation {
+    border-left-color: hsl(var(--accusation-tint));
+  }
+
+  .category-tint-policy {
+    border-left-color: hsl(var(--policy-tint));
+  }
+
+  .category-tint-default {
+    border-left-color: hsl(var(--default-tint));
+  }
+
+  /* Focus ring colors that match categories */
+  .focus-visible\:ring-safety-tint:focus-visible {
+    --tw-ring-color: hsl(var(--safety-tint));
+  }
+
+  .focus-visible\:ring-harassment-tint:focus-visible {
+    --tw-ring-color: hsl(var(--harassment-tint));
+  }
+
+  .focus-visible\:ring-accusation-tint:focus-visible {
+    --tw-ring-color: hsl(var(--accusation-tint));
+  }
+
+  .focus-visible\:ring-policy-tint:focus-visible {
+    --tw-ring-color: hsl(var(--policy-tint));
+  }
+
+  .focus-visible\:ring-default-tint:focus-visible {
+    --tw-ring-color: hsl(var(--default-tint));
+  }
+
   /* Overflow and word breaking utilities for content containment */
   .break-words {
     word-break: break-word;
