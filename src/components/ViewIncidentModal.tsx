@@ -910,7 +910,7 @@ export const ViewIncidentModal = ({
                   <div>Created: {new Date(incident.createdAt).toLocaleString()}</div>
                   <div>Last Updated: {new Date(incident.updatedAt).toLocaleString()}</div>
                   {incident.originalEventDateText && (
-                    <div>Original Date Text: "{incident.originalEventDateText}"</div>
+                    <div>Original Date Text: "{displayDate}"</div>
                   )}
                 </div>
               </div>
