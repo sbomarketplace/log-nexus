@@ -26,6 +26,8 @@ import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
+import { toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
+import '../styles/incident-modal.css';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -49,6 +51,7 @@ export const ViewIncidentModal = ({
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<OrganizedIncident>>({});
   const [dateInput, setDateInput] = useState('');
+  const [timeInput, setTimeInput] = useState('');
   const [parsedDate, setParsedDate] = useState<{ date: string; confidence: string } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
@@ -67,7 +70,8 @@ export const ViewIncidentModal = ({
       setFormData({
         ...incident
       });
-      setDateInput(incident.originalEventDateText || getDateSafely(incident, '') || '');
+      setDateInput(toDateInputValue(incident.date));
+      setTimeInput(toTimeInputValue(incident.when));
       if (incident.canonicalEventDate) {
         setParsedDate({
           date: formatDisplayDate(incident.canonicalEventDate),
@@ -96,47 +100,31 @@ export const ViewIncidentModal = ({
       formData.requests !== incident.requests ||
       formData.policy !== incident.policy ||
       formData.evidence !== incident.evidence ||
-      dateInput !== (incident.originalEventDateText || getDateSafely(incident, '') || '')
+      dateInput !== toDateInputValue(incident.date) ||
+      timeInput !== toTimeInputValue(incident.when)
     );
     
     setIsDirty(hasChanges);
-  }, [formData, dateInput, incident, isEditMode]);
+  }, [formData, dateInput, timeInput, incident, isEditMode]);
 
   // Derived values and callbacks after hooks but before early return
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
 
   const displayDate = incident?.canonicalEventDate 
     ? formatDisplayDate(incident.canonicalEventDate)
-    : getDateSafely(incident) !== 'No date' 
-      ? getDateSafely(incident) 
-      : 'No date';
+    : dateInput || 'No date';
 
-  // Handle date input changes with live parsing
   const handleDateInputChange = useCallback((value: string) => {
     setDateInput(value);
     
-    if (!value.trim()) {
-      setParsedDate(null);
+    // Clear date validation error if we have a valid date
+    if (value.trim() && validationErrors.date) {
       setValidationErrors(prev => ({ ...prev, date: '' }));
-      return;
     }
+  }, [validationErrors.date]);
 
-    try {
-      const parsed = parseIncidentDate(value);
-      if (parsed) {
-        setParsedDate({
-          date: formatDisplayDate(parsed.canonicalEventDate),
-          confidence: parsed.confidence
-        });
-        setValidationErrors(prev => ({ ...prev, date: '' }));
-      } else {
-        setParsedDate(null);
-        setValidationErrors(prev => ({ ...prev, date: 'Unable to parse date. Try formats like "yesterday", "07/23", or "last Friday".' }));
-      }
-    } catch (error) {
-      setParsedDate(null);
-      setValidationErrors(prev => ({ ...prev, date: 'Invalid date format' }));
-    }
+  const handleTimeInputChange = useCallback((value: string) => {
+    setTimeInput(value);
   }, []);
 
   // Handle form field changes
@@ -185,12 +173,9 @@ export const ViewIncidentModal = ({
       let canonicalEventDate = incident.canonicalEventDate;
       let originalEventDateText = incident.originalEventDateText;
       
-      if (dateInput !== (incident.originalEventDateText || getDateSafely(incident, '') || '')) {
-        const parsed = parseIncidentDate(dateInput);
-        if (parsed) {
-          canonicalEventDate = parsed.canonicalEventDate;
-          originalEventDateText = parsed.originalEventDateText;
-        }
+      if (dateInput !== toDateInputValue(incident.date)) {
+        originalEventDateText = dateInput;
+        setParsedDate({ date: formatDateForStorage(dateInput), confidence: 'high' });
       }
 
       // Apply first-person normalization and grammar pass to text fields
@@ -213,7 +198,8 @@ export const ViewIncidentModal = ({
         ...normalizedData,
         canonicalEventDate,
         originalEventDateText,
-        date: parsedDate?.date || getDateSafely(incident, ''),
+        date: parsedDate?.date || formatDateForStorage(dateInput) || getDateSafely(incident, ''),
+        when: timeInput || incident.when,
         updatedAt: new Date().toISOString()
       };
 
@@ -252,8 +238,9 @@ export const ViewIncidentModal = ({
       if (window.confirm('You have unsaved changes. Discard your changes?')) {
         // Reset form data
         if (incident) {
-          setFormData({ ...incident });
-          setDateInput(incident.originalEventDateText || getDateSafely(incident, '') || '');
+        setFormData({ ...incident });
+          setDateInput(toDateInputValue(incident.date));
+          setTimeInput(toTimeInputValue(incident.when));
           if (incident.canonicalEventDate) {
             setParsedDate({
               date: formatDisplayDate(incident.canonicalEventDate),
@@ -423,25 +410,46 @@ export const ViewIncidentModal = ({
             <div className={`flex items-start gap-3 mb-3 ${isEditMode ? 'flex-col sm:flex-row' : 'flex-wrap'}`}>
               {isEditMode ? (
                 <>
-                  {/* Date Input */}
-                  <div className="flex-1 min-w-0">
-                    <Input
-                      ref={firstEditFieldRef}
-                      value={dateInput}
-                      onChange={(e) => handleDateInputChange(e.target.value)}
-                      placeholder="e.g., yesterday, 07/23, last Friday"
-                      className={`text-base h-9 ${validationErrors.date ? 'border-destructive' : ''}`}
-                      aria-label="Event date"
-                    />
-                    {parsedDate && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Parsed as: {parsedDate.date}
-                      </div>
-                    )}
-                    {validationErrors.date && (
-                      <div className="text-xs text-destructive mt-1">{validationErrors.date}</div>
-                    )}
-                  </div>
+                    {/* Date Field - Native calendar picker */}
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        ref={firstEditFieldRef}
+                        id="incident-date"
+                        type="date"
+                        value={dateInput}
+                        onChange={(e) => handleDateInputChange(e.target.value)}
+                        className={`text-base h-9 cc-field-label ${validationErrors.date ? 'border-destructive' : ''}`}
+                        aria-label="Incident date"
+                        style={{ fontSize: '16px' }}
+                      />
+                      {dateInput && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Selected: {new Date(dateInput).toLocaleDateString()}
+                        </div>
+                      )}
+                      {validationErrors.date && (
+                        <div className="text-xs text-destructive mt-1">{validationErrors.date}</div>
+                      )}
+                    </div>
+
+                    {/* Time Field - Native time picker */}
+                    <div className="flex-1 min-w-0">
+                      <Input
+                        id="incident-time-header"
+                        type="time"
+                        step="60"
+                        value={timeInput}
+                        onChange={(e) => handleTimeInputChange(e.target.value)}
+                        className="text-base h-9 cc-field-label"
+                        aria-label="Incident time"
+                        style={{ fontSize: '16px' }}
+                      />
+                      {timeInput && (
+                        <div className="text-xs text-muted-foreground mt-1">
+                          {new Date(`2000-01-01T${timeInput}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
+                        </div>
+                      )}
+                    </div>
                   
                   {/* Category Select */}
                   <div className="flex-1 min-w-0">
@@ -549,24 +557,29 @@ export const ViewIncidentModal = ({
 
               {((isEditMode || incident.where) && (isEditMode || incident.when)) && <div className="border-t border-border/50 my-2"></div>}
 
-              {/* When Section */}
-              {(isEditMode || incident.when) && (
                 <div>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">When</h4>
+                  <h4 className="text-xs font-medium text-slate-600 mb-1">Time</h4>
                   {isEditMode ? (
                     <Input
-                      value={formData.when || ''}
-                      onChange={(e) => handleFieldChange('when', e.target.value)}
-                      placeholder="When did it happen?"
-                      className="text-base"
+                      id="incident-time-edit"
+                      type="time"
+                      step="60"
+                      value={timeInput}
+                      onChange={(e) => handleTimeInputChange(e.target.value)}
+                      className="text-base h-9 cc-field-label"
+                      aria-label="Incident time"
+                      style={{ fontSize: '16px' }}
                     />
                   ) : (
-                    <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {renderTextWithPhoneLinks(incident.when)}
-                    </p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <div className="break-words">
+                        {timeInput || incident.when || (
+                          <span className="text-muted-foreground italic">No time specified</span>
+                        )}
+                      </div>
+                    </div>
                   )}
                 </div>
-              )}
 
               {((isEditMode || incident.when) && (isEditMode || incident.witnesses)) && <div className="border-t border-border/50 my-2"></div>}
 

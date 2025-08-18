@@ -237,4 +237,18 @@ All colors MUST be HSL.
   .phone-link {
     @apply text-primary hover:underline transition-colors cursor-pointer;
   }
+
+  /* Prevent iOS zoom on date/time inputs */
+  .cc-field-label + input[type="date"],
+  .cc-field-label + input[type="time"],
+  input[type="date"].cc-field-label,
+  input[type="time"].cc-field-label {
+    font-size: 16px !important;
+  }
+
+  /* Ensure native date/time pickers are accessible */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+  }
 }
