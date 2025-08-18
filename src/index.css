@@ -117,7 +117,8 @@ All colors MUST be HSL.
   /* Make default text sizes smaller */
   p, div, span { @apply text-sm; }
   label { @apply text-xs font-medium; }
-  input, textarea, select { @apply text-sm; }
+  /* Prevent mobile zoom on inputs - use 16px minimum font-size */
+  input, textarea, select { @apply text-base; }
 }
 
 /* Enhanced UI utilities for incident list */
