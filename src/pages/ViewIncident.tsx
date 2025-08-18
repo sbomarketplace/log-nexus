@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { ArrowLeftIcon } from '@/components/icons/CustomIcons';
+import { getDateSafely } from '@/utils/safeDate';
 
 const ViewIncident = () => {
   const { id } = useParams<{ id: string }>();
@@ -62,7 +63,7 @@ const ViewIncident = () => {
           <div className="flex-1">
             <h1 className="text-lg font-medium text-foreground">{incident.title}</h1>
             <p className="text-xs text-muted-foreground">
-              {formatDate(incident.date)} at {formatTime(incident.time)}
+              {formatDate(getDateSafely(incident, ''))} at {formatTime(incident.time)}
             </p>
           </div>
         </div>

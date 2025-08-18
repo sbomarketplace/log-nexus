@@ -164,7 +164,7 @@ const Home = () => {
         const incidentsToSave = results.map(incident => {
           const baseIncident: OrganizedIncident = {
             id: crypto.randomUUID(),
-            date: incident.date,
+            date: getDateSafely(incident, ''),
             categoryOrIssue: incident.categoryOrIssue,
             who: incident.who,
             what: incident.what,

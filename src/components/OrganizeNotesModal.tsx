@@ -113,7 +113,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       // Convert StructuredIncident to OrganizedIncident for home page storage
       const organizedIncident = {
         id: crypto.randomUUID(),
-        date: incident.date || "Unknown",
+        date: getDateSafely(incident, 'Unknown'),
         categoryOrIssue: incident.category,
         who: Object.values(incident.who).flat().join(", "),
         what: incident.whatHappened,
@@ -155,7 +155,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
     try {
       const organizedIncidentsToSave = organizedIncidents.map(incident => ({
         id: crypto.randomUUID(),
-        date: incident.date || "Unknown",
+        date: getDateSafely(incident, 'Unknown'),
         categoryOrIssue: incident.category,
         who: Object.values(incident.who).flat().join(", "),
         what: incident.whatHappened,
@@ -188,7 +188,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
   };
 
   const handleExportIncident = (incident: StructuredIncident) => {
-    const content = `${incident.date || 'Unknown'} — ${incident.category}
+    const content = `${getDateSafely(incident, 'Unknown')} — ${incident.category}
 
 Who:
 - Accused: ${incident.who.accused?.join(', ') || 'None'}
@@ -223,7 +223,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `incident-${incident.date || 'unknown'}-${incident.category.toLowerCase().replace(/\s+/g, '-')}.txt`;
+    link.download = `incident-${getDateSafely(incident, 'unknown')}-${incident.category.toLowerCase().replace(/\s+/g, '-')}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

@@ -7,6 +7,7 @@ import { Download } from 'lucide-react';
 import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { useToast } from '@/hooks/use-toast';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
+import { formatDateForUI } from '@/utils/safeDate';
 
 interface ExportModalProps {
   open: boolean;
@@ -73,7 +74,7 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
                   <CardContent className="p-4 space-y-3">
                     <div className="flex flex-wrap gap-2 mb-3">
                       <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                        {formatDate(incident.date)}
+                        {formatDateForUI(incident?.date)}
                       </span>
                       <span className="px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full">
                         {incident.categoryOrIssue}

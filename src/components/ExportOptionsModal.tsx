@@ -6,6 +6,7 @@ import { Loader2, Mail, FileText, Printer, Download, Share, Save, File, FileImag
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { useExportIncident } from '@/hooks/useExportIncident';
 import { ExportOption } from '@/types/export';
+import { formatDateForUI } from '@/utils/safeDate';
 
 interface ExportOptionsModalProps {
   open: boolean;
@@ -128,7 +129,7 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           <div className="mb-4 p-3 bg-muted/30 rounded-lg">
           <div className="flex flex-wrap gap-2 mb-2">
             <Badge variant="outline" className="text-xs">
-              {formatDate(incident.date)}
+              {formatDateForUI(incident?.date)}
             </Badge>
             <Badge variant="secondary" className="text-xs">
               {incident.categoryOrIssue}

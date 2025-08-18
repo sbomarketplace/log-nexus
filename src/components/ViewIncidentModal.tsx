@@ -25,6 +25,7 @@ import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
+import { getDateSafely } from '@/utils/safeDate';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -66,7 +67,7 @@ export const ViewIncidentModal = ({
       setFormData({
         ...incident
       });
-      setDateInput(incident.originalEventDateText || incident.date || '');
+      setDateInput(incident.originalEventDateText || getDateSafely(incident, '') || '');
       if (incident.canonicalEventDate) {
         setParsedDate({
           date: formatDisplayDate(incident.canonicalEventDate),
@@ -95,7 +96,7 @@ export const ViewIncidentModal = ({
       formData.requests !== incident.requests ||
       formData.policy !== incident.policy ||
       formData.evidence !== incident.evidence ||
-      dateInput !== (incident.originalEventDateText || incident.date || '')
+      dateInput !== (incident.originalEventDateText || getDateSafely(incident, '') || '')
     );
     
     setIsDirty(hasChanges);
@@ -106,8 +107,8 @@ export const ViewIncidentModal = ({
 
   const displayDate = incident?.canonicalEventDate 
     ? formatDisplayDate(incident.canonicalEventDate)
-    : incident?.date !== 'No date' 
-      ? incident.date 
+    : getDateSafely(incident) !== 'No date' 
+      ? getDateSafely(incident) 
       : 'No date';
 
   // Handle date input changes with live parsing
@@ -184,7 +185,7 @@ export const ViewIncidentModal = ({
       let canonicalEventDate = incident.canonicalEventDate;
       let originalEventDateText = incident.originalEventDateText;
       
-      if (dateInput !== (incident.originalEventDateText || incident.date || '')) {
+      if (dateInput !== (incident.originalEventDateText || getDateSafely(incident, '') || '')) {
         const parsed = parseIncidentDate(dateInput);
         if (parsed) {
           canonicalEventDate = parsed.canonicalEventDate;
@@ -212,7 +213,7 @@ export const ViewIncidentModal = ({
         ...normalizedData,
         canonicalEventDate,
         originalEventDateText,
-        date: parsedDate?.date || incident.date,
+        date: parsedDate?.date || getDateSafely(incident, ''),
         updatedAt: new Date().toISOString()
       };
 
@@ -252,7 +253,7 @@ export const ViewIncidentModal = ({
         // Reset form data
         if (incident) {
           setFormData({ ...incident });
-          setDateInput(incident.originalEventDateText || incident.date || '');
+          setDateInput(incident.originalEventDateText || getDateSafely(incident, '') || '');
           if (incident.canonicalEventDate) {
             setParsedDate({
               date: formatDisplayDate(incident.canonicalEventDate),

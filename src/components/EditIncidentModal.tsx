@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Upload, FileText, X } from 'lucide-react';
 import { processIncident, updateIncidentCategory } from '@/services/incidentProcessor';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
+import { getDateSafely } from '@/utils/safeDate';
 
 interface EditIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -30,7 +31,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
   useEffect(() => {
     if (incident) {
       setFormData({
-        date: incident.date,
+        date: getDateSafely(incident, ''),
         categoryOrIssue: incident.categoryOrIssue,
         who: incident.who,
         what: incident.what,
@@ -83,7 +84,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
   };
 
   const handleSave = async () => {
-    if (!incident || !formData.date || !formData.categoryOrIssue || !formData.what) {
+    if (!incident || !getDateSafely(incident, formData.date) || !formData.categoryOrIssue || !formData.what) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -139,7 +140,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
   const handleCancel = () => {
     if (incident) {
       setFormData({
-        date: incident.date,
+        date: getDateSafely(incident, ''),
         categoryOrIssue: incident.categoryOrIssue,
         who: incident.who,
         what: incident.what,
@@ -198,12 +199,12 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
             {/* Date Field */}
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date || ''}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              />
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date || getDateSafely(incident, '')}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                />
             </div>
 
             {/* Category Field */}

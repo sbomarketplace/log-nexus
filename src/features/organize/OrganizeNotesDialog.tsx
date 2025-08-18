@@ -3,10 +3,11 @@ import { organizeIncidents } from "@/services/ai";
 import { incidentService } from "@/services/incidents";
 import type { OrganizedIncident } from "@/types/incidents";
 import { IncidentRecord } from "@/types/incidents";
+import { getDateSafely } from "@/utils/safeDate";
 
 function exportText(inc: OrganizedIncident) {
   const lines = [
-    `${inc.date} — ${inc.categoryOrIssue}`,
+    `${getDateSafely(inc, 'No date')} — ${inc.categoryOrIssue}`,
     `Who: ${inc.who}`,
     `What: ${inc.what}`,
     `Where: ${inc.where}`,
@@ -18,7 +19,7 @@ function exportText(inc: OrganizedIncident) {
   const a = document.createElement("a");
   const safe = (inc.categoryOrIssue || "incident").toLowerCase().replace(/[^a-z0-9]+/g, "-");
   a.href = URL.createObjectURL(blob);
-  a.download = `incident-${inc.date}-${safe}.txt`;
+  a.download = `incident-${getDateSafely(inc, 'unknown')}-${safe}.txt`;
   a.click();
   URL.revokeObjectURL(a.href);
 }
@@ -56,7 +57,7 @@ export default function OrganizeNotesDialog(props: { onClose: () => void; onSave
       id: crypto.randomUUID(),
       created_at: new Date().toISOString(),
       events: [{
-        date: inc.date,
+        date: getDateSafely(inc, ''),
         category: inc.categoryOrIssue,
         who: inc.who,
         what: inc.what,
@@ -128,7 +129,7 @@ export default function OrganizeNotesDialog(props: { onClose: () => void; onSave
 
           {preview.map((inc, idx) => (
             <div key={idx} className="rounded-xl border p-3 shadow-sm">
-              <div className="font-semibold mb-1">{inc.date} — {inc.categoryOrIssue}</div>
+              <div className="font-semibold mb-1">{getDateSafely(inc, 'No date')} — {inc.categoryOrIssue}</div>
               <div className="text-sm leading-6">
                 <div><strong>Who:</strong> {inc.who}</div>
                 <div><strong>What:</strong> {inc.what}</div>

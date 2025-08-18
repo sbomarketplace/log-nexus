@@ -184,7 +184,7 @@ Rules:
     try {
       const organizedIncident: OrganizedIncident = {
         id: crypto.randomUUID(),
-        date: incident.date,
+        date: getDateSafely(incident, ''),
         categoryOrIssue: incident.categoryOrIssue,
         who: incident.who,
         what: incident.what,
@@ -221,7 +221,7 @@ Rules:
     try {
       const newIncidents: OrganizedIncident[] = organizedIncidents.map(incident => ({
         id: crypto.randomUUID(),
-        date: incident.date,
+        date: getDateSafely(incident, ''),
         categoryOrIssue: incident.categoryOrIssue,
         who: incident.who,
         what: incident.what,
@@ -364,7 +364,7 @@ Rules:
                     <div className="space-y-3">
                       <div className="flex items-center gap-2 mb-2">
                         <Badge variant="secondary" className="text-xs">
-                          {incident.date}
+                          {getDateSafely(incident, 'No date')}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
                           {incident.categoryOrIssue}
@@ -394,7 +394,7 @@ Rules:
                           onClick={() => {
                             const content = organizedIncidentStorage.exportToText({
                               id: 'temp',
-                              date: incident.date,
+                              date: getDateSafely(incident, ''),
                               categoryOrIssue: incident.categoryOrIssue,
                               who: incident.who,
                               what: incident.what,
