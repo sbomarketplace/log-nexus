@@ -23,6 +23,7 @@ import { getAllCategories } from '@/utils/incidentCategories';
 import { processIncident } from '@/services/incidentProcessor';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getDateSafely, hasValidDate } from '@/utils/safeDate';
+import { getPreferredDateTime } from '@/utils/timelineParser';
 
 import jsPDF from 'jspdf';
 
@@ -236,7 +237,6 @@ const Home = () => {
   const formatDate = (incident: OrganizedIncident): string => {
     // First check for preferred date from original text
     if (incident.originalEventDateText || incident.timeline) {
-      const { getPreferredDateTime } = require('@/utils/timelineParser');
       const preferred = getPreferredDateTime(incident);
       
       if (preferred.date) {
