@@ -109,8 +109,8 @@ export const organizedIncidentStorage = {
     return `INCIDENT REPORT
 =================
 
-Date: ${incident.date}
-Category/Issue: ${incident.categoryOrIssue}
+Date: ${incident?.date || 'Unknown'}
+Category/Issue: ${incident?.categoryOrIssue || 'Uncategorized'}
 
 WHO: ${incident.who}
 
@@ -131,7 +131,10 @@ Last Updated: ${new Date(incident.updatedAt).toLocaleString()}`;
 
   downloadAsFile(incident: OrganizedIncident): void {
     const content = this.exportToText(incident);
-    const filename = `incident-${incident.date.replace(/[\/\s]/g, '-')}-${incident.categoryOrIssue.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+    // Safe filename generation to prevent null date access error
+    const safeDate = (incident?.date || 'unknown').replace(/[\/\s]/g, '-');
+    const safeCategory = (incident?.categoryOrIssue || 'uncategorized').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const filename = `incident-${safeDate}-${safeCategory}.txt`;
     
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);

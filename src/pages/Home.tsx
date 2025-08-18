@@ -22,6 +22,7 @@ import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIn
 import { getAllCategories } from '@/utils/incidentCategories';
 import { processIncident } from '@/services/incidentProcessor';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
+import { getDateSafely, hasValidDate } from '@/utils/safeDate';
 
 import jsPDF from 'jspdf';
 
@@ -261,8 +262,9 @@ const Home = () => {
       }
     }
 
-    const dateString = incident.date;
-    if (!dateString || dateString === 'No date' || dateString.trim() === '') {
+    // Parse the date string to check if it's the current year - null safety
+    const dateString = getDateSafely(incident, '');
+    if (!dateString || dateString === 'No date' || dateString === 'Unknown date') {
       return 'No date';
     }
     

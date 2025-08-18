@@ -5,14 +5,12 @@
 
 import { parseIncidentDate } from '@/utils/dateParser';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
-import { generateIncidentKey, saveCategoryMapping, getCategoryForKey } from '@/utils/incidentKeyGenerator';
+import { generateIncidentKey, getCategoryForKey, saveCategoryMapping } from '@/utils/incidentKeyGenerator';
+import { getDateSafely } from '@/utils/safeDate';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 
-export interface ProcessedIncident extends OrganizedIncident {
-  canonicalEventDate?: string;
-  originalEventDateText?: string;
-  incidentKey?: string;
-}
+// ProcessedIncident is just an alias since OrganizedIncident already has all the fields we need
+export type ProcessedIncident = OrganizedIncident;
 
 export interface ProcessIncidentOptions {
   authorPerspective?: 'first_person' | 'third_person';
@@ -30,7 +28,9 @@ export function processIncident(
   let existingCategory: string | null = null;
   
   if (rawNotes) {
-    const keyInfo = generateIncidentKey(rawNotes, incident.date);
+    // Safe date access for key generation
+    const dateForKey = getDateSafely(incident, '');
+    const keyInfo = generateIncidentKey(rawNotes, dateForKey);
     incidentKey = keyInfo.key;
     existingCategory = getCategoryForKey(incidentKey);
   }
@@ -39,8 +39,8 @@ export function processIncident(
   let canonicalEventDate: string | undefined;
   let originalEventDateText: string | undefined;
   
-  // Try to parse date from various sources
-  const dateToParse = incident.date || incident.when || 
+  // Try to parse date from various sources - null safety
+  const dateToParse = getDateSafely(incident, '') || incident.when || 
     (rawNotes ? extractDateFromRawNotes(rawNotes) : null);
   
   if (dateToParse && dateToParse !== 'No date') {
@@ -67,20 +67,6 @@ export function processIncident(
   const normalizedWhen = normalizeToFirstPerson(incident.when, { authorPerspective });
   const normalizedWitnesses = normalizeToFirstPerson(incident.witnesses, { authorPerspective });
   
-  // Apply to optional fields as well
-  const normalizedTimeline = incident.timeline 
-    ? normalizeToFirstPerson(incident.timeline, { authorPerspective })
-    : incident.timeline;
-  const normalizedRequests = incident.requests 
-    ? normalizeToFirstPerson(incident.requests, { authorPerspective })
-    : incident.requests;
-  const normalizedPolicy = incident.policy 
-    ? normalizeToFirstPerson(incident.policy, { authorPerspective })
-    : incident.policy;
-  const normalizedEvidence = incident.evidence 
-    ? normalizeToFirstPerson(incident.evidence, { authorPerspective })
-    : incident.evidence;
-  
   return {
     ...incident,
     categoryOrIssue,
@@ -90,10 +76,6 @@ export function processIncident(
     where: normalizedWhere,
     when: normalizedWhen, 
     witnesses: normalizedWitnesses,
-    timeline: normalizedTimeline,
-    requests: normalizedRequests,
-    policy: normalizedPolicy,
-    evidence: normalizedEvidence,
     canonicalEventDate,
     originalEventDateText,
     incidentKey

@@ -121,9 +121,10 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
     whereLocation = "Digital chat platform";
   }
 
-  // Generate unique incident summary
+  // Generate unique incident summary - null safety for date access
   const summaryParts = [];
-  if (apiIncident.date) summaryParts.push(`On ${apiIncident.date}`);
+  const safeDate = apiIncident?.date;
+  if (safeDate && safeDate.trim()) summaryParts.push(`On ${safeDate}`);
   if (whereLocation !== "Location unspecified") summaryParts.push(`at ${whereLocation}`);
   if (timeOnly !== "Time unspecified") summaryParts.push(`around ${timeOnly}`);
   
@@ -147,8 +148,8 @@ export function adaptApiToStructuredIncident(apiIncident: ApiIncident): Structur
   };
 
   return {
-    date: apiIncident.date || null,
-    category: apiIncident.category || "Uncategorized",
+    date: apiIncident?.date || null,
+    category: apiIncident?.category || "Uncategorized",
     who: whoGroups,
     where: whereLocation,
     timeline: timelineEvents,

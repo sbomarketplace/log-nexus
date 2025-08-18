@@ -10,6 +10,7 @@ import { organizeNotes } from '@/services/organizer';
 import { StructuredIncident } from '@/types/structured-incidents';
 import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
 import { organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
+import { getDateSafely, sanitizeIncidentArray } from '@/utils/safeDate';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
@@ -399,7 +400,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
                            {/* Header */}
                            <div className="mb-4">
                              <h3 className="text-sm font-semibold">
-                               Date — {incident.date || 'Unknown'} — {incident.category}
+                               Date — {getDateSafely(incident, 'Unknown')} — {incident.category || 'Uncategorized'}
                              </h3>
                            </div>
                            

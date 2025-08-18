@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
+import { getDateSafely } from '@/utils/safeDate';
 import { Upload, FileText } from 'lucide-react';
 
 interface ImportNotesModalProps {
@@ -409,7 +410,10 @@ Rules:
                             const url = URL.createObjectURL(blob);
                             const link = document.createElement('a');
                             link.href = url;
-                            link.download = `incident-${incident.date.replace(/[\/\s]/g, '-')}-${incident.categoryOrIssue.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.txt`;
+            // Safe filename generation to prevent null date access error
+            const safeDate = getDateSafely(incident, 'unknown').replace(/[\/\s]/g, '-');
+            const safeCategory = (incident.categoryOrIssue || 'uncategorized').replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            link.download = `incident-${safeDate}-${safeCategory}.txt`;
                             document.body.appendChild(link);
                             link.click();
                             document.body.removeChild(link);
