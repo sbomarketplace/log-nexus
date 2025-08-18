@@ -58,8 +58,8 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
       });
 
       // Check if category mapping exists and add if missing
-      if (payload.categoryOrIssue) {
-        await updateIncidentCategory(payload.categoryOrIssue);
+      if (payload.categoryOrIssue && processedIncident.incidentKey) {
+        await updateIncidentCategory(processedIncident.incidentKey, payload.categoryOrIssue);
       }
 
       organizedIncidentStorage.save(processedIncident);
@@ -154,5 +154,4 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
       </DialogContent>
     </Dialog>
   );
-  };
 };
