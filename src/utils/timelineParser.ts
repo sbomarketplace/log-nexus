@@ -135,5 +135,14 @@ export function getPreferredDateTime(incident: any): ExtractedDateTime {
     result.time = normalizeTimeForInput(firstTime);
   }
   
+  // Debug logging to help identify the issue
+  console.log('getPreferredDateTime debug:', {
+    originalEventDateText: incident.originalEventDateText,
+    timeline: incident.timeline,
+    extractedTime: firstTime,
+    normalizedTime: result.time,
+    result
+  });
+  
   return result;
 }
