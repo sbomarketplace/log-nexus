@@ -1,3 +1,16 @@
+/*
+ * REACT ERROR #310 FIX: "Rendered more hooks than during the previous render"
+ * 
+ * This error occurs when hooks are called conditionally or in different orders
+ * between renders. All hooks must be called at the top level and in the same
+ * order every time the component renders, regardless of props or state.
+ * 
+ * Fixed by:
+ * 1. Moving all hooks to top level before any conditional logic
+ * 2. Placing early returns AFTER all hook declarations
+ * 3. Guarding hook effects internally instead of conditionally calling hooks
+ */
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -40,9 +53,14 @@ export const ViewIncidentModal = ({
   const [isDirty, setIsDirty] = useState(false);
   const firstEditFieldRef = useRef<HTMLInputElement>(null);
 
-  const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
+  // Ensure consistent hook ordering with mounting guard
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
-  // Initialize form data when incident changes
+  // Initialize form data when incident changes - guarded internally to maintain hook order
   useEffect(() => {
     if (incident) {
       setFormData({
@@ -58,7 +76,7 @@ export const ViewIncidentModal = ({
     }
   }, [incident]);
 
-  // Check if form is dirty
+  // Check if form is dirty - guarded internally to maintain hook order  
   useEffect(() => {
     if (!incident || !isEditMode) {
       setIsDirty(false);
@@ -83,9 +101,12 @@ export const ViewIncidentModal = ({
     setIsDirty(hasChanges);
   }, [formData, dateInput, incident, isEditMode]);
 
-  const displayDate = incident.canonicalEventDate 
+  // Derived values and callbacks after hooks but before early return
+  const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
+
+  const displayDate = incident?.canonicalEventDate 
     ? formatDisplayDate(incident.canonicalEventDate)
-    : incident.date !== 'No date' 
+    : incident?.date !== 'No date' 
       ? incident.date 
       : 'No date';
 
@@ -229,13 +250,15 @@ export const ViewIncidentModal = ({
       // Show confirmation dialog for unsaved changes
       if (window.confirm('You have unsaved changes. Discard your changes?')) {
         // Reset form data
-        setFormData({ ...incident });
-        setDateInput(incident.originalEventDateText || incident.date || '');
-        if (incident.canonicalEventDate) {
-          setParsedDate({
-            date: formatDisplayDate(incident.canonicalEventDate),
-            confidence: 'high'
-          });
+        if (incident) {
+          setFormData({ ...incident });
+          setDateInput(incident.originalEventDateText || incident.date || '');
+          if (incident.canonicalEventDate) {
+            setParsedDate({
+              date: formatDisplayDate(incident.canonicalEventDate),
+              confidence: 'high'
+            });
+          }
         }
         setIsEditMode(false);
         setIsDirty(false);
@@ -263,7 +286,7 @@ export const ViewIncidentModal = ({
     }
   }, [isEditMode, isDirty, onOpenChange]);
 
-  // Keyboard handling
+  // Keyboard handling effect - moved after callback declarations
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isEditMode) return;
@@ -283,9 +306,6 @@ export const ViewIncidentModal = ({
     }
   }, [open, isEditMode, handleSave, handleCancel]);
 
-  // Early return AFTER all hooks are declared to maintain consistent hook order
-  if (!incident) return null;
-
   // Get category class for styling (ensure we get a consistent class reference)
   const getCategoryClass = useCallback((category: string) => {
     const lowerCategory = category.toLowerCase();
@@ -302,13 +322,17 @@ export const ViewIncidentModal = ({
     }
   }, []);
 
-  const categoryClass = getCategoryClass(formData.categoryOrIssue || incident.categoryOrIssue);
+  const categoryClass = getCategoryClass(formData.categoryOrIssue || incident?.categoryOrIssue || '');
 
   // Function to render text with clickable phone numbers
   const renderTextWithPhoneLinks = (text: string) => {
     const htmlWithPhoneLinks = makePhoneNumbersClickable(text);
     return <span dangerouslySetInnerHTML={{ __html: htmlWithPhoneLinks }} />;
   };
+
+  // Early return AFTER all hooks are declared to maintain consistent hook order
+  // Use mounting guard to prevent hydration mismatches
+  if (!mounted || !incident) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleModalClose}>
