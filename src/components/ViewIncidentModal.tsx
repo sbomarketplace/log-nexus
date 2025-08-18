@@ -27,7 +27,7 @@ import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
 import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
-import { getEffectiveOrganizedDateTime } from '@/utils/organizedIncidentMigration';
+import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -74,7 +74,7 @@ export const ViewIncidentModal = ({
       });
       
       // Use unified dateTime field with fallback to legacy fields
-      const effectiveDateTime = getEffectiveOrganizedDateTime(incident);
+      const effectiveDateTime = getOrganizedDateTime(incident);
       if (effectiveDateTime) {
         const dateObj = parseFromISO(effectiveDateTime);
         if (dateObj) {
@@ -129,7 +129,7 @@ export const ViewIncidentModal = ({
 
   // Derived values and callbacks after hooks but before early return
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
-  const effectiveDateTime = getEffectiveOrganizedDateTime(incident);
+  const effectiveDateTime = getOrganizedDateTime(incident);
 
   // Derived display values
   const displayDate = (() => {
