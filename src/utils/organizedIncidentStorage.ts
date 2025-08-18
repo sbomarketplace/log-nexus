@@ -2,6 +2,8 @@ export interface OrganizedIncident {
   id: string;
   date: string;
   dateTime?: string; // ISO 8601 UTC string - new unified field
+  datePart?: string; // YYYY-MM-DD date only
+  timePart?: string; // HH:mm time only
   caseNumber?: string; // Case number field
   categoryOrIssue: string;
   who: string;

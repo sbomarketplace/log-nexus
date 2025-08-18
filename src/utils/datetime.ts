@@ -170,6 +170,99 @@ export function parseISOToLocalDate(iso: string): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+// NEW UTILITIES FOR SHARED FORM COMPONENT
+
+/**
+ * Parse ISO to local and format as YYYY-MM-DD for date inputs
+ */
+export function parseISOToLocal(iso: string): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Format Date as YYYY-MM-DD for date input
+ */
+export function formatYYYYMMDD(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+/**
+ * Format Date as HH:mm for time input
+ */
+export function formatHHmm(d: Date): string {
+  const hours = d.getHours().toString().padStart(2, '0');
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${hours}:${minutes}`;
+}
+
+/**
+ * Combine local date string and time string into Date object in local timezone
+ */
+export function combineLocalDateAndTime(dateStr: string, timeStr: string): Date {
+  const [year, month, day] = dateStr.split('-').map(Number);
+  const [hours, minutes] = timeStr.split(':').map(Number);
+  return new Date(year, month - 1, day, hours, minutes);
+}
+
+/**
+ * Format time part as localized time string for display
+ */
+export function formatTimeOnlyFromParts(timePart: string): string {
+  if (!timePart) return "No time";
+  const [hours, minutes] = timePart.split(':').map(Number);
+  const d = new Date();
+  d.setHours(hours, minutes, 0, 0);
+  return d.toLocaleTimeString([], { 
+    hour: 'numeric', 
+    minute: '2-digit' 
+  });
+}
+
+/**
+ * Get formatted display for incident date/time based on data precedence
+ */
+export function getIncidentDisplayDate(incident: any): string {
+  if (incident.dateTime) {
+    return formatHeader(incident.dateTime);
+  }
+  if (incident.datePart && incident.timePart) {
+    const date = new Date(incident.datePart).toLocaleDateString([], { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    const time = formatTimeOnlyFromParts(incident.timePart);
+    return `${date} at ${time}`;
+  }
+  if (incident.datePart) {
+    const date = new Date(incident.datePart).toLocaleDateString([], { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+    return date;
+  }
+  if (incident.timePart) {
+    return `No date - ${formatTimeOnlyFromParts(incident.timePart)}`;
+  }
+  return "No date";
+}
+
+/**
+ * Get formatted time display for incident based on data precedence
+ */
+export function getIncidentDisplayTime(incident: any): string {
+  if (incident.dateTime) {
+    return formatTimeOnly(incident.dateTime);
+  }
+  if (incident.timePart) {
+    return formatTimeOnlyFromParts(incident.timePart);
+  }
+  return "No time";
+}
+
 /**
  * Migration utility: combine legacy date and time into unified dateTime
  */
