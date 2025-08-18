@@ -68,20 +68,25 @@ function splitPreservingQuotes(text: string): TextSegment[] {
 function normalizeSegment(text: string): string {
   // Patterns for converting third-person reporter references to first-person
   const replacements = [
-    // Direct reporter references
+    // Direct reporter references - expanded to catch more cases
     { pattern: /\bthe reporting employee\b/gi, replacement: 'I' },
     { pattern: /\bthe employee who reported\b/gi, replacement: 'I' },
     { pattern: /\bthe worker who reported\b/gi, replacement: 'I' },
     { pattern: /\bthe person reporting\b/gi, replacement: 'I' },
     
-    // Possessive forms
+    // Possessive forms - more comprehensive
     { pattern: /\bthe reporting employee's\b/gi, replacement: 'my' },
     { pattern: /\bthe employee's\b/gi, replacement: 'my' },
     { pattern: /\bthe worker's\b/gi, replacement: 'my' },
     
-    // When clearly referring to the reporter in context
-    { pattern: /\bthe employee(?=\s+(?:was|felt|experienced|reported|stated|said|told|asked|requested|complained|noted|observed|witnessed))/gi, replacement: 'I' },
-    { pattern: /\bthe worker(?=\s+(?:was|felt|experienced|reported|stated|said|told|asked|requested|complained|noted|observed|witnessed))/gi, replacement: 'I' },
+    // When clearly referring to the reporter in context - expanded verb list
+    { pattern: /\bthe employee(?=\s+(?:was|felt|experienced|reported|stated|said|told|asked|requested|complained|noted|observed|witnessed|intervened|completed|confirmed|stopped|finished|talked))/gi, replacement: 'I' },
+    { pattern: /\bthe worker(?=\s+(?:was|felt|experienced|reported|stated|said|told|asked|requested|complained|noted|observed|witnessed|intervened|completed|confirmed|stopped|finished|talked))/gi, replacement: 'I' },
+    
+    // Context-sensitive patterns for "being present"
+    { pattern: /\bthe employee being present\b/gi, replacement: 'my presence' },
+    { pattern: /\bme being present\b/gi, replacement: 'my presence' },
+    { pattern: /\bwith me being there\b/gi, replacement: 'with my presence' },
     
     // Handle verb agreement after replacements
     { pattern: /\bI were\b/g, replacement: 'I was' },
@@ -117,14 +122,18 @@ function fixCapitalization(text: string): string {
 function grammarSafetyPass(text: string): string {
   let result = text;
   
-  // Fix possessive issues - never allow "I's"
-  result = result.replace(/\bI's\b/g, 'my');
-  result = result.replace(/\bI'S\b/g, 'my');
+  // Fix possessive issues - never allow "I's" or "I.'s"
+  result = result.replace(/\bI\.?'s\b/g, 'my');
+  result = result.replace(/\bI\.?'S\b/g, 'my');
   
   // Fix stray apostrophes in possessives
   result = result.replace(/\bemployee'S\b/g, "employee's");
   result = result.replace(/\bworker'S\b/g, "worker's");
   result = result.replace(/\bmanager'S\b/g, "manager's");
+  
+  // Fix double letters from replacements
+  result = result.replace(/\btthe\b/g, 'the');
+  result = result.replace(/\bwwhich\b/g, 'which');
   
   // Fix subject-verb agreement
   result = result.replace(/\bI were\b/g, 'I was');
@@ -134,6 +143,14 @@ function grammarSafetyPass(text: string): string {
   // Improve clarity in common phrases
   result = result.replace(/\bdespite me being present\b/gi, 'despite my presence');
   result = result.replace(/\bwith me being there\b/gi, 'with my presence');
+  result = result.replace(/\bdespite the employee being present\b/gi, 'despite my presence');
+  
+  // Fix remaining third-person references that got missed
+  result = result.replace(/\bthe employee confirmed\b/gi, 'I confirmed');
+  result = result.replace(/\bthe employee intervened\b/gi, 'I intervened');
+  result = result.replace(/\bthe employee completed\b/gi, 'I completed');
+  result = result.replace(/\bthe employee stopped\b/gi, 'I stopped');
+  result = result.replace(/\bthe employee finished\b/gi, 'I finished');
   
   // Ensure proper sentence case and punctuation
   result = result.replace(/([.!?]\s*)([a-z])/g, (match, punctuation, letter) => 
@@ -183,6 +200,21 @@ export function testVoiceNormalization(): { test: string; input: string; expecte
                       test: 'Improve clarity phrases',
                       input: 'Despite me being present, the incident occurred.',
                       expected: 'Despite my presence, the incident occurred.'
+                    },
+                    {
+                      test: 'Fix I.\'s possessive with period',
+                      input: 'Mark and Troy attempted to perform I.\'s job duties.',
+                      expected: 'Mark and Troy attempted to perform my job duties.'
+                    },
+                    {
+                      test: 'Fix missed employee references',
+                      input: 'Despite the employee being present, the employee intervened and the employee confirmed.',
+                      expected: 'Despite my presence, I intervened and I confirmed.'
+                    },
+                    {
+                      test: 'Fix double letters from replacements',
+                      input: 'The issue was tthe employee completed the task.',
+                      expected: 'The issue was I completed the task.'
                     }
   ];
 
