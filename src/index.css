@@ -242,7 +242,9 @@ All colors MUST be HSL.
   .cc-field-label + input[type="date"],
   .cc-field-label + input[type="time"],
   input[type="date"].cc-field-label,
-  input[type="time"].cc-field-label {
+  input[type="time"].cc-field-label,
+  input[type="date"],
+  input[type="time"] {
     font-size: 16px !important;
   }
 

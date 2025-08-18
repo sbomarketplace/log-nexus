@@ -109,9 +109,16 @@ export const ViewIncidentModal = ({
   // Derived values and callbacks after hooks but before early return
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
 
-  const displayDate = incident?.canonicalEventDate 
-    ? formatDisplayDate(incident.canonicalEventDate)
-    : dateInput || 'No date';
+  const displayDate = (() => {
+    if (isEditMode) {
+      return dateInput ? new Date(dateInput).toLocaleDateString() : 'No date';
+    }
+    return incident?.canonicalEventDate 
+      ? formatDisplayDate(incident.canonicalEventDate)
+      : formData.date 
+        ? new Date(formData.date).toLocaleDateString()
+        : 'No date';
+  })();
 
   const handleDateInputChange = useCallback((value: string) => {
     setDateInput(value);
@@ -168,7 +175,7 @@ export const ViewIncidentModal = ({
     setIsSaving(true);
 
     try {
-      // Calculate the updated date and time values directly
+      // Calculate the updated date and time values directly from current inputs
       const updatedDate = dateInput ? formatDateForStorage(dateInput) : getDateSafely(incident, '');
       const updatedTime = timeInput || incident.when;
       
@@ -209,7 +216,7 @@ export const ViewIncidentModal = ({
       // Save to storage
       organizedIncidentStorage.save(updatedIncident);
       
-      // Update parent component
+      // Update parent component immediately
       onIncidentUpdate?.(updatedIncident);
       
       // Update parsed date state for UI consistency
@@ -217,8 +224,13 @@ export const ViewIncidentModal = ({
         setParsedDate({ date: updatedDate, confidence: 'high' });
       }
 
-      // Update local state
+      // Update local state with the saved data to ensure read view shows correct values
       setFormData(updatedIncident);
+      
+      // Reset input states to match saved values
+      setDateInput(toDateInputValue(updatedIncident.date));
+      setTimeInput(toTimeInputValue(updatedIncident.when));
+      
       setIsEditMode(false);
       setIsDirty(false);
       
@@ -581,7 +593,18 @@ export const ViewIncidentModal = ({
                   ) : (
                     <div className="flex items-center gap-2 text-sm">
                       <div className="break-words">
-                        {timeInput || incident.when || (
+                        {(formData.when || incident.when) ? (
+                          (() => {
+                            const timeValue = formData.when || incident.when;
+                            if (timeValue && /^\d{1,2}:\d{2}$/.test(timeValue)) {
+                              const [hh, mm] = timeValue.split(':').map(n => parseInt(n, 10));
+                              const t = new Date();
+                              t.setHours(hh, mm, 0, 0);
+                              return t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                            }
+                            return timeValue;
+                          })()
+                        ) : (
                           <span className="text-muted-foreground italic">No time specified</span>
                         )}
                       </div>

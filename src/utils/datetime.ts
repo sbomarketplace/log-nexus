@@ -54,3 +54,37 @@ export function formatDateForStorage(dateValue: string): string {
   // Keep existing behavior: store as ISO with midnight UTC
   return new Date(`${dateValue}T00:00:00Z`).toISOString();
 }
+
+/**
+ * Combine yyyy-mm-dd and HH:MM into an ISO string at local time without shifting
+ * The DB write format should stay consistent with current schema. If the app expects midnight UTC for date, continue that pattern.
+ */
+export function combineLocalDateTime(dateValue: string, timeValue: string | undefined): string | null {
+  if (!dateValue) return null;
+  const hhmm = timeValue || "00:00";
+  const [hh, mm] = hhmm.split(":").map(n => parseInt(n || "0", 10));
+  const d = new Date(dateValue);
+  if (Number.isNaN(d.getTime())) return null;
+  d.setHours(hh, mm, 0, 0);
+  return d.toISOString();
+}
+
+export function formatDateTimeForUI(dateISO?: string, timeHHMM?: string): string {
+  // Prefer combining for a stable UI string
+  if (dateISO) {
+    const d = new Date(dateISO);
+    if (!Number.isNaN(d.getTime())) {
+      const date = d.toLocaleDateString();
+      const time = timeHHMM
+        ? (() => {
+            const [hh, mm] = timeHHMM.split(":").map(n => parseInt(n || "0", 10));
+            const t = new Date();
+            t.setHours(hh, mm, 0, 0);
+            return t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+          })()
+        : null;
+      return time ? `${date} at ${time}` : date;
+    }
+  }
+  return "Unknown date";
+}
