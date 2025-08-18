@@ -628,6 +628,11 @@ const Home = () => {
           incident={viewIncident}
           open={!!viewIncident}
           onOpenChange={(open) => !open && setViewIncident(null)}
+          onIncidentUpdate={(updatedIncident) => {
+            loadIncidents();
+            setViewIncident(updatedIncident);
+          }}
+          currentUserId="mock-user" // TODO: Replace with actual user ID when auth is implemented
         />
 
         {/* Edit Incident Modal */}
