@@ -28,6 +28,8 @@ export const ViewIncidentModal = ({
   onIncidentUpdate,
   currentUserId 
 }: ViewIncidentModalProps) => {
+  // HOOKS MUST BE DECLARED AT TOP LEVEL - React Rules of Hooks requirement
+  // All hooks must be called in the same order every render, regardless of props or state
   const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -37,8 +39,6 @@ export const ViewIncidentModal = ({
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
   const firstEditFieldRef = useRef<HTMLInputElement>(null);
-
-  if (!incident) return null;
 
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
 
@@ -282,6 +282,9 @@ export const ViewIncidentModal = ({
       return () => document.removeEventListener('keydown', handleKeyDown);
     }
   }, [open, isEditMode, handleSave, handleCancel]);
+
+  // Early return AFTER all hooks are declared to maintain consistent hook order
+  if (!incident) return null;
 
   // Get category class for styling (ensure we get a consistent class reference)
   const getCategoryClass = useCallback((category: string) => {
