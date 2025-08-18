@@ -26,7 +26,8 @@ import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
-import { toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
+import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage } from '@/utils/datetime';
+import { getEffectiveOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -54,6 +55,8 @@ export const ViewIncidentModal = ({
   const [parsedDate, setParsedDate] = useState<{ date: string; confidence: string } | null>(null);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  const [caseNumber, setCaseNumber] = useState('');
   const firstEditFieldRef = useRef<HTMLInputElement>(null);
 
   // Ensure consistent hook ordering with mounting guard
@@ -69,8 +72,26 @@ export const ViewIncidentModal = ({
       setFormData({
         ...incident
       });
-      setDateInput(toDateInputValue(incident.date));
-      setTimeInput(toTimeInputValue(incident.when));
+      
+      // Use unified dateTime field with fallback to legacy fields
+      const effectiveDateTime = getEffectiveOrganizedDateTime(incident);
+      if (effectiveDateTime) {
+        const dateObj = parseFromISO(effectiveDateTime);
+        if (dateObj) {
+          setDateInput(toDateInputValue(dateObj.toISOString()));
+          setTimeInput(toTimeInputValue(dateObj.toTimeString().slice(0, 5)));
+          setSelectedDateTime(dateObj);
+        }
+      } else {
+        // Fallback to legacy fields
+        setDateInput(toDateInputValue(incident.date));
+        setTimeInput(toTimeInputValue(incident.when));
+        const legacyDateTime = parseFromISO(incident.date);
+        setSelectedDateTime(legacyDateTime || new Date());
+      }
+      
+      setCaseNumber(incident.caseNumber || '');
+      
       if (incident.canonicalEventDate) {
         setParsedDate({
           date: formatDisplayDate(incident.canonicalEventDate),
@@ -108,30 +129,55 @@ export const ViewIncidentModal = ({
 
   // Derived values and callbacks after hooks but before early return
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
+  const effectiveDateTime = getEffectiveOrganizedDateTime(incident);
 
+  // Derived display values
   const displayDate = (() => {
     if (isEditMode) {
-      return dateInput ? new Date(dateInput).toLocaleDateString() : 'No date';
+      return selectedDateTime.toLocaleDateString();
     }
-    return incident?.canonicalEventDate 
-      ? formatDisplayDate(incident.canonicalEventDate)
-      : formData.date 
-        ? new Date(formData.date).toLocaleDateString()
-        : 'No date';
+    return effectiveDateTime ? formatHeader(effectiveDateTime) : 'No date';
+  })();
+
+  const displayTime = (() => {
+    if (isEditMode) {
+      return selectedDateTime.toTimeString().slice(0, 5);
+    }
+    return effectiveDateTime ? formatTimeOnly(effectiveDateTime) : 'No time';
   })();
 
   const handleDateInputChange = useCallback((value: string) => {
     setDateInput(value);
     
+    // Update selectedDateTime when date changes
+    if (value.trim()) {
+      const newDate = new Date(value);
+      if (!isNaN(newDate.getTime())) {
+        const updatedDateTime = new Date(selectedDateTime);
+        updatedDateTime.setFullYear(newDate.getFullYear(), newDate.getMonth(), newDate.getDate());
+        setSelectedDateTime(updatedDateTime);
+      }
+    }
+    
     // Clear date validation error if we have a valid date
     if (value.trim() && validationErrors.date) {
       setValidationErrors(prev => ({ ...prev, date: '' }));
     }
-  }, [validationErrors.date]);
+  }, [selectedDateTime, validationErrors.date]);
 
   const handleTimeInputChange = useCallback((value: string) => {
     setTimeInput(value);
-  }, []);
+    
+    // Update selectedDateTime when time changes
+    if (value.trim()) {
+      const [hours, minutes] = value.split(':').map(Number);
+      if (!isNaN(hours) && !isNaN(minutes)) {
+        const updatedDateTime = new Date(selectedDateTime);
+        updatedDateTime.setHours(hours, minutes, 0, 0);
+        setSelectedDateTime(updatedDateTime);
+      }
+    }
+  }, [selectedDateTime]);
 
   // Handle form field changes
   const handleFieldChange = useCallback((field: keyof OrganizedIncident, value: string) => {
@@ -175,7 +221,8 @@ export const ViewIncidentModal = ({
     setIsSaving(true);
 
     try {
-      // Calculate the updated date and time values directly from current inputs
+      // Calculate the updated date and time values using the unified selectedDateTime approach
+      const updatedDateTime = selectedDateTime.toISOString(); // Store as unified dateTime
       const updatedDate = dateInput ? formatDateForStorage(dateInput) : getDateSafely(incident, '');
       const updatedTime = timeInput || incident.when;
       
@@ -208,8 +255,10 @@ export const ViewIncidentModal = ({
         ...normalizedData,
         canonicalEventDate,
         originalEventDateText,
-        date: updatedDate,
-        when: updatedTime,
+        date: updatedDate, // Keep for backward compatibility
+        when: updatedTime, // Keep for backward compatibility
+        dateTime: updatedDateTime, // New unified field
+        caseNumber: caseNumber.trim() || undefined, // Add case number field
         updatedAt: new Date().toISOString()
       };
 
@@ -426,7 +475,7 @@ export const ViewIncidentModal = ({
             className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2' : 'py-3'}`}
             data-scroll-container
           >
-            {/* Header row with date and category - editable in edit mode */}
+            {/* Header row with date, case number and category - editable in edit mode */}
             <div className={`flex items-start gap-3 mb-3 ${isEditMode ? 'flex-col sm:flex-row' : 'flex-wrap'}`}>
               {isEditMode ? (
                 <>
@@ -471,6 +520,19 @@ export const ViewIncidentModal = ({
                       )}
                     </div>
                   
+                  {/* Case Number Field */}
+                  <div className="flex-1 min-w-0">
+                    <Input
+                      id="incident-case-number"
+                      value={caseNumber}
+                      onChange={(e) => setCaseNumber(e.target.value)}
+                      placeholder="Case # (Optional)"
+                      maxLength={50}
+                      className="text-base h-9"
+                      aria-label="Case number"
+                    />
+                  </div>
+
                   {/* Category Select */}
                   <div className="flex-1 min-w-0">
                     <Select
@@ -501,6 +563,14 @@ export const ViewIncidentModal = ({
                   >
                     {displayDate}
                   </Badge>
+                  {incident.caseNumber && (
+                    <Badge 
+                      variant="outline" 
+                      className="text-xs font-medium shrink-0 h-7 px-3 flex items-center border-2 rounded-full"
+                    >
+                      Case #: {incident.caseNumber}
+                    </Badge>
+                  )}
                   <div className={`${categoryClass} text-white font-medium h-7 px-3 rounded-full flex items-center justify-center break-words min-w-0`} 
                        style={{ fontSize: 'clamp(10px, 1.6vw, 12px)' }}>
                     {incident.categoryOrIssue}
@@ -591,24 +661,13 @@ export const ViewIncidentModal = ({
                       style={{ fontSize: '16px' }}
                     />
                   ) : (
-                    <div className="flex items-center gap-2 text-sm">
-                      <div className="break-words">
-                        {(formData.when || incident.when) ? (
-                          (() => {
-                            const timeValue = formData.when || incident.when;
-                            if (timeValue && /^\d{1,2}:\d{2}$/.test(timeValue)) {
-                              const [hh, mm] = timeValue.split(':').map(n => parseInt(n, 10));
-                              const t = new Date();
-                              t.setHours(hh, mm, 0, 0);
-                              return t.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
-                            }
-                            return timeValue;
-                          })()
-                        ) : (
-                          <span className="text-muted-foreground italic">No time specified</span>
-                        )}
-                      </div>
-                    </div>
+                     <div className="flex items-center gap-2 text-sm">
+                       <div className="break-words">
+                         {effectiveDateTime ? formatTimeOnly(effectiveDateTime) : (
+                           <span className="text-muted-foreground italic">No time specified</span>
+                         )}
+                       </div>
+                     </div>
                   )}
                 </div>
 

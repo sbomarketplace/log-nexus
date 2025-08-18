@@ -88,3 +88,99 @@ export function formatDateTimeForUI(dateISO?: string, timeHHMM?: string): string
   }
   return "Unknown date";
 }
+
+/**
+ * Utility to combine separate date and time inputs into a unified Date object
+ */
+export function combineDateAndTime(dateOnly: Date, timeOnly: Date): Date {
+  const result = new Date(dateOnly);
+  result.setHours(
+    timeOnly.getHours(),
+    timeOnly.getMinutes(),
+    timeOnly.getSeconds(),
+    timeOnly.getMilliseconds()
+  );
+  return result;
+}
+
+/**
+ * Convert Date object to UTC ISO string for storage
+ */
+export function toUTCISO(date: Date): string {
+  return date.toISOString();
+}
+
+/**
+ * Parse ISO dateTime to Date object, handling timezone properly
+ */
+export function parseFromISO(dateTimeISO?: string): Date | null {
+  if (!dateTimeISO) return null;
+  const d = new Date(dateTimeISO);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Format ISO dateTime for header display
+ */
+export function formatHeader(dateTimeISO?: string): string {
+  if (!dateTimeISO) return "No date";
+  const d = parseFromISO(dateTimeISO);
+  if (!d) return "Invalid date";
+  
+  const date = d.toLocaleDateString([], { 
+    year: 'numeric', 
+    month: 'short', 
+    day: 'numeric' 
+  });
+  const time = d.toLocaleTimeString([], { 
+    hour: 'numeric', 
+    minute: '2-digit' 
+  });
+  
+  return `${date} at ${time}`;
+}
+
+/**
+ * Format ISO dateTime for time-only display
+ */
+export function formatTimeOnly(dateTimeISO?: string): string {
+  if (!dateTimeISO) return "No time";
+  const d = parseFromISO(dateTimeISO);
+  if (!d) return "Invalid time";
+  
+  return d.toLocaleTimeString([], { 
+    hour: 'numeric', 
+    minute: '2-digit' 
+  });
+}
+
+/**
+ * Validate case number format
+ */
+export function validateCaseNumber(caseNumber: string): boolean {
+  return /^[A-Za-z0-9 \-\/]{0,50}$/.test(caseNumber);
+}
+
+/**
+ * Migration utility: combine legacy date and time into unified dateTime
+ */
+export function migrateLegacyDateTime(legacyDate?: string, legacyTime?: string): string | null {
+  if (!legacyDate) return null;
+  
+  const date = new Date(legacyDate);
+  if (Number.isNaN(date.getTime())) return null;
+  
+  if (legacyTime) {
+    // Parse time and combine with date
+    const timeValue = toTimeInputValue(legacyTime);
+    if (timeValue) {
+      const [hh, mm] = timeValue.split(":").map(n => parseInt(n, 10));
+      date.setHours(hh, mm, 0, 0);
+    }
+  } else {
+    // Default to 9:00 AM local time if no time specified
+    date.setHours(9, 0, 0, 0);
+  }
+  
+  return toUTCISO(date);
+}

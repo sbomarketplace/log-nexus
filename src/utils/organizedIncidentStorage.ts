@@ -1,6 +1,8 @@
 export interface OrganizedIncident {
   id: string;
   date: string;
+  dateTime?: string; // ISO 8601 UTC string - new unified field
+  caseNumber?: string; // Case number field
   categoryOrIssue: string;
   who: string;
   what: string;

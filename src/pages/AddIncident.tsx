@@ -13,6 +13,7 @@ import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/Cus
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategoryOptions } from '@/utils/incidentCategories';
 import { supabase } from '@/integrations/supabase/client';
+import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { Wand2, Loader2 } from 'lucide-react';
 
 
@@ -34,14 +35,16 @@ const AddIncident = () => {
   
   const [formData, setFormData] = useState({
     title: '',
-    date: new Date().toISOString().split('T')[0],
-    time: new Date().toTimeString().slice(0, 5),
     category: '',
     what: '',
     where: '',
     why: '',
     how: '',
   });
+  
+  // Unified date/time state
+  const [selectedDateTime, setSelectedDateTime] = useState(new Date());
+  const [caseNumber, setCaseNumber] = useState('');
 
   const [whoInvolved, setWhoInvolved] = useState<Person[]>([{ name: '', role: '' }]);
   const [witnesses, setWitnesses] = useState<Person[]>([{ name: '', role: '' }]);
@@ -61,12 +64,40 @@ const AddIncident = () => {
     if (!formData.category.trim()) newErrors.category = 'Category is required';
     if (!formData.what.trim()) newErrors.what = 'What happened is required';
     if (!formData.where.trim()) newErrors.where = 'Location is required';
+    if (!selectedDateTime) newErrors.dateTime = 'Please select a date and time';
+    if (caseNumber && !validateCaseNumber(caseNumber)) {
+      newErrors.caseNumber = 'Case number can only contain letters, numbers, spaces, dashes, and slashes (max 50 characters)';
+    }
     if (whoInvolved.filter(person => person.name.trim()).length === 0) {
       newErrors.who = 'At least one person involved is required';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
+  };
+
+  // Date and time picker handlers
+  const handleDateChange = (date: Date) => {
+    const merged = combineDateAndTime(date, selectedDateTime);
+    setSelectedDateTime(merged);
+    if (errors.dateTime) {
+      setErrors(prev => ({ ...prev, dateTime: '' }));
+    }
+  };
+
+  const handleTimeChange = (time: Date) => {
+    const merged = combineDateAndTime(selectedDateTime, time);
+    setSelectedDateTime(merged);
+    if (errors.dateTime) {
+      setErrors(prev => ({ ...prev, dateTime: '' }));
+    }
+  };
+
+  const handleCaseNumberChange = (value: string) => {
+    setCaseNumber(value);
+    if (errors.caseNumber) {
+      setErrors(prev => ({ ...prev, caseNumber: '' }));
+    }
   };
 
   const handleInputChange = (field: string, value: string) => {
@@ -150,8 +181,10 @@ const AddIncident = () => {
     const incident: Incident = {
       id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: formData.title,
-      date: formData.date,
-      time: formData.time,
+      date: selectedDateTime.toISOString().split('T')[0], // Keep for backward compatibility 
+      time: selectedDateTime.toTimeString().slice(0, 5), // Keep for backward compatibility
+      dateTime: toUTCISO(selectedDateTime), // New unified field
+      caseNumber: caseNumber.trim() || null, // New case number field
       summary: formData.what, // Using 'what' as the main summary
       location: formData.where, // Enhanced: populate location field
       category: formData.category, // Enhanced: now captured from form
@@ -316,39 +349,68 @@ const AddIncident = () => {
                 {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="space-y-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
                   <Label htmlFor="date">Date *</Label>
                   <Input
                     id="date"
                     type="date"
-                    value={formData.date}
-                    onChange={(e) => handleInputChange('date', e.target.value)}
+                    value={selectedDateTime.toISOString().split('T')[0]}
+                    onChange={(e) => {
+                      const newDate = new Date(e.target.value);
+                      if (!isNaN(newDate.getTime())) {
+                        handleDateChange(newDate);
+                      }
+                    }}
                     required
+                    aria-label="Choose date"
                   />
                 </div>
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <Label htmlFor="time">Time *</Label>
                   <Input
                     id="time"
                     type="time"
-                    value={formData.time}
-                    onChange={(e) => handleInputChange('time', e.target.value)}
+                    step="60"
+                    value={selectedDateTime.toTimeString().slice(0, 5)}
+                    onChange={(e) => {
+                      const [hours, minutes] = e.target.value.split(':').map(Number);
+                      const newTime = new Date();
+                      newTime.setHours(hours, minutes, 0, 0);
+                      handleTimeChange(newTime);
+                    }}
                     required
+                    aria-label="Choose time"
                   />
                 </div>
-                 <div className="space-y-1">
-                   <Label htmlFor="where">Location *</Label>
-                   <Input
-                     id="where"
-                     value={formData.where}
-                     onChange={(e) => handleInputChange('where', e.target.value)}
-                     placeholder="Where did this occur?"
-                     className={errors.where ? 'border-destructive' : ''}
-                   />
-                   {errors.where && <p className="text-xs text-destructive">{errors.where}</p>}
-                 </div>
-               </div>
+              </div>
+              {errors.dateTime && <p className="text-sm text-destructive">{errors.dateTime}</p>}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label htmlFor="caseNumber">Case #</Label>
+                  <Input
+                    id="caseNumber"
+                    value={caseNumber}
+                    onChange={(e) => handleCaseNumberChange(e.target.value)}
+                    placeholder="Optional"
+                    maxLength={50}
+                    aria-label="Case number"
+                  />
+                  {errors.caseNumber && <p className="text-sm text-destructive">{errors.caseNumber}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="where">Location *</Label>
+                  <Input
+                    id="where"
+                    value={formData.where}
+                    onChange={(e) => handleInputChange('where', e.target.value)}
+                    placeholder="Where did this occur?"
+                    className={errors.where ? 'border-destructive' : ''}
+                  />
+                  {errors.where && <p className="text-xs text-destructive">{errors.where}</p>}
+                </div>
+              </div>
 
                <div className="space-y-2">
                  <Label htmlFor="category">Category/Issue *</Label>
