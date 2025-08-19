@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
 import { deriveIncidentTime, formatHHMMForUI, normalizeTimeToHHMM } from "@/utils/datetime";
+import { briefIncidentSummary } from "@/utils/briefSummary";
 
 type Incident = {
   id: string;
@@ -33,12 +34,15 @@ function fmtTime(incident: Incident): string {
 export function buildPlainText(incident: Incident) {
   const timeStr = fmtTime(incident);
   const category = incident.categoryOrIssue ?? incident.category ?? "";
+  const brief = briefIncidentSummary(incident);
   
   return [
     `Incident Report`,
     `ID: ${incident.id}`,
     `Date: ${fmtDate(incident.date)}${timeStr ? ` at ${timeStr}` : ""}`,
     `Category: ${category}`,
+    ``,
+    `Summary: ${brief}`,
     ``,
     `Who:`,
     incident.who ?? "",
@@ -112,6 +116,9 @@ export async function exportDOCX(incident: Incident) {
   addText(`Date: ${fmtDate(incident.date)}`);
   addText(`Time: ${fmtTime(incident)}`);
   addText(`Category: ${category}`);
+  addText("");
+  addHeading("Summary");
+  addText(briefIncidentSummary(incident));
   addHeading("Who");
   addText(incident.who ?? "");
   addHeading("What");
@@ -150,6 +157,7 @@ export async function exportPrint(incident: Incident) {
   <div class="group"><div class="label">Date</div>${fmtDate(incident.date)}</div>
   <div class="group"><div class="label">Time</div>${fmtTime(incident)}</div>
   <div class="group"><div class="label">Category</div>${category}</div>
+  <div class="group"><div class="label">Summary</div><pre>${briefIncidentSummary(incident)}</pre></div>
   <div class="group"><div class="label">Who</div><pre>${incident.who ?? ""}</pre></div>
   <div class="group"><div class="label">What</div><pre>${incident.what ?? ""}</pre></div>
   <div class="group"><div class="label">Where</div><pre>${incident.where ?? ""}</pre></div>
@@ -192,6 +200,6 @@ export async function emailIncident(incident: Incident) {
   }
   // Fallback to mailto with prefilled body
   const subject = encodeURIComponent(`Incident Report ${incident.id}`);
-  const body = encodeURIComponent(buildPlainText(incident));
+  const body = encodeURIComponent(`Summary: ${briefIncidentSummary(incident)}\n\n${buildPlainText(incident)}`);
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
 }

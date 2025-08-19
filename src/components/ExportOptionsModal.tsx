@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Mail, FileText, Printer, Share, Save, File, FileImage } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { IncidentCardHeader } from '@/components/IncidentCardHeader';
+import { briefIncidentSummary } from '@/utils/briefSummary';
 import {
   exportPDF,
   exportPrint,
@@ -106,6 +107,9 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           {/* Incident Header - mirrors Incident Card layout */}
           <div className="mb-4 p-3 bg-neutral-50/50 rounded-lg border border-neutral-100">
             <IncidentCardHeader incident={incident} />
+            <p className="mt-2 text-base text-neutral-900">
+              {briefIncidentSummary(incident)}
+            </p>
           </div>
 
         {/* Export Options Grid */}
