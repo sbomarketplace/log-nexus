@@ -8,10 +8,10 @@ import { ConsentModal } from "@/components/ConsentModal";
 import { consentStorage } from "@/utils/consentStorage";
 import Home from "./pages/Home";
 import AddIncident from "./pages/AddIncident";
-import ViewIncident from "./pages/ViewIncident";
 import Resources from "./pages/Resources";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import { IncidentRedirect } from "./components/IncidentRedirect";
 
 const queryClient = new QueryClient();
 
@@ -54,9 +54,11 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/add" element={<AddIncident />} />
-            <Route path="/incident/:id" element={<ViewIncident />} />
             <Route path="/resources" element={<Resources />} />
             <Route path="/settings" element={<Settings />} />
+            {/* Legacy route redirects */}
+            <Route path="/incident/:id" element={<IncidentRedirect />} />
+            <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,7 @@ import { SearchIcon, X, Loader2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
-import { ViewIncidentModal } from '@/components/ViewIncidentModal';
-import { EditIncidentModal } from '@/components/EditIncidentModal';
+import { IncidentModal } from '@/components/IncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
@@ -31,8 +30,6 @@ const Home = () => {
   const [organizedIncidents, setOrganizedIncidents] = useState<OrganizedIncident[]>([]);
   const [filteredIncidents, setFilteredIncidents] = useState<OrganizedIncident[]>([]);
   const [deleteId, setDeleteId] = useState<string | null>(null);
-  const [viewIncident, setViewIncident] = useState<OrganizedIncident | null>(null);
-  const [editIncident, setEditIncident] = useState<OrganizedIncident | null>(null);
   const [exportIncident, setExportIncident] = useState<OrganizedIncident | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
@@ -47,6 +44,10 @@ const Home = () => {
   const [isOrganizing, setIsOrganizing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // Query params for modal management
+  const [searchParams, setSearchParams] = useSearchParams();
+  const incidentId = searchParams.get('incidentId');
 
   const loadIncidents = () => {
     try {
@@ -203,9 +204,9 @@ const Home = () => {
           }
         }, 100);
 
-        // Navigate to the first incident's details
+        // Open the incident modal for the first organized incident
         if (incidentsToSave.length > 0) {
-          setViewIncident(incidentsToSave[0]);
+          setSearchParams({ incidentId: incidentsToSave[0].id });
         }
       }
     } catch (error: any) {
@@ -341,6 +342,18 @@ const Home = () => {
   };
 
 
+
+  const handleViewIncident = (incident: OrganizedIncident) => {
+    setSearchParams({ incidentId: incident.id });
+  };
+
+  const handleEditIncident = (incident: OrganizedIncident) => {
+    setSearchParams({ incidentId: incident.id });
+  };
+
+  const handleCloseIncidentModal = () => {
+    setSearchParams({});
+  };
 
   const handleExport = (incident: OrganizedIncident) => {
     setExportIncident(incident);
@@ -604,28 +617,28 @@ const Home = () => {
 
                       {/* Compact action bar */}
                       <div className="flex gap-1.5 pt-1">
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                          onClick={() => setViewIncident(incident)}
-                        >
-                          View
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                          onClick={() => setEditIncident(incident)}
-                        >
-                          Edit
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                          onClick={() => handleExport(incident)}
-                        >
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                           onClick={() => handleViewIncident(incident)}
+                         >
+                           View
+                         </Button>
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                           onClick={() => handleEditIncident(incident)}
+                         >
+                           Edit
+                         </Button>
+                         <Button 
+                           variant="outline" 
+                           size="sm" 
+                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                           onClick={() => handleExport(incident)}
+                         >
                           Export
                         </Button>
                         <Button 
@@ -644,24 +657,12 @@ const Home = () => {
           )}
         </div>
 
-        {/* View Incident Modal */}
-        <ViewIncidentModal 
-          incident={viewIncident}
-          open={!!viewIncident}
-          onOpenChange={(open) => !open && setViewIncident(null)}
-          onIncidentUpdate={(updatedIncident) => {
-            loadIncidents();
-            setViewIncident(updatedIncident);
-          }}
-          currentUserId="mock-user" // TODO: Replace with actual user ID when auth is implemented
-        />
-
-        {/* Edit Incident Modal */}
-        <EditIncidentModal 
-          incident={editIncident}
-          open={!!editIncident}
-          onOpenChange={(open) => !open && setEditIncident(null)}
-          onSave={loadIncidents}
+        {/* Unified Incident Modal */}
+        <IncidentModal 
+          incidentId={incidentId}
+          open={!!incidentId}
+          onOpenChange={(open) => !open && handleCloseIncidentModal()}
+          onIncidentUpdate={loadIncidents}
         />
 
         {/* Export Options Modal */}
