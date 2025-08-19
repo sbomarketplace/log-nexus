@@ -574,21 +574,26 @@ const Home = () => {
                 <Card key={incident.id} className="border rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
                   <CardContent className="p-3">
                     <div className="space-y-2">
-                      {/* Date and category badges in responsive header row - category wraps below date if needed */}
-                      <div className="flex flex-col gap-1 mb-2">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <Badge 
-                            variant="secondary" 
-                            className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-muted text-muted-foreground border rounded-full"
-                          >
-                            {extractDateFromContent(incident)}
-                          </Badge>
-                          <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
-                               style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
-                            {incident.categoryOrIssue}
-                          </div>
-                        </div>
-                      </div>
+                       {/* Created timestamp and category badges in responsive header row */}
+                       <div className="flex flex-col gap-1 mb-2">
+                         <div className="flex flex-wrap items-center gap-2">
+                           <Badge 
+                             variant="secondary" 
+                             className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-muted text-muted-foreground border rounded-full"
+                           >
+                             Created {new Date(incident.createdAt).toLocaleDateString('en-US', {
+                               month: 'short',
+                               day: 'numeric',
+                               hour: 'numeric',
+                               minute: '2-digit'
+                             })}
+                           </Badge>
+                           <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
+                                style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
+                             {incident.categoryOrIssue}
+                           </div>
+                         </div>
+                       </div>
 
                        {/* Title/Description - compact and clean, with phone number support */}
                        <div className="min-h-[2.5rem]">
@@ -597,26 +602,8 @@ const Home = () => {
                          </h3>
                        </div>
 
-                      {/* Created timestamp - smaller and lighter */}
-                      <div className="text-[9px] text-muted-foreground">
-                        Created {new Date(incident.createdAt).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          hour: 'numeric',
-                          minute: '2-digit'
-                        })}
-                        {incident.updatedAt !== incident.createdAt && (
-                          <span className="ml-1">
-                            • Updated {new Date(incident.updatedAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric'
-                            })}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Compact action bar */}
-                      <div className="flex gap-1.5 pt-1">
+                       {/* Compact action bar */}
+                       <div className="flex gap-1.5 pt-1">
                          <Button 
                            variant="outline" 
                            size="sm" 
