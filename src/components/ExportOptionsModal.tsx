@@ -2,11 +2,18 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Mail, FileText, Printer, Download, Share, Save, File, FileImage } from 'lucide-react';
+import { Loader2, Mail, FileText, Printer, Share, Save, File, FileImage } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
-import { useExportIncident } from '@/hooks/useExportIncident';
-import { ExportOption } from '@/types/export';
 import { formatDateForUI } from '@/utils/safeDate';
+import {
+  exportPDF,
+  exportPrint,
+  exportTXT,
+  exportDOCX,
+  exportPDFToDevice,
+  shareIncident,
+  emailIncident
+} from '@/utils/exporters';
 
 interface ExportOptionsModalProps {
   open: boolean;
@@ -16,13 +23,17 @@ interface ExportOptionsModalProps {
 
 export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptionsModalProps) => {
   const [loadingOption, setLoadingOption] = useState<string | null>(null);
-  const exportHandlers = useExportIncident(incident);
 
-  const executeExport = async (optionId: string, handler: () => Promise<void> | void) => {
+  // Guard against null incident values
+  if (!incident) {
+    return null;
+  }
+
+  const executeExport = async (optionId: string, handler: () => Promise<any> | any) => {
     setLoadingOption(optionId);
     try {
       await handler();
-      onOpenChange(false);
+      // Don't close modal automatically - let user decide if they want to export another format
     } catch (error) {
       console.error(`Export ${optionId} failed:`, error);
     } finally {
@@ -30,81 +41,51 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
     }
   };
 
-  const exportOptions: ExportOption[] = [
+  const exportOptions = [
     {
       id: 'email',
       label: 'Email',
-      description: 'Send via your email app (attaches PDF when supported)',
       icon: Mail,
-      action: () => executeExport('email', exportHandlers.exportEmail)
+      action: () => executeExport('email', () => emailIncident(incident))
     },
     {
       id: 'pdf',
       label: 'PDF',
-      description: 'Download a formatted PDF',
       icon: FileImage,
-      action: () => executeExport('pdf', exportHandlers.exportPDF)
+      action: () => executeExport('pdf', () => exportPDF(incident))
     },
     {
       id: 'print',
       label: 'Print',
-      description: 'Open printer-friendly view',
       icon: Printer,
-      action: () => executeExport('print', exportHandlers.exportPrint)
+      action: () => executeExport('print', () => exportPrint(incident))
     },
     {
       id: 'txt',
       label: 'TXT',
-      description: 'Download plain text',
       icon: FileText,
-      action: () => executeExport('txt', exportHandlers.exportTXT)
+      action: () => executeExport('txt', () => exportTXT(incident))
     },
     {
       id: 'docx',
       label: 'DOCX',
-      description: 'Download a Word document',
       icon: File,
-      action: () => executeExport('docx', exportHandlers.exportDOCX)
+      action: () => executeExport('docx', () => exportDOCX(incident))
     },
     {
       id: 'save',
       label: 'Save to Device',
-      description: 'Save PDF to your device',
       icon: Save,
-      action: () => executeExport('save', exportHandlers.exportSave)
+      action: () => executeExport('save', () => exportPDFToDevice(incident))
     },
     {
       id: 'share',
       label: 'Share…',
-      description: 'Use your device\'s share sheet',
       icon: Share,
-      action: () => executeExport('share', exportHandlers.exportShare),
+      action: () => executeExport('share', () => shareIncident(incident)),
       disabled: !navigator.share
     }
   ];
-
-  const formatDate = (dateString: string) => {
-    try {
-      if (!dateString) return 'No date';
-      
-      if (dateString.includes('/') || dateString.includes('-')) {
-        const date = new Date(dateString);
-        if (!isNaN(date.getTime())) {
-          return date.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          });
-        }
-      }
-      
-      return dateString;
-    } catch {
-      return 'Invalid date';
-    }
-  };
-
-  if (!incident) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -145,7 +126,7 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           {exportOptions.map((option) => {
             const Icon = option.icon;
             const isLoading = loadingOption === option.id;
-            const isDisabled = option.disabled || isLoading || !exportHandlers.isReady;
+            const isDisabled = option.disabled || isLoading;
 
             return (
               <Button
@@ -154,20 +135,15 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
                 className="h-auto p-3 flex flex-col items-center gap-2 text-center hover:bg-accent/50 transition-colors disabled:opacity-50"
                 onClick={option.action}
                 disabled={isDisabled}
-                aria-label={`${option.label} - ${option.description}`}
+                aria-label={option.label}
               >
                 {isLoading ? (
                   <Loader2 className="h-5 w-5 animate-spin" />
                 ) : (
                   <Icon className="h-5 w-5" />
                 )}
-                <div>
-                  <div className="font-medium text-xs">
-                    {option.label}
-                  </div>
-                  <div className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                    {option.description}
-                  </div>
+                <div className="font-medium text-xs">
+                  {option.label}
                 </div>
               </Button>
             );
