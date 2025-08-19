@@ -672,7 +672,7 @@ export const ViewIncidentModal = ({
                         <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor"/>
                         <path d="M9 12h6" stroke="currentColor"/>
                       </svg>
-                      Case {incident.caseNumber || extractCaseNumberFlexible(incident.notes)}
+                      Case #: {incident.caseNumber || extractCaseNumberFlexible(incident.notes)}
                     </Badge>
                   ) : null}
                   <div className={`${categoryClass} text-white font-medium h-7 px-3 rounded-full flex items-center justify-center break-words min-w-0`} 
