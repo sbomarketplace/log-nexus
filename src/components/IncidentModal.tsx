@@ -422,9 +422,6 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
           <div className="flex items-center gap-2">
             {isEditMode ? (
               <>
-                <Button variant="outline" onClick={handleCancel} disabled={isSaving}>
-                  Cancel
-                </Button>
                 <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">
                   {isSaving ? 'Saving...' : 'Save'}
                 </Button>
