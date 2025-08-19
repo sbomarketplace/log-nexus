@@ -644,8 +644,8 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     value={formData.notes || ''}
                     onChange={(e) => handleFieldChange('notes', e.target.value)}
                     placeholder="Detailed notes..."
-                    className="rounded-lg min-h-[720px] resize-none"
-                    rows={30}
+                    className="rounded-lg min-h-[360px] resize-none"
+                    rows={15}
                   />
                   {validationErrors.notes && (
                     <p className="text-xs text-destructive">{validationErrors.notes}</p>
