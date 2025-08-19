@@ -30,6 +30,7 @@ import { getDateSafely } from '@/utils/safeDate';
 import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 import { formatWhoList, parseWhoFromString } from '@/helpers/people';
+import { extractCaseNumberFlexible } from '@/lib/caseNumber';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -535,7 +536,7 @@ export const ViewIncidentModal = ({
             data-scroll-container
           >
             {/* Header row with date, case number and category - editable in edit mode */}
-            <div className={`flex items-start gap-3 mb-3 ${isEditMode ? 'flex-col sm:flex-row' : 'flex-wrap'}`}>
+            <div className={`flex items-start gap-3 mb-3 ${isEditMode ? 'flex-col sm:flex-row' : 'flex-wrap'}`} aria-label="Incident date, time and case">{/* badges are displayed here in view mode */}
               {isEditMode ? (
                 <>
                     {/* Date Field - Native calendar picker */}
@@ -662,14 +663,18 @@ export const ViewIncidentModal = ({
                       </Badge>
                     ) : null;
                   })()}
-                  {incident.caseNumber && (
+                  {incident.caseNumber || extractCaseNumberFlexible(incident.notes) ? (
                     <Badge 
                       variant="outline" 
                       className="font-medium shrink-0 h-7 px-3 flex items-center border-2 rounded-full"
                     >
-                      Case #: {incident.caseNumber}
+                      <svg width="16" height="16" viewBox="0 0 24 24" className="mr-2" aria-hidden="true">
+                        <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z" fill="none" stroke="currentColor"/>
+                        <path d="M9 12h6" stroke="currentColor"/>
+                      </svg>
+                      Case {incident.caseNumber || extractCaseNumberFlexible(incident.notes)}
                     </Badge>
-                  )}
+                  ) : null}
                   <div className={`${categoryClass} text-white font-medium h-7 px-3 rounded-full flex items-center justify-center break-words min-w-0`} 
                        style={{ fontSize: 'clamp(10px, 1.6vw, 12px)' }}>
                     {incident.categoryOrIssue}

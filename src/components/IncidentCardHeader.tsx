@@ -4,6 +4,7 @@ import { getPreferredDateTime } from '@/utils/timelineParser';
 import { getEffectiveOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 import { formatHeader, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
+import { extractCaseNumberFlexible } from '@/lib/caseNumber';
 
 interface IncidentCardHeaderProps {
   incident: OrganizedIncident;
@@ -90,6 +91,9 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
 
   const category = incident.categoryOrIssue || "Uncategorized";
   const title = incident.what || category;
+  
+  // Get case number from incident or extract from notes
+  const caseText = incident.caseNumber || extractCaseNumberFlexible(incident.notes) || null;
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -105,6 +109,11 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
         <Badge variant="secondary" className="text-xs bg-neutral-200 text-neutral-800 font-medium">
           {category}
         </Badge>
+        {caseText && (
+          <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
+            Case {caseText}
+          </Badge>
+        )}
       </div>
       <div className="text-base font-semibold text-neutral-900 leading-tight">
         {title}

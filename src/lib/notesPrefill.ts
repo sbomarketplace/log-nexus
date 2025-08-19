@@ -3,6 +3,7 @@
  */
 
 import { parseNotesToStructured, extractCaseNumber } from "./notesParser";
+import { extractCaseNumberFlexible } from "./caseNumber";
 import { combineLocalDateAndTime, toUTCISO } from "@/utils/incidentFormatting";
 import { OrganizedIncident } from "@/utils/organizedIncidentStorage";
 
@@ -61,11 +62,11 @@ export function prefillIncidentFromNotes(incident: OrganizedIncident): Partial<O
         result.who = parsed.people.join(', ');
       }
 
-      // Case number prefill (only if empty)
+      // Case number prefill (only if empty) - use enhanced extractor
       if (!incident.caseNumber && sourceText) {
-        const caseNo = extractCaseNumber(sourceText);
-        if (caseNo) {
-          result.caseNumber = caseNo;
+        const parsedCase = extractCaseNumberFlexible(sourceText);
+        if (parsedCase) {
+          result.caseNumber = parsedCase;
         }
       }
 
