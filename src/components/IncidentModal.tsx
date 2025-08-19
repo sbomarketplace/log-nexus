@@ -488,7 +488,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                       type="time"
                       value={timeInput}
                       onChange={handleTimeChange}
-                      className="h-8 pl-7 pr-3 w-28 rounded-full text-xs"
+                      className="h-8 pl-7 pr-3 w-32 rounded-full text-xs"
                       aria-label="Choose time"
                     />
                   </div>
@@ -644,7 +644,8 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     value={formData.notes || ''}
                     onChange={(e) => handleFieldChange('notes', e.target.value)}
                     placeholder="Detailed notes..."
-                    className="rounded-lg"
+                    className="rounded-lg min-h-[720px] resize-none"
+                    rows={30}
                   />
                   {validationErrors.notes && (
                     <p className="text-xs text-destructive">{validationErrors.notes}</p>
