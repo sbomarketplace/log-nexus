@@ -422,7 +422,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
           {/* Header Content Rows */}
           <div className="space-y-4">
             {/* Row 1: Date, Time, Category */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+            <div className="flex flex-row gap-3 items-center">
               {/* Date Input */}
               <div className="flex-none">
                 {isEditMode ? (
