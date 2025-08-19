@@ -105,7 +105,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSaveAndView 
           }
         }}
       >
-        <div className="flex max-h-[85vh] flex-col">
+        <div className="flex max-h-[85vh] flex-col incident-typography">
           {/* Header */}
           <div className="flex items-center justify-between border-b px-6 py-4 sm:px-8">
             <DialogTitle className="text-lg font-semibold text-center flex-1">

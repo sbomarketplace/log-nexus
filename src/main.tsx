@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './styles/typography.css'
 import { migrateIncidentsToDateTime } from './utils/incidentMigration'
 
 // Run migration on app startup

@@ -211,10 +211,10 @@ export const SharedIncidentForm = ({
   }));
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 incident-typography">{/* Typography unified with read view */}
       {/* Date Section */}
       <div className="space-y-2">
-        <Label htmlFor="date-input" className="text-sm font-medium">
+        <Label htmlFor="date-input" className="cc-field-label">
           Date
         </Label>
         <div className="relative">
@@ -232,7 +232,7 @@ export const SharedIncidentForm = ({
 
       {/* Time Section - directly under Date */}
       <div className="space-y-2">
-        <Label htmlFor="time-input" className="text-sm font-medium">
+        <Label htmlFor="time-input" className="cc-field-label">
           Time
         </Label>
         <div className="relative">
@@ -250,7 +250,7 @@ export const SharedIncidentForm = ({
 
       {/* Case Number Section */}
       <div className="space-y-2">
-        <Label htmlFor="case-number" className="text-sm font-medium">
+        <Label htmlFor="case-number" className="cc-field-label">
           Case # (Optional)
         </Label>
         <Input
@@ -270,7 +270,7 @@ export const SharedIncidentForm = ({
 
       {/* Category Section */}
       <div className="space-y-2">
-        <Label className="text-sm font-medium">Category/Issue *</Label>
+        <Label className="cc-field-label">Category/Issue *</Label>
         <Select 
           value={formData.categoryOrIssue} 
           onValueChange={(value) => handleFieldChange('categoryOrIssue', value)}
@@ -293,7 +293,7 @@ export const SharedIncidentForm = ({
 
       {/* Who Section */}
       <div className="space-y-2">
-        <Label htmlFor="who" className="text-sm font-medium">Who</Label>
+        <Label htmlFor="who" className="cc-field-label">Who</Label>
         <Textarea
           id="who"
           value={formData.who}
@@ -306,7 +306,7 @@ export const SharedIncidentForm = ({
 
       {/* What Section */}
       <div className="space-y-2">
-        <Label htmlFor="what" className="text-sm font-medium">What</Label>
+        <Label htmlFor="what" className="cc-field-label">What</Label>
         <Textarea
           id="what"
           value={formData.what}
@@ -319,7 +319,7 @@ export const SharedIncidentForm = ({
 
       {/* Where Section */}
       <div className="space-y-2">
-        <Label htmlFor="where" className="text-sm font-medium">Where</Label>
+        <Label htmlFor="where" className="cc-field-label">Where</Label>
         <Textarea
           id="where"
           value={formData.where}
@@ -332,7 +332,7 @@ export const SharedIncidentForm = ({
 
       {/* When Section */}
       <div className="space-y-2">
-        <Label htmlFor="when" className="text-sm font-medium">When</Label>
+        <Label htmlFor="when" className="cc-field-label">When</Label>
         <Textarea
           id="when"
           value={formData.when}
@@ -345,7 +345,7 @@ export const SharedIncidentForm = ({
 
       {/* Witnesses Section */}
       <div className="space-y-2">
-        <Label htmlFor="witnesses" className="text-sm font-medium">Witnesses</Label>
+        <Label htmlFor="witnesses" className="cc-field-label">Witnesses</Label>
         <Textarea
           id="witnesses"
           value={formData.witnesses}
@@ -358,7 +358,7 @@ export const SharedIncidentForm = ({
 
       {/* Timeline Section */}
       <div className="space-y-2">
-        <Label htmlFor="timeline" className="text-sm font-medium">Timeline</Label>
+        <Label htmlFor="timeline" className="cc-field-label">Timeline</Label>
         <Textarea
           id="timeline"
           value={formData.timeline}
@@ -371,7 +371,7 @@ export const SharedIncidentForm = ({
 
       {/* Requests Section */}
       <div className="space-y-2">
-        <Label htmlFor="requests" className="text-sm font-medium">Requests</Label>
+        <Label htmlFor="requests" className="cc-field-label">Requests</Label>
         <Textarea
           id="requests"
           value={formData.requests}
@@ -384,7 +384,7 @@ export const SharedIncidentForm = ({
 
       {/* Policy Section */}
       <div className="space-y-2">
-        <Label htmlFor="policy" className="text-sm font-medium">Policy Reference</Label>
+        <Label htmlFor="policy" className="cc-field-label">Policy Reference</Label>
         <Textarea
           id="policy"
           value={formData.policy}
@@ -397,7 +397,7 @@ export const SharedIncidentForm = ({
 
       {/* Evidence Section */}
       <div className="space-y-2">
-        <Label htmlFor="evidence" className="text-sm font-medium">Evidence</Label>
+        <Label htmlFor="evidence" className="cc-field-label">Evidence</Label>
         <Textarea
           id="evidence"
           value={formData.evidence}
@@ -410,7 +410,7 @@ export const SharedIncidentForm = ({
 
       {/* Notes Section */}
       <div className="space-y-2">
-        <Label htmlFor="notes" className="text-sm font-medium">Additional Notes</Label>
+        <Label htmlFor="notes" className="cc-field-label">Additional Notes</Label>
         <Textarea
           id="notes"
           value={formData.notes}
@@ -424,7 +424,7 @@ export const SharedIncidentForm = ({
       {/* File Upload Section */}
       {onFileUpload && (
         <div className="space-y-2">
-          <Label className="text-sm font-medium">Supporting Files</Label>
+          <Label className="cc-field-label">Supporting Files</Label>
           
           {/* Existing Files */}
           {existingFiles.length > 0 && (

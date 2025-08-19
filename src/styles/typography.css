@@ -1,0 +1,37 @@
+:root{
+  --cc-font-base:16px;
+  --cc-line:1.5;
+  --cc-h1:clamp(20px, 2.2vw, 24px);
+  --cc-h2:clamp(18px, 1.9vw, 20px);
+  --cc-h3:clamp(16px, 1.7vw, 18px);
+}
+
+/* Shared container for Incident typography */
+.incident-typography{
+  font-size:var(--cc-font-base);
+  line-height:var(--cc-line);
+}
+.incident-typography h1{font-size:var(--cc-h1);line-height:1.3;}
+.incident-typography h2{font-size:var(--cc-h2);line-height:1.35;}
+.incident-typography h3{font-size:var(--cc-h3);line-height:1.4;}
+
+/* Make modals inherit the same scale */
+.cc-modal,
+.cc-modal *{
+  font-size:inherit;
+  line-height:inherit;
+}
+
+/* Form controls at least 16px to avoid iOS zoom */
+.incident-typography input,
+.incident-typography select,
+.incident-typography textarea{
+  font-size:16px;
+  line-height:1.4;
+}
+
+/* Field labels consistent sizing */
+.incident-typography .cc-field-label{
+  font-size:inherit;
+  font-weight:600;
+}

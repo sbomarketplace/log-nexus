@@ -497,7 +497,7 @@ export const ViewIncidentModal = ({
           }
         }}
       >
-        <div className="flex max-h-[85vh] flex-col">
+        <div className="flex max-h-[85vh] flex-col incident-typography">
           {/* Header with edit/save controls and single close */}
           <div className="flex items-center justify-between px-5 py-3 border-b">
             <h2 className="text-base font-semibold">
@@ -511,7 +511,7 @@ export const ViewIncidentModal = ({
                     size="sm"
                     onClick={handleCancel}
                     disabled={isSaving}
-                    className="text-xs h-8 px-3"
+                    className="h-8 px-3"
                   >
                     Cancel
                   </Button>
@@ -520,7 +520,7 @@ export const ViewIncidentModal = ({
                     size="sm"
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="text-xs h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
+                    className="h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
                     aria-label="Save changes"
                   >
                     {isSaving ? (
@@ -542,7 +542,7 @@ export const ViewIncidentModal = ({
                     variant="ghost"
                     size="sm"
                     onClick={handleEditClick}
-                    className="text-xs h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
+                    className="h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
                     aria-label="Edit incident"
                   >
                     <Edit3 className="h-4 w-4 mr-1" />
@@ -584,12 +584,12 @@ export const ViewIncidentModal = ({
                         style={{ fontSize: '16px' }}
                       />
                       {dateInput && (
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="text-muted-foreground mt-1">
                           Selected: {new Date(dateInput).toLocaleDateString()}
                         </div>
                       )}
                       {validationErrors.date && (
-                        <div className="text-xs text-destructive mt-1">{validationErrors.date}</div>
+                        <div className="text-destructive mt-1">{validationErrors.date}</div>
                       )}
                     </div>
 
@@ -606,7 +606,7 @@ export const ViewIncidentModal = ({
                         style={{ fontSize: '16px' }}
                       />
                       {timeInput && (
-                        <div className="text-xs text-muted-foreground mt-1">
+                        <div className="text-muted-foreground mt-1">
                           {new Date(`2000-01-01T${timeInput}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
                         </div>
                       )}
@@ -647,7 +647,7 @@ export const ViewIncidentModal = ({
                       </SelectContent>
                     </Select>
                     {validationErrors.categoryOrIssue && (
-                      <div className="text-xs text-destructive mt-1">{validationErrors.categoryOrIssue}</div>
+                      <div className="text-destructive mt-1">{validationErrors.categoryOrIssue}</div>
                     )}
                   </div>
                 </>
@@ -655,14 +655,14 @@ export const ViewIncidentModal = ({
                 <>
                   <Badge 
                     variant="secondary" 
-                    className="text-xs font-medium shrink-0 h-7 px-3 flex items-center bg-muted text-muted-foreground border rounded-full"
+                    className="font-medium shrink-0 h-7 px-3 flex items-center bg-muted text-muted-foreground border rounded-full"
                   >
                     {displayDate}
                   </Badge>
                   {incident.caseNumber && (
                     <Badge 
                       variant="outline" 
-                      className="text-xs font-medium shrink-0 h-7 px-3 flex items-center border-2 rounded-full"
+                      className="font-medium shrink-0 h-7 px-3 flex items-center border-2 rounded-full"
                     >
                       Case #: {incident.caseNumber}
                     </Badge>
@@ -681,7 +681,7 @@ export const ViewIncidentModal = ({
               {/* Who Section */}
               {(isEditMode || incident.who) && (
                 <div className={`${!isEditMode ? `border-l-[3px] pl-3 category-tint-${categoryClass.split('-')[1]}` : ''}`}>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">Who</h4>
+                  <h4 className="cc-field-label text-slate-600 mb-1">Who</h4>
                   {isEditMode ? (
                     <Textarea
                       value={formData.who || ''}
@@ -691,7 +691,7 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                       {(() => {
                         const whoText = formatWhoList(parseWhoFromString(incident.who || ''));
                         return whoText ? renderTextWithPhoneLinks(whoText) : <span className="text-muted-foreground">Not specified</span>;
@@ -706,7 +706,7 @@ export const ViewIncidentModal = ({
               {/* What Section */}
               {(isEditMode || incident.what) && (
                 <div className={`${!isEditMode ? `border-l-[3px] pl-3 category-tint-${categoryClass.split('-')[1]}` : ''}`}>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">What</h4>
+                  <h4 className="cc-field-label text-slate-600 mb-1">What</h4>
                   {isEditMode ? (
                     <Textarea
                       value={formData.what || ''}
@@ -716,7 +716,7 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                       {renderTextWithPhoneLinks(incident.what)}
                     </p>
                   )}
@@ -728,7 +728,7 @@ export const ViewIncidentModal = ({
               {/* Where Section */}
               {(isEditMode || incident.where) && (
                 <div>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">Where</h4>
+                  <h4 className="cc-field-label text-slate-600 mb-1">Where</h4>
                   {isEditMode ? (
                     <Input
                       value={formData.where || ''}
@@ -737,7 +737,7 @@ export const ViewIncidentModal = ({
                       className="text-base"
                     />
                   ) : (
-                    <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                       {renderTextWithPhoneLinks(incident.where)}
                     </p>
                   )}
@@ -747,7 +747,7 @@ export const ViewIncidentModal = ({
               {((isEditMode || incident.where) && (isEditMode || incident.when)) && <div className="border-t border-border/50 my-2"></div>}
 
                 <div>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">Time</h4>
+                  <h4 className="cc-field-label text-slate-600 mb-1">Time</h4>
                   {isEditMode ? (
                     <Input
                       id="incident-time-edit"
@@ -760,7 +760,7 @@ export const ViewIncidentModal = ({
                       style={{ fontSize: '16px' }}
                     />
                   ) : (
-                     <div className="flex items-center gap-2 text-sm">
+                     <div className="flex items-center gap-2">
                        <div className="break-words">
                          {effectiveDateTime ? formatTimeOnly(effectiveDateTime) : (
                            <span className="text-muted-foreground italic">No time specified</span>
@@ -775,7 +775,7 @@ export const ViewIncidentModal = ({
               {/* Witnesses Section */}
               {(isEditMode || incident.witnesses) && (
                 <div>
-                  <h4 className="text-xs font-medium text-slate-600 mb-1">Witnesses</h4>
+                  <h4 className="cc-field-label text-slate-600 mb-1">Witnesses</h4>
                   {isEditMode ? (
                     <Textarea
                       value={formData.witnesses || ''}
@@ -785,7 +785,7 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                       {renderTextWithPhoneLinks(incident.witnesses)}
                     </p>
                   )}
@@ -797,7 +797,7 @@ export const ViewIncidentModal = ({
                 <>
                   {((isEditMode || incident.who || incident.what || incident.where || incident.when || incident.witnesses) && (isEditMode || incident.timeline)) && <div className="border-t border-border/50 my-2"></div>}
                   <div>
-                    <h4 className="text-xs font-medium text-slate-600 mb-1">Timeline</h4>
+                    <h4 className="cc-field-label text-slate-600 mb-1">Timeline</h4>
                     {isEditMode ? (
                       <Textarea
                         value={formData.timeline || ''}
@@ -807,7 +807,7 @@ export const ViewIncidentModal = ({
                         rows={3}
                       />
                     ) : (
-                      <p className="text-sm leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                         {renderTextWithPhoneLinks(incident.timeline)}
                       </p>
                     )}
@@ -820,7 +820,7 @@ export const ViewIncidentModal = ({
                 <>
                   {((isEditMode || incident.timeline || incident.who || incident.what || incident.where || incident.when || incident.witnesses) && (isEditMode || incident.requests)) && <div className="border-t border-border/50 my-2"></div>}
                   <div>
-                    <h4 className="text-xs font-medium text-slate-600 mb-1">Requests</h4>
+                    <h4 className="cc-field-label text-slate-600 mb-1">Requests</h4>
                     {isEditMode ? (
                       <Textarea
                         value={formData.requests || ''}
@@ -830,7 +830,7 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="text-sm leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                         {renderTextWithPhoneLinks(incident.requests)}
                       </p>
                     )}
@@ -843,7 +843,7 @@ export const ViewIncidentModal = ({
                 <>
                   {((isEditMode || incident.requests || incident.timeline || incident.who || incident.what || incident.where || incident.when || incident.witnesses) && (isEditMode || incident.policy)) && <div className="border-t border-border/50 my-2"></div>}
                   <div>
-                    <h4 className="text-xs font-medium text-slate-600 mb-1">Policy</h4>
+                    <h4 className="cc-field-label text-slate-600 mb-1">Policy</h4>
                     {isEditMode ? (
                       <Textarea
                         value={formData.policy || ''}
@@ -853,7 +853,7 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="text-sm leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                         {renderTextWithPhoneLinks(incident.policy)}
                       </p>
                     )}
@@ -866,7 +866,7 @@ export const ViewIncidentModal = ({
                 <>
                   {((isEditMode || incident.policy || incident.requests || incident.timeline || incident.who || incident.what || incident.where || incident.when || incident.witnesses) && (isEditMode || incident.evidence)) && <div className="border-t border-border/50 my-2"></div>}
                   <div>
-                    <h4 className="text-xs font-medium text-slate-600 mb-1">Evidence</h4>
+                    <h4 className="cc-field-label text-slate-600 mb-1">Evidence</h4>
                     {isEditMode ? (
                       <Textarea
                         value={formData.evidence || ''}
@@ -876,7 +876,7 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="text-sm leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                         {renderTextWithPhoneLinks(incident.evidence)}
                       </p>
                     )}
@@ -889,7 +889,7 @@ export const ViewIncidentModal = ({
 
               {/* Incident Summary */}
               <div>
-                <h4 className="text-xs font-medium text-slate-600 mb-1">
+                <h4 className="cc-field-label text-slate-600 mb-1">
                   Incident Summary {isEditMode && <span className="text-destructive">*</span>}
                 </h4>
                 {isEditMode ? (
@@ -902,11 +902,11 @@ export const ViewIncidentModal = ({
                       rows={4}
                     />
                     {validationErrors.notes && (
-                      <div className="text-xs text-destructive mt-1">{validationErrors.notes}</div>
+                      <div className="text-destructive mt-1">{validationErrors.notes}</div>
                     )}
                   </>
                 ) : (
-                  <p className="text-sm leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                  <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
                     {renderTextWithPhoneLinks(incident.notes)}
                   </p>
                 )}
@@ -915,7 +915,7 @@ export const ViewIncidentModal = ({
 
             {/* Timestamps */}
             {!isEditMode && (
-              <div className="border-t border-border/50 pt-2 mt-3 text-xs text-slate-500">
+              <div className="border-t border-border/50 pt-2 mt-3 text-slate-500">
                 <div className="space-y-1">
                   <div>Created: {new Date(incident.createdAt).toLocaleString()}</div>
                   <div>Last Updated: {new Date(incident.updatedAt).toLocaleString()}</div>
