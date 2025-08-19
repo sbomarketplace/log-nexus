@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { X, Calendar as CalendarIcon, Clock, Save, Plus } from 'lucide-react';
+import { X, Calendar as CalendarIcon, Clock, Save, Plus, CheckCircle } from 'lucide-react';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
 import { 
@@ -24,6 +24,7 @@ import {
 import { getPreferredDateTime } from '@/utils/timelineParser';
 import { showToast } from '@/components/SuccessToast';
 import { processIncident } from '@/services/incidentProcessor';
+import { prefillIncidentFromNotes, shouldRunOneTimePrefill } from '@/lib/notesPrefill';
 import { cn } from '@/lib/utils';
 
 interface IncidentModalProps {
@@ -37,12 +38,14 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
   const [incident, setIncident] = useState<OrganizedIncident | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isOrganizing, setIsOrganizing] = useState(false);
   const [formData, setFormData] = useState<Partial<OrganizedIncident>>({});
   const [dateInput, setDateInput] = useState('');
   const [timeInput, setTimeInput] = useState('');
   const [caseNumber, setCaseNumber] = useState('');
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
+  const [hasRunOneTimePrefill, setHasRunOneTimePrefill] = useState(false);
   const firstEditFieldRef = useRef<HTMLInputElement>(null);
 
   // Load incident data when ID changes
@@ -57,12 +60,17 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         
         // Initialize date/time inputs following prefill rules
         initializeDateTimeInputs(foundIncident);
+        
+        // Run one-time prefill if incident has no date/time data
+        if (!hasRunOneTimePrefill && shouldRunOneTimePrefill(foundIncident)) {
+          runOneTimePrefill(foundIncident);
+        }
       }
     } else {
       setIncident(null);
       resetForm();
     }
-  }, [incidentId]);
+  }, [incidentId, hasRunOneTimePrefill]);
 
   const initializeDateTimeInputs = (incident: OrganizedIncident) => {
     let initialDate = '';
@@ -122,6 +130,105 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     setIsEditMode(false);
     setIsDirty(false);
     setValidationErrors({});
+    setHasRunOneTimePrefill(false);
+  };
+
+  // One-time prefill from parsed notes
+  const runOneTimePrefill = (incident: OrganizedIncident) => {
+    try {
+      const prefillData = prefillIncidentFromNotes(incident);
+      
+      if (Object.keys(prefillData).length > 0) {
+        // Apply prefill data to form
+        setFormData(prev => ({ ...prev, ...prefillData }));
+        
+        // Update date/time inputs if they were prefilled
+        if (prefillData.dateTime) {
+          const d = parseISOToLocal(prefillData.dateTime);
+          if (d) {
+            setDateInput(formatYYYYMMDD(d));
+            setTimeInput(formatHHmm(d));
+          }
+        } else {
+          if (prefillData.datePart) {
+            const d = parseISOToLocal(prefillData.datePart);
+            if (d) setDateInput(formatYYYYMMDD(d));
+          }
+          if (prefillData.timePart) {
+            setTimeInput(prefillData.timePart);
+          }
+        }
+      }
+      
+      setHasRunOneTimePrefill(true);
+    } catch (error) {
+      console.error('Error in one-time prefill:', error);
+      setHasRunOneTimePrefill(true); // Prevent retry loops
+    }
+  };
+
+  // Handle organize notes action
+  const handleOrganizeNotes = async () => {
+    if (!incident) return;
+    
+    setIsOrganizing(true);
+    
+    try {
+      const prefillData = prefillIncidentFromNotes(incident);
+      
+      if (Object.keys(prefillData).length > 0) {
+        // Apply prefill to current form data (only empty fields)
+        const updatedFormData = { ...formData };
+        
+        // Only update fields that are currently empty
+        Object.keys(prefillData).forEach(key => {
+          const typedKey = key as keyof OrganizedIncident;
+          if (!formData[typedKey] || (typeof formData[typedKey] === 'string' && !(formData[typedKey] as string).trim())) {
+            (updatedFormData as any)[typedKey] = prefillData[typedKey];
+          }
+        });
+        
+        setFormData(updatedFormData);
+        
+        // Update date/time inputs if they were empty
+        if (!dateInput && !timeInput) {
+          if (prefillData.dateTime) {
+            const d = parseISOToLocal(prefillData.dateTime);
+            if (d) {
+              setDateInput(formatYYYYMMDD(d));
+              setTimeInput(formatHHmm(d));
+            }
+          } else {
+            if (prefillData.datePart && !dateInput) {
+              const d = parseISOToLocal(prefillData.datePart);
+              if (d) setDateInput(formatYYYYMMDD(d));
+            }
+            if (prefillData.timePart && !timeInput) {
+              setTimeInput(prefillData.timePart);
+            }
+          }
+        }
+        
+        // Show success toast
+        showToast({ 
+          message: 'Notes organized successfully', 
+          type: 'success' 
+        });
+      } else {
+        showToast({ 
+          message: 'No additional information found to organize', 
+          type: 'info' 
+        });
+      }
+    } catch (error) {
+      console.error('Error organizing notes:', error);
+      showToast({ 
+        message: 'Failed to organize notes. Please try again.', 
+        type: 'error' 
+      });
+    } finally {
+      setIsOrganizing(false);
+    }
   };
 
   // Track if form is dirty
@@ -556,9 +663,20 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                       variant="outline"
                       size="sm"
                       className="absolute top-2 right-2 h-8 px-3 text-xs"
+                      onClick={handleOrganizeNotes}
+                      disabled={isOrganizing}
                     >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Organize notes
+                      {isOrganizing ? (
+                        <>
+                          <CheckCircle className="h-3 w-3 mr-1 animate-spin" />
+                          Organizing...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-3 w-3 mr-1" />
+                          Organize notes
+                        </>
+                      )}
                     </Button>
                   )}
                 </div>
