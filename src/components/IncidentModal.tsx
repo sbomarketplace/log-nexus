@@ -126,7 +126,28 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         }
       }
     }
-    // 5. If nothing found, leave blank (never default to current time)
+    
+    // 5. If no time found yet, try extracting from notes (same as pill display)
+    if (!initialTime) {
+      const notesTime = extractFirstTimeFromNotes(incident.notes);
+      if (notesTime?.text) {
+        // Convert display format (12:30 PM) back to 24-hour format (12:30)
+        const timeStr = notesTime.text;
+        const match = timeStr.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+        if (match) {
+          let hour = parseInt(match[1], 10);
+          const minute = match[2];
+          const ampm = match[3].toUpperCase();
+          
+          if (ampm === 'AM' && hour === 12) hour = 0;
+          if (ampm === 'PM' && hour !== 12) hour = hour + 12;
+          
+          initialTime = `${hour.toString().padStart(2, '0')}:${minute}`;
+        }
+      }
+    }
+    
+    // 6. If nothing found, leave blank (never default to current time)
 
     setDateInput(initialDate);
     setTimeInput(initialTime);
@@ -482,9 +503,9 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     return (
                       <>
                         {timeText && (
-                          <Badge variant="outline" className="h-8 px-3 rounded-full text-xs font-medium">
-                            <Clock className="h-3 w-3 mr-1" />
-                            {timeText}
+                          <Badge variant="outline" className="h-8 px-3 rounded-full text-xs font-medium whitespace-nowrap min-w-fit">
+                            <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <span className="flex-shrink-0">{timeText}</span>
                           </Badge>
                         )}
                       </>
