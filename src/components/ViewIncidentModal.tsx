@@ -496,7 +496,7 @@ export const ViewIncidentModal = ({
           }
         }}
       >
-        <div className="flex max-h-[85vh] flex-col incident-typography">
+        <div className="flex max-h-[85vh] flex-col incident-typography relative">
           {/* Header with edit/save controls and single close */}
           <div className="flex items-center justify-between px-5 py-3 border-b">
             <h2 className="text-base font-semibold">
