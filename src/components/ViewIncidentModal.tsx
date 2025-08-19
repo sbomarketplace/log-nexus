@@ -25,7 +25,7 @@ import { getPreferredDateTime } from '@/utils/timelineParser';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
-import { useToast } from '@/hooks/use-toast';
+import { showSuccessToast, showErrorToast } from '@/lib/showToast';
 import { getDateSafely } from '@/utils/safeDate';
 import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
@@ -48,7 +48,6 @@ export const ViewIncidentModal = ({
 }: ViewIncidentModalProps) => {
   // HOOKS MUST BE DECLARED AT TOP LEVEL - React Rules of Hooks requirement
   // All hooks must be called in the same order every render, regardless of props or state
-  const { toast } = useToast();
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<OrganizedIncident>>({});
@@ -382,22 +381,15 @@ export const ViewIncidentModal = ({
       setIsEditMode(false);
       setIsDirty(false);
       
-      toast({
-        title: 'Incident Updated',
-        description: 'Your incident has been successfully updated.',
-      });
+      showSuccessToast('Incident Updated', 'Your incident has been successfully updated.');
 
     } catch (error) {
       console.error('Error saving incident:', error);
-      toast({
-        title: 'Save Failed',
-        description: 'There was an error updating your incident. Please try again.',
-        variant: 'destructive'
-      });
+      showErrorToast('Save Failed', 'There was an error updating your incident. Please try again.');
     } finally {
       setIsSaving(false);
     }
-  }, [incident, formData, dateInput, parsedDate, isOwner, onIncidentUpdate, toast, selectedDateTime, timeInput, caseNumber]);
+  }, [incident, formData, dateInput, parsedDate, isOwner, onIncidentUpdate, selectedDateTime, timeInput, caseNumber]);
 
   // Cancel editing
   const handleCancel = useCallback(() => {

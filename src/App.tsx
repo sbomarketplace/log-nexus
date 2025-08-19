@@ -12,12 +12,14 @@ import Resources from "./pages/Resources";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
+import { useToastStore } from "@/lib/showToast";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const { node } = useToastStore();
 
   useEffect(() => {
     // Check if user has given consent
@@ -50,6 +52,7 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
+        {node}
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />
