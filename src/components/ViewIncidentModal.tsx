@@ -658,6 +658,38 @@ export const ViewIncidentModal = ({
                   >
                     {displayDate}
                   </Badge>
+                  {(() => {
+                    // Display time from timeline fallback or explicit time
+                    const timeToShow = (() => {
+                      const preferred = getPreferredDateTime(incident);
+                      if (preferred.time) {
+                        try {
+                          const [hours, minutes] = preferred.time.split(':');
+                          const hour12 = parseInt(hours) % 12 || 12;
+                          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
+                          return `${hour12}:${minutes} ${ampm}`;
+                        } catch {
+                          return preferred.time;
+                        }
+                      }
+                      
+                      const derivedTime = deriveIncidentTime(incident);
+                      if (derivedTime) {
+                        return formatHHMMForUI(derivedTime);
+                      }
+                      
+                      return effectiveDateTime ? formatTimeOnly(effectiveDateTime) : null;
+                    })();
+                    
+                    return timeToShow ? (
+                      <Badge 
+                        variant="secondary" 
+                        className="font-medium shrink-0 h-7 px-3 flex items-center bg-muted text-muted-foreground border rounded-full"
+                      >
+                        {timeToShow}
+                      </Badge>
+                    ) : null;
+                  })()}
                   {incident.caseNumber && (
                     <Badge 
                       variant="outline" 
