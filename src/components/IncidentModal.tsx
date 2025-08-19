@@ -337,6 +337,9 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
       // Notify parent of update
       onIncidentUpdate?.();
 
+      // Close the modal
+      onOpenChange(false);
+
     } catch (error) {
       console.error('Error saving incident:', error);
       setValidationErrors({ general: 'Failed to save incident. Please try again.' });
