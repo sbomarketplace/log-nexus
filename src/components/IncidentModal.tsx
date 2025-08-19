@@ -88,16 +88,27 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         initialTime = incident.timePart;
       }
     }
-        // 3. Else attempt one-time parse from notes fields
-        else {
-          const notesToParse = incident.notes || incident.what || '';
-          const parsed = parseDateTimeFromNotes(notesToParse);
-          if (parsed) {
-            if (parsed.date) initialDate = parsed.date;
-            if (parsed.time) initialTime = parsed.time;
-          }
+    // 3. Else check for preferred date/time from original text and timeline
+    else {
+      const preferred = getPreferredDateTime(incident);
+      if (preferred.date) {
+        initialDate = preferred.date;
+      }
+      if (preferred.time) {
+        initialTime = preferred.time;
+      }
+      
+      // 4. Fallback to one-time parse from notes fields if preferred didn't work
+      if (!initialDate && !initialTime) {
+        const notesToParse = incident.notes || incident.what || '';
+        const parsed = parseDateTimeFromNotes(notesToParse);
+        if (parsed) {
+          if (parsed.date) initialDate = parsed.date;
+          if (parsed.time) initialTime = parsed.time;
         }
-    // 4. If nothing found, leave blank (never default to current time)
+      }
+    }
+    // 5. If nothing found, leave blank (never default to current time)
 
     setDateInput(initialDate);
     setTimeInput(initialTime);
