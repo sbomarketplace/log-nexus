@@ -48,6 +48,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
   const [dateInput, setDateInput] = useState('');
   const [timeInput, setTimeInput] = useState('');
   const [caseNumber, setCaseNumber] = useState('');
+  const [caseNumberAutoFilled, setCaseNumberAutoFilled] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
   const [isDirty, setIsDirty] = useState(false);
   const [hasRunOneTimePrefill, setHasRunOneTimePrefill] = useState(false);
@@ -153,49 +154,48 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     setTimeInput(initialTime);
   };
 
+  const runOneTimePrefill = (incident: OrganizedIncident) => {
+    const prefillData = prefillIncidentFromNotes(incident);
+    if (Object.keys(prefillData).length > 0) {
+      setFormData(prev => ({ ...prev, ...prefillData }));
+      
+      // Update date/time inputs if they were prefilled
+      if (prefillData.dateTime) {
+        const d = parseISOToLocal(prefillData.dateTime);
+        if (d) {
+          setDateInput(formatYYYYMMDD(d));
+          setTimeInput(formatHHmm(d));
+        }
+      } else {
+        if (prefillData.datePart) setDateInput(prefillData.datePart);
+        if (prefillData.timePart) setTimeInput(prefillData.timePart);
+      }
+      
+      // Update case number if prefilled
+      if (prefillData.caseNumber && !caseNumber) {
+        setCaseNumber(prefillData.caseNumber);
+        setCaseNumberAutoFilled(true);
+      }
+      
+      setHasRunOneTimePrefill(true);
+    }
+  };
+
   const resetForm = () => {
     setFormData({});
     setDateInput('');
     setTimeInput('');
     setCaseNumber('');
-    setIsEditMode(false);
-    setIsDirty(false);
+    setCaseNumberAutoFilled(false);
     setValidationErrors({});
+    setIsDirty(false);
+    setIsEditMode(false);
     setHasRunOneTimePrefill(false);
-  };
-
-  // One-time prefill from parsed notes
-  const runOneTimePrefill = (incident: OrganizedIncident) => {
-    try {
-      const prefillData = prefillIncidentFromNotes(incident);
-      
-      if (Object.keys(prefillData).length > 0) {
-        // Apply prefill data to form
-        setFormData(prev => ({ ...prev, ...prefillData }));
-        
-        // Update date/time inputs if they were prefilled
-        if (prefillData.dateTime) {
-          const d = parseISOToLocal(prefillData.dateTime);
-          if (d) {
-            setDateInput(formatYYYYMMDD(d));
-            setTimeInput(formatHHmm(d));
-          }
-        } else {
-          if (prefillData.datePart) {
-            const d = parseISOToLocal(prefillData.datePart);
-            if (d) setDateInput(formatYYYYMMDD(d));
-          }
-          if (prefillData.timePart) {
-            setTimeInput(prefillData.timePart);
-          }
-        }
-      }
-      
-      setHasRunOneTimePrefill(true);
-    } catch (error) {
-      console.error('Error in one-time prefill:', error);
-      setHasRunOneTimePrefill(true); // Prevent retry loops
-    }
+    
+    // Clear URL parameters
+    const url = new URL(window.location.href);
+    url.searchParams.delete('mode');
+    window.history.replaceState({}, '', url.toString());
   };
 
   // Track if form is dirty (allow dirty state in both edit and view modes)
@@ -557,11 +557,19 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     ref={firstEditFieldRef}
                     placeholder="Case Number (Optional)"
                     value={caseNumber}
-                    onChange={(e) => setCaseNumber(e.target.value)}
+                    onChange={(e) => {
+                      setCaseNumber(e.target.value);
+                      if (caseNumberAutoFilled) {
+                        setCaseNumberAutoFilled(false);
+                      }
+                    }}
                     maxLength={50}
                     className="max-w-xs rounded-lg text-sm"
                     aria-label="Case number"
                   />
+                  {caseNumberAutoFilled && (
+                    <p className="text-xs text-muted-foreground">Parsed from notes • You can edit this</p>
+                  )}
                   {validationErrors.caseNumber && (
                     <p className="text-xs text-destructive">{validationErrors.caseNumber}</p>
                   )}

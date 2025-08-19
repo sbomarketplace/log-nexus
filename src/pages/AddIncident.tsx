@@ -15,6 +15,7 @@ import { getCategoryOptions } from '@/utils/incidentCategories';
 import { supabase } from '@/integrations/supabase/client';
 import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { Wand2, Loader2 } from 'lucide-react';
+import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
 
 
 interface Person {
@@ -45,6 +46,7 @@ const AddIncident = () => {
   // Unified date/time state
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [caseNumber, setCaseNumber] = useState('');
+  const [caseNumberAutoFilled, setCaseNumberAutoFilled] = useState(false);
 
   const [whoInvolved, setWhoInvolved] = useState<Person[]>([{ name: '', role: '' }]);
   const [witnesses, setWitnesses] = useState<Person[]>([{ name: '', role: '' }]);
@@ -95,6 +97,9 @@ const AddIncident = () => {
 
   const handleCaseNumberChange = (value: string) => {
     setCaseNumber(value);
+    if (caseNumberAutoFilled) {
+      setCaseNumberAutoFilled(false);
+    }
     if (errors.caseNumber) {
       setErrors(prev => ({ ...prev, caseNumber: '' }));
     }
@@ -102,6 +107,27 @@ const AddIncident = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Auto-prefill from notes when "what" field changes and other fields are empty
+    if (field === 'what' && value.trim()) {
+      const mockIncident = { 
+        what: value, 
+        notes: value,
+        caseNumber: caseNumber,
+        where: formData.where,
+        dateTime: undefined,
+        datePart: undefined,
+        timePart: undefined 
+      };
+      
+      const prefillData = prefillIncidentFromNotes(mockIncident as any);
+      
+      if (prefillData.caseNumber && !caseNumber) {
+        setCaseNumber(prefillData.caseNumber);
+        setCaseNumberAutoFilled(true);
+      }
+    }
+    
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -389,15 +415,20 @@ const AddIncident = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div className="space-y-2">
                   <Label htmlFor="caseNumber">Case #</Label>
-                  <Input
-                    id="caseNumber"
-                    value={caseNumber}
-                    onChange={(e) => handleCaseNumberChange(e.target.value)}
-                    placeholder="Optional"
-                    maxLength={50}
-                    aria-label="Case number"
-                  />
-                  {errors.caseNumber && <p className="text-sm text-destructive">{errors.caseNumber}</p>}
+                  <div className="space-y-1">
+                    <Input
+                      id="caseNumber"
+                      value={caseNumber}
+                      onChange={(e) => handleCaseNumberChange(e.target.value)}
+                      placeholder="Optional"
+                      maxLength={50}
+                      aria-label="Case number"
+                    />
+                    {caseNumberAutoFilled && (
+                      <p className="text-xs text-muted-foreground">Parsed from notes • You can edit this</p>
+                    )}
+                    {errors.caseNumber && <p className="text-sm text-destructive">{errors.caseNumber}</p>}
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="where">Location *</Label>

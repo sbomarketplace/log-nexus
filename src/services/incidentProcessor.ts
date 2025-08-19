@@ -8,6 +8,7 @@ import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { generateIncidentKey, getCategoryForKey, saveCategoryMapping } from '@/utils/incidentKeyGenerator';
 import { getDateSafely } from '@/utils/safeDate';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
+import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
 
 // ProcessedIncident is just an alias since OrganizedIncident already has all the fields we need
 export type ProcessedIncident = OrganizedIncident;
@@ -23,13 +24,24 @@ export function processIncident(
 ): ProcessedIncident {
   const { authorPerspective = 'first_person', rawNotes } = options;
   
+  // Apply prefill data from notes first
+  let processedIncident = { ...incident };
+  if (rawNotes) {
+    const prefillData = prefillIncidentFromNotes({ 
+      ...incident, 
+      notes: rawNotes,
+      what: incident.what || rawNotes
+    });
+    processedIncident = { ...processedIncident, ...prefillData };
+  }
+  
   // Generate incident key for consistency
   let incidentKey: string | undefined;
   let existingCategory: string | null = null;
   
   if (rawNotes) {
     // Safe date access for key generation
-    const dateForKey = getDateSafely(incident, '');
+    const dateForKey = getDateSafely(processedIncident, '');
     const keyInfo = generateIncidentKey(rawNotes, dateForKey);
     incidentKey = keyInfo.key;
     existingCategory = getCategoryForKey(incidentKey);
@@ -40,7 +52,7 @@ export function processIncident(
   let originalEventDateText: string | undefined;
   
   // Try to parse date from various sources - null safety
-  const dateToParse = getDateSafely(incident, '') || incident.when || 
+  const dateToParse = getDateSafely(processedIncident, '') || processedIncident.when || 
     (rawNotes ? extractDateFromRawNotes(rawNotes) : null);
   
   if (dateToParse && dateToParse !== 'No date') {
@@ -52,7 +64,7 @@ export function processIncident(
   }
   
   // Use existing category if available for consistency
-  const categoryOrIssue = existingCategory || incident.categoryOrIssue;
+  const categoryOrIssue = existingCategory || processedIncident.categoryOrIssue;
   
   // Save category mapping for future consistency
   if (incidentKey && !existingCategory) {
@@ -60,15 +72,15 @@ export function processIncident(
   }
   
   // Normalize voice perspective for all text fields
-  const normalizedNotes = normalizeToFirstPerson(incident.notes, { authorPerspective });
-  const normalizedWhat = normalizeToFirstPerson(incident.what, { authorPerspective });
-  const normalizedWho = normalizeToFirstPerson(incident.who, { authorPerspective });
-  const normalizedWhere = normalizeToFirstPerson(incident.where, { authorPerspective });
-  const normalizedWhen = normalizeToFirstPerson(incident.when, { authorPerspective });
-  const normalizedWitnesses = normalizeToFirstPerson(incident.witnesses, { authorPerspective });
+  const normalizedNotes = normalizeToFirstPerson(processedIncident.notes, { authorPerspective });
+  const normalizedWhat = normalizeToFirstPerson(processedIncident.what, { authorPerspective });
+  const normalizedWho = normalizeToFirstPerson(processedIncident.who, { authorPerspective });
+  const normalizedWhere = normalizeToFirstPerson(processedIncident.where, { authorPerspective });
+  const normalizedWhen = normalizeToFirstPerson(processedIncident.when, { authorPerspective });
+  const normalizedWitnesses = normalizeToFirstPerson(processedIncident.witnesses, { authorPerspective });
   
   return {
-    ...incident,
+    ...processedIncident,
     categoryOrIssue,
     notes: normalizedNotes,
     what: normalizedWhat,

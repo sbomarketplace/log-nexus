@@ -21,6 +21,7 @@ const reYMD = /\b(?<y>\d{4})-(?<m>\d{2})-(?<d>\d{2})\b/;
 const reMonName = new RegExp(`\\b(?<mon>${MONTHS})\\s+(?<d>\\d{1,2})(?:,)?\\s+(?<y>\\d{2,4})\\b`, "i");
 const reTime12 = /\b(?<h>\d{1,2}):(?<min>\d{2})\s*(?<ampm>AM|PM)\b/i;
 const reTime24 = /\b(?<h>\d{1,2}):(?<min>\d{2})\b/;
+const reCaseNumber = /\bcase\s*(?:#|no\.?|number)\s*([A-Za-z0-9\-\/ ]{1,50})\b/i;
 
 const reWhere = /\b(?:in|at|inside|outside|near|to)\s+(the\s+)?(?<place>[A-Za-z0-9\-\s]{3,25})(?:\.|,|;|\n|$)/i;
 const reWhoLine = /^(?:who|people|participants|managers?|coworkers?)\s*:\s*(?<list>.+)$/im;
@@ -213,4 +214,15 @@ function buildSummary(text: string): string | null {
 function sentenceCase(s: string): string {
   if (!s) return s;
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+export function extractCaseNumber(text: string): string | null {
+  const m = reCaseNumber.exec(text || "");
+  if (!m?.[1]) return null;
+  // Sanitize: keep letters, numbers, spaces, dash, slash; trim and collapse spaces
+  const cleaned = m[1]
+    .replace(/[^A-Za-z0-9\-\/ ]/g, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+  return cleaned || null;
 }

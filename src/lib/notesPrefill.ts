@@ -2,7 +2,7 @@
  * Safe prefill utility that applies parsed notes data without overwriting existing values
  */
 
-import { parseNotesToStructured } from "./notesParser";
+import { parseNotesToStructured, extractCaseNumber } from "./notesParser";
 import { combineLocalDateAndTime, toUTCISO } from "@/utils/incidentFormatting";
 import { OrganizedIncident } from "@/utils/organizedIncidentStorage";
 
@@ -59,6 +59,14 @@ export function prefillIncidentFromNotes(incident: OrganizedIncident): Partial<O
       // Store people information in the 'who' field if empty
       if (!incident.who && parsed.people?.length) {
         result.who = parsed.people.join(', ');
+      }
+
+      // Case number prefill (only if empty)
+      if (!incident.caseNumber && sourceText) {
+        const caseNo = extractCaseNumber(sourceText);
+        if (caseNo) {
+          result.caseNumber = caseNo;
+        }
       }
 
       // Store quotes and requests in notes if they exist and notes field is not too full
