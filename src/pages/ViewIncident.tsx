@@ -8,6 +8,7 @@ import { storage } from '@/utils/storage';
 import { Incident } from '@/types/incident';
 import { ArrowLeftIcon } from '@/components/icons/CustomIcons';
 import { getDateSafely } from '@/utils/safeDate';
+import { deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 
 const ViewIncident = () => {
   const { id } = useParams<{ id: string }>();
@@ -90,7 +91,6 @@ const ViewIncident = () => {
     }
     
     // Check for time in timeline even if no explicit time
-    const { deriveIncidentTime, formatHHMMForUI } = require('@/utils/datetime');
     const timelineTime = deriveIncidentTime(incident);
     
     // Fallback to original logic for date
