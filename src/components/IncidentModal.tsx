@@ -198,9 +198,9 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     }
   };
 
-  // Track if form is dirty
+  // Track if form is dirty (allow dirty state in both edit and view modes)
   useEffect(() => {
-    if (!incident || !isEditMode) {
+    if (!incident) {
       setIsDirty(false);
       return;
     }
@@ -218,7 +218,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     );
     
     setIsDirty(hasChanges);
-  }, [formData, dateInput, timeInput, caseNumber, incident, isEditMode]);
+  }, [formData, dateInput, timeInput, caseNumber, incident]);
 
   const getInitialDateInput = (incident: OrganizedIncident): string => {
     if (incident.dateTime) {
@@ -401,12 +401,18 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
           e.preventDefault();
           handleSave();
         }
+      } else if (!isEditMode && isDirty) {
+        // Allow Cmd/Ctrl+S in view mode when there are changes
+        if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+          e.preventDefault();
+          handleSave();
+        }
       }
     };
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [open, isEditMode, handleCancel, handleSave]);
+  }, [open, isEditMode, isDirty, handleCancel, handleSave]);
 
   if (!incident) return null;
 
@@ -415,27 +421,36 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
       <DialogContent 
         showClose={false}
         className="fixed left-[50%] top-[50%] z-50 w-[95%] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border bg-background p-0 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 max-h-[90vh] overflow-hidden flex flex-col"
+        aria-busy={isSaving}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h1 className="text-lg font-semibold">Incident Details</h1>
-          <div className="flex items-center gap-2">
-            {isEditMode ? (
-              <>
-                <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">
-                  {isSaving ? 'Saving...' : 'Save'}
-                </Button>
-              </>
-            ) : (
-              <Button variant="outline" onClick={handleEditClick}>
-                Edit
-              </Button>
-            )}
-            <Button variant="ghost" size="sm" onClick={handleClose} className="h-8 w-8 p-0 rounded-full">
-              <X className="h-4 w-4" />
-              <span className="sr-only">Close</span>
-            </Button>
-          </div>
+           <div className="flex items-center gap-2">
+             {isEditMode ? (
+               <>
+                 <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">
+                   {isSaving ? 'Saving...' : 'Save'}
+                 </Button>
+               </>
+             ) : (
+               <>
+                 {isDirty && (
+                   <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]" aria-label="Save and close">
+                     <Save className="h-4 w-4 mr-1" />
+                     {isSaving ? 'Saving...' : 'Save'}
+                   </Button>
+                 )}
+                 <Button variant="outline" onClick={handleEditClick}>
+                   Edit
+                 </Button>
+               </>
+             )}
+             <Button variant="ghost" size="sm" onClick={handleClose} className="h-8 w-8 p-0 rounded-full">
+               <X className="h-4 w-4" />
+               <span className="sr-only">Close</span>
+             </Button>
+           </div>
         </div>
 
         {/* Scrollable Content */}
@@ -733,8 +748,28 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
               {validationErrors.general}
             </div>
           )}
-        </div>
-      </DialogContent>
+         </div>
+ 
+         {/* Sticky Bottom Action Bar - Only show in view mode when there are changes */}
+         {!isEditMode && isDirty && (
+           <div className="sticky bottom-0 left-0 right-0 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t px-6 py-3">
+             <div className="flex items-center justify-end gap-2">
+               <Button variant="ghost" onClick={handleClose}>
+                 Cancel
+               </Button>
+               <Button 
+                 onClick={handleSave} 
+                 disabled={isSaving} 
+                 className="min-w-[80px]"
+                 aria-label="Save and close"
+               >
+                 <Save className="h-4 w-4 mr-1" />
+                 {isSaving ? 'Saving...' : 'Save'}
+               </Button>
+             </div>
+           </div>
+         )}
+       </DialogContent>
     </Dialog>
   );
 };
