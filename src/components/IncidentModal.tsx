@@ -384,7 +384,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h1 className="text-lg font-semibold">Edit Incident</h1>
+          <h1 className="text-lg font-semibold">Incident Details</h1>
           <div className="flex items-center gap-2">
             {isEditMode ? (
               <>
