@@ -18,13 +18,13 @@ import {
   toUTCISO, 
   parseDateTimeFromNotes,
   validateCaseNumber,
-  getIncidentDisplayDate,
   formatRelativeTime
 } from '@/utils/incidentFormatting';
 import { getPreferredDateTime } from '@/utils/timelineParser';
 import { showToast } from '@/components/SuccessToast';
 import { processIncident } from '@/services/incidentProcessor';
 import { prefillIncidentFromNotes, shouldRunOneTimePrefill } from '@/lib/notesPrefill';
+import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, hasTimeOnly } from '@/ui/incidentDisplay';
 import { cn } from '@/lib/utils';
 
 interface IncidentModalProps {
@@ -498,7 +498,10 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                 ) : (
                   <Badge variant="secondary" className="h-8 px-3 rounded-full text-xs font-medium">
                     <CalendarIcon className="h-3 w-3 mr-1" />
-                    {getIncidentDisplayDate(incident)}
+                    {(() => {
+                      const occ = deriveIncidentOccurrence(incident);
+                      return formatPrimaryChip(occ);
+                    })()}
                   </Badge>
                 )}
               </div>
@@ -517,12 +520,27 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     />
                   </div>
                 ) : (
-                  timeInput && (
-                    <Badge variant="outline" className="h-8 px-3 rounded-full text-xs font-medium">
-                      <Clock className="h-3 w-3 mr-1" />
-                      {new Date(`2000-01-01T${timeInput}`).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
-                    </Badge>
-                  )
+                  (() => {
+                    const occ = deriveIncidentOccurrence(incident);
+                    const timeChip = formatTimeChip(occ);
+                    const timeOnlyBadge = hasTimeOnly(occ);
+                    
+                    return (
+                      <>
+                        {timeChip && (
+                          <Badge variant="outline" className="h-8 px-3 rounded-full text-xs font-medium">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {timeChip}
+                          </Badge>
+                        )}
+                        {timeOnlyBadge && (
+                          <Badge variant="secondary" className="h-6 px-2 rounded-full text-xs font-medium ml-2">
+                            Time only
+                          </Badge>
+                        )}
+                      </>
+                    );
+                  })()
                 )}
               </div>
 
@@ -581,8 +599,12 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
             {/* Row 3: Metadata */}
             {!isEditMode && (
               <div className="text-xs text-muted-foreground">
-                Created {new Date(incident.createdAt).toLocaleDateString()} • 
-                Last edited {formatRelativeTime(incident.updatedAt)}
+                {(() => {
+                  const occ = deriveIncidentOccurrence(incident);
+                  return occ.type === "occurrence" 
+                    ? formatSecondaryCreated(incident.createdAt)
+                    : `Last edited ${formatRelativeTime(incident.updatedAt)}`;
+                })()}
               </div>
             )}
           </div>

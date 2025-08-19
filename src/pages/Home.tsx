@@ -23,6 +23,7 @@ import { processIncident } from '@/services/incidentProcessor';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getDateSafely, hasValidDate } from '@/utils/safeDate';
 import { getPreferredDateTime } from '@/utils/timelineParser';
+import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 
 import jsPDF from 'jspdf';
 
@@ -581,13 +582,34 @@ const Home = () => {
                              variant="secondary" 
                              className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-muted text-muted-foreground border rounded-full"
                            >
-                             Created {new Date(incident.createdAt).toLocaleDateString('en-US', {
-                               month: 'short',
-                               day: 'numeric',
-                               hour: 'numeric',
-                               minute: '2-digit'
-                             })}
+                             {(() => {
+                               const occ = deriveIncidentOccurrence(incident);
+                               return formatPrimaryChip(occ);
+                             })()}
                            </Badge>
+                           {(() => {
+                             const occ = deriveIncidentOccurrence(incident);
+                             const timeChip = formatTimeChip(occ);
+                             return timeChip && (
+                               <Badge 
+                                 variant="outline" 
+                                 className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center rounded-full"
+                               >
+                                 {timeChip}
+                               </Badge>
+                             );
+                           })()}
+                           {(() => {
+                             const occ = deriveIncidentOccurrence(incident);
+                             return hasTimeOnly(occ) && (
+                               <Badge 
+                                 variant="secondary" 
+                                 className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
+                               >
+                                 Time only
+                               </Badge>
+                             );
+                           })()}
                            <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
                                 style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
                              {incident.categoryOrIssue}
@@ -600,6 +622,16 @@ const Home = () => {
                          <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
                            <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
                          </h3>
+                       </div>
+
+                       {/* Secondary metadata line */}
+                       <div className="text-[10px] text-muted-foreground">
+                         {(() => {
+                           const occ = deriveIncidentOccurrence(incident);
+                           return occ.type === "occurrence" 
+                             ? formatSecondaryCreated(incident.createdAt) 
+                             : formatRelativeUpdate(incident.updatedAt);
+                         })()}
                        </div>
 
                        {/* Compact action bar */}
