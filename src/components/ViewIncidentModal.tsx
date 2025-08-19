@@ -609,7 +609,7 @@ export const ViewIncidentModal = ({
                        >
                          <SelectValue placeholder="Select category" />
                        </SelectTrigger>
-                       <SelectContent>
+                       <SelectContent className="max-h-[200px] mt-2" side="bottom" align="start" sideOffset={8}>
                          {getAllCategories().map((category) => (
                            <SelectItem key={category} value={category} className="text-[16px]">
                              {category}
