@@ -503,17 +503,7 @@ export const ViewIncidentModal = ({
               Incident Details
             </h2>
             <div className="flex items-center gap-2">
-              {isEditMode ? (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={isSaving}
-                  className="h-8 px-3"
-                >
-                  Cancel
-                </Button>
-              ) : (
+              {!isEditMode && (
                 isOwner && (
                   <Button
                     variant="ghost"
