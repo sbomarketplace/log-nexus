@@ -24,7 +24,7 @@ export function BrandLogo({
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <img
-        src="/lovable-uploads/57e14644-6765-4dfd-a219-99bb00bbbbc6.png"
+        src="/brand/clearcase-mark.png?v=2"
         alt="ClearCase"
         className={`${sizeClasses[size]} w-auto select-none`}
         loading="eager"

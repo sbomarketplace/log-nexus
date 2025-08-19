@@ -2,7 +2,7 @@ export function ReportHeader() {
   return (
     <div className="flex items-center gap-4 border-b pb-3 mb-4 print:mb-6">
       <img 
-        src="/lovable-uploads/57e14644-6765-4dfd-a219-99bb00bbbbc6.png" 
+        src="/brand/clearcase-mark.png?v=2" 
         alt="ClearCase" 
         className="h-8 w-auto print:h-10" 
       />
