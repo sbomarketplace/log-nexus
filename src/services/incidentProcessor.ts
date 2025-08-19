@@ -9,6 +9,7 @@ import { generateIncidentKey, getCategoryForKey, saveCategoryMapping } from '@/u
 import { getDateSafely } from '@/utils/safeDate';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
+import { improveGrammarForFields } from '@/services/grammarService';
 
 // ProcessedIncident is just an alias since OrganizedIncident already has all the fields we need
 export type ProcessedIncident = OrganizedIncident;
@@ -16,13 +17,14 @@ export type ProcessedIncident = OrganizedIncident;
 export interface ProcessIncidentOptions {
   authorPerspective?: 'first_person' | 'third_person';
   rawNotes?: string;
+  improveGrammar?: boolean; // New option to enable grammar improvement
 }
 
-export function processIncident(
+export async function processIncident(
   incident: OrganizedIncident, 
   options: ProcessIncidentOptions = {}
-): ProcessedIncident {
-  const { authorPerspective = 'first_person', rawNotes } = options;
+): Promise<ProcessedIncident> {
+  const { authorPerspective = 'first_person', rawNotes, improveGrammar = true } = options;
   
   // Apply prefill data from notes first
   let processedIncident = { ...incident };
@@ -33,6 +35,12 @@ export function processIncident(
       what: incident.what || rawNotes
     });
     processedIncident = { ...processedIncident, ...prefillData };
+  }
+  
+  // Improve grammar for text fields if enabled
+  if (improveGrammar) {
+    const fieldsToImprove = ['notes', 'what', 'who', 'where', 'when', 'witnesses'] as (keyof OrganizedIncident)[];
+    processedIncident = await improveGrammarForFields(processedIncident, fieldsToImprove);
   }
   
   // Generate incident key for consistency

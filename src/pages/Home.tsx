@@ -172,7 +172,7 @@ const Home = () => {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
       } else {
         // Save all organized incidents with processing
-        const incidentsToSave = results.map(incident => {
+        const incidentsToSave = await Promise.all(results.map(async incident => {
           const baseIncident: OrganizedIncident = {
             id: crypto.randomUUID(),
             date: getDateSafely(incident, ''),
@@ -187,12 +187,13 @@ const Home = () => {
             updatedAt: new Date().toISOString()
           };
           
-          // Process incident for enhanced features
-          return processIncident(baseIncident, {
+          // Process incident for enhanced features including grammar improvement
+          return await processIncident(baseIncident, {
             authorPerspective: 'first_person',
-            rawNotes: quickNotes
+            rawNotes: quickNotes,
+            improveGrammar: true
           });
-        });
+        }));
         
         organizedIncidentStorage.saveMultiple(incidentsToSave);
         

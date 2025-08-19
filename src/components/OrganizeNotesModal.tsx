@@ -11,6 +11,7 @@ import { StructuredIncident } from '@/types/structured-incidents';
 import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
 import { organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getDateSafely, sanitizeIncidentArray } from '@/utils/safeDate';
+import { processIncident } from '@/services/incidentProcessor';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
@@ -125,8 +126,14 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         updatedAt: new Date().toISOString()
       };
       
-      // Save to the same storage system that home page uses
-      organizedIncidentStorage.save(organizedIncident);
+      // Save to the same storage system that home page uses with grammar improvement
+      const processedIncident = await processIncident(organizedIncident, {
+        authorPerspective: 'first_person',
+        rawNotes: rawNotes,
+        improveGrammar: true
+      });
+      
+      organizedIncidentStorage.save(processedIncident);
       
       // Remove from preview
       setOrganizedIncidents(prev => prev.filter(inc => inc !== incident));
@@ -153,26 +160,35 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
 
   const handleSaveAllIncidents = async () => {
     try {
-      const organizedIncidentsToSave = organizedIncidents.map(incident => ({
-        id: crypto.randomUUID(),
-        date: getDateSafely(incident, 'Unknown'),
-        categoryOrIssue: incident.category,
-        who: Object.values(incident.who).flat().join(", "),
-        what: incident.whatHappened,
-        where: incident.where || "None noted",
-        when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
-        witnesses: incident.witnesses?.join(", ") || "",
-        notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+      // Convert and process all incidents with grammar improvement
+      const processedIncidents = await Promise.all(organizedIncidents.map(async (incident) => {
+        const organizedIncident = {
+          id: crypto.randomUUID(),
+          date: getDateSafely(incident, 'Unknown'),
+          categoryOrIssue: incident.category,
+          who: Object.values(incident.who).flat().join(", "),
+          what: incident.whatHappened,
+          where: incident.where || "None noted",
+          when: incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || "Time unspecified",
+          witnesses: incident.witnesses?.join(", ") || "",
+          notes: `${incident.notes?.join(" ") || ""} | Timeline: ${incident.timeline?.map(t => `${t.time || 'Time unspecified'}: ${t.event}`).join("; ") || ""} | Requests: ${incident.requestsAndResponses?.map(r => `${r.request} - ${r.response}${r.byWhom ? ` by ${r.byWhom}` : ''}`).join("; ") || ""} | Policy: ${incident.policyOrProcedure?.join("; ") || ""} | Evidence: ${incident.evidenceOrTests?.map(e => `${e.type}: ${e.detail || ''} (${e.status || 'unknown'})`).join("; ") || ""}`,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        };
+        
+        return await processIncident(organizedIncident, {
+          authorPerspective: 'first_person',
+          rawNotes: rawNotes,
+          improveGrammar: true
+        });
       }));
       
       // Save all to the same storage system that home page uses
-      organizedIncidentStorage.saveMultiple(organizedIncidentsToSave);
+      organizedIncidentStorage.saveMultiple(processedIncidents);
       
       toast({
         title: "Incidents saved",
-        description: `${organizedIncidents.length} incidents have been saved successfully.`,
+        description: `${organizedIncidents.length} incidents have been saved successfully with improved grammar.`,
       });
       
       resetModal();
