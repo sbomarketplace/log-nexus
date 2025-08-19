@@ -341,3 +341,84 @@ export function migrateLegacyDateTime(legacyDate?: string, legacyTime?: string):
   
   return toUTCISO(date);
 }
+
+export function normalizeTimeToHHMM(v: unknown): string {
+  if (!v) return "";
+  const s = String(v).trim().toLowerCase();
+  // 9:05 or 09:05
+  if (/^\d{1,2}:\d{2}$/.test(s)) {
+    const [hh, mm] = s.split(":");
+    return `${hh.padStart(2, "0")}:${mm}`;
+  }
+  // 9am or 9 pm
+  const hm1 = s.match(/^(\d{1,2})\s*(am|pm)$/i);
+  if (hm1) {
+    let hh = parseInt(hm1[1], 10);
+    const ap = hm1[2].toLowerCase();
+    if (ap === "pm" && hh < 12) hh += 12;
+    if (ap === "am" && hh === 12) hh = 0;
+    return `${String(hh).padStart(2, "0")}:00`;
+  }
+  // 9:05am
+  const hm2 = s.match(/^(\d{1,2}):(\d{2})\s*(am|pm)$/i);
+  if (hm2) {
+    let hh = parseInt(hm2[1], 10);
+    const mm = hm2[2];
+    const ap = hm2[3].toLowerCase();
+    if (ap === "pm" && hh < 12) hh += 12;
+    if (ap === "am" && hh === 12) hh = 0;
+    return `${String(hh).padStart(2, "0")}:${mm}`;
+  }
+  return "";
+}
+
+/**
+ * Find the first time token in a Timeline. Searches the text after "Timeline:" first.
+ * Supports "8:00 AM", "8:00am", "8am", "08:30", "17:05".
+ * Returns HH:MM or empty string if none found.
+ */
+export function firstTimeFromTimeline(text: unknown): string {
+  if (!text) return "";
+  const raw = String(text);
+  const start = raw.toLowerCase().indexOf("timeline:");
+  const body = start >= 0 ? raw.slice(start + "timeline:".length) : raw;
+  const timeRegexes = [
+    /\b(\d{1,2}):([0-5]\d)\s*(am|pm)\b/i,
+    /\b(\d{1,2})\s*(am|pm)\b/i,
+    /\b([01]?\d|2[0-3]):([0-5]\d)\b/
+  ];
+  for (const rx of timeRegexes) {
+    const m = body.match(rx);
+    if (m) {
+      if (m.length === 3 && !/[ap]m/i.test(m[0])) {
+        // 24h HH:MM
+        const hh = m[1].padStart(2, "0");
+        const mm = m[2];
+        return `${hh}:${mm}`;
+      }
+      return normalizeTimeToHHMM(m[0]);
+    }
+  }
+  return "";
+}
+
+/**
+ * Return the time to show for an incident.
+ * Prefer explicit incident.when or incident.time. Otherwise use firstTimeFromTimeline from timeline or notes.
+ */
+export function deriveIncidentTime(incident: any): string {
+  const explicit = normalizeTimeToHHMM(incident?.when ?? incident?.time);
+  if (explicit) return explicit;
+  const fromTimeline = firstTimeFromTimeline(incident?.timeline);
+  if (fromTimeline) return fromTimeline;
+  const fromNotes = firstTimeFromTimeline(incident?.notes);
+  return fromNotes;
+}
+
+export function formatHHMMForUI(hhmm: string): string {
+  if (!hhmm) return "";
+  const [h, m] = hhmm.split(":").map(n => parseInt(n || "0", 10));
+  const t = new Date();
+  t.setHours(h, m, 0, 0);
+  return t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}

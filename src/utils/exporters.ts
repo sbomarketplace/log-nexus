@@ -1,5 +1,6 @@
 import jsPDF from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
+import { deriveIncidentTime, formatHHMMForUI, normalizeTimeToHHMM } from "@/utils/datetime";
 
 type Incident = {
   id: string;
@@ -24,17 +25,13 @@ function fmtDate(s?: string) {
   return isNaN(d.getTime()) ? "Unknown date" : d.toLocaleDateString();
 }
 
-function fmtTime(hhmm?: string | null) {
-  if (!hhmm) return "Time unspecified";
-  const [hh, mm] = String(hhmm).split(":");
-  if (!hh || !mm) return String(hhmm);
-  const t = new Date();
-  t.setHours(parseInt(hh, 10) || 0, parseInt(mm, 10) || 0, 0, 0);
-  return t.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+function fmtTime(incident: Incident): string {
+  const derivedTime = deriveIncidentTime(incident);
+  return derivedTime ? formatHHMMForUI(derivedTime) : "Time unspecified";
 }
 
 export function buildPlainText(incident: Incident) {
-  const timeStr = fmtTime(incident.when ?? incident.time);
+  const timeStr = fmtTime(incident);
   const category = incident.categoryOrIssue ?? incident.category ?? "";
   
   return [
@@ -113,7 +110,7 @@ export async function exportDOCX(incident: Incident) {
   addHeading("Incident Report");
   addText(`ID: ${incident.id}`);
   addText(`Date: ${fmtDate(incident.date)}`);
-  addText(`Time: ${fmtTime(incident.when ?? incident.time)}`);
+  addText(`Time: ${fmtTime(incident)}`);
   addText(`Category: ${category}`);
   addHeading("Who");
   addText(incident.who ?? "");
@@ -151,7 +148,7 @@ export async function exportPrint(incident: Incident) {
   <h1>Incident Report</h1>
   <div class="group"><div class="label">ID</div>${incident.id}</div>
   <div class="group"><div class="label">Date</div>${fmtDate(incident.date)}</div>
-  <div class="group"><div class="label">Time</div>${fmtTime(incident.when ?? incident.time)}</div>
+  <div class="group"><div class="label">Time</div>${fmtTime(incident)}</div>
   <div class="group"><div class="label">Category</div>${category}</div>
   <div class="group"><div class="label">Who</div><pre>${incident.who ?? ""}</pre></div>
   <div class="group"><div class="label">What</div><pre>${incident.what ?? ""}</pre></div>

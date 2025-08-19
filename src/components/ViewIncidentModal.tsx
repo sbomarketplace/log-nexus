@@ -27,7 +27,7 @@ import { getAllCategories } from '@/utils/incidentCategories';
 import { normalizeToFirstPerson } from '@/utils/voiceNormalizer';
 import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
-import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime } from '@/utils/datetime';
+import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 import { formatWhoList, parseWhoFromString } from '@/helpers/people';
 
@@ -310,7 +310,14 @@ export const ViewIncidentModal = ({
       
       // Legacy field updates for backward compatibility
       const updatedDate = dateInput ? formatDateForStorage(dateInput) : getDateSafely(incident, '');
-      const updatedTime = timeInput || incident.when;
+      
+      // Handle time with fallback logic - if user left time empty, try to infer from timeline
+      let timeToPersist = timeInput; // "HH:MM" from the input
+      if (!timeToPersist) {
+        const inferred = deriveIncidentTime(incident);
+        if (inferred) timeToPersist = inferred;
+      }
+      const updatedTime = timeToPersist || incident.when;
       
       // Update canonical date info if date changed
       let canonicalEventDate = incident.canonicalEventDate;
@@ -348,7 +355,7 @@ export const ViewIncidentModal = ({
         canonicalEventDate,
         originalEventDateText,
         date: updatedDate, // Keep for backward compatibility
-        when: updatedTime, // Keep for backward compatibility
+        when: updatedTime, // Keep for backward compatibility - now includes inferred time
         dateTime: resolvedDateTimeISO, // Unified field - preserve existing if not changed
         caseNumber: caseNumber.trim() || undefined, // Add case number field
         updatedAt: new Date().toISOString()
@@ -390,7 +397,7 @@ export const ViewIncidentModal = ({
     } finally {
       setIsSaving(false);
     }
-  }, [incident, formData, dateInput, parsedDate, isOwner, onIncidentUpdate, toast]);
+  }, [incident, formData, dateInput, parsedDate, isOwner, onIncidentUpdate, toast, selectedDateTime, timeInput, caseNumber]);
 
   // Cancel editing
   const handleCancel = useCallback(() => {
@@ -762,9 +769,17 @@ export const ViewIncidentModal = ({
                   ) : (
                      <div className="flex items-center gap-2">
                        <div className="break-words">
-                         {effectiveDateTime ? formatTimeOnly(effectiveDateTime) : (
-                           <span className="text-muted-foreground italic">No time specified</span>
-                         )}
+                         {(() => {
+                           // Use derived time with timeline fallback for display
+                           const derivedTime = deriveIncidentTime(incident);
+                           if (derivedTime) {
+                             return formatHHMMForUI(derivedTime);
+                           }
+                           if (effectiveDateTime) {
+                             return formatTimeOnly(effectiveDateTime);
+                           }
+                           return <span className="text-muted-foreground italic">No time specified</span>;
+                         })()}
                        </div>
                      </div>
                   )}

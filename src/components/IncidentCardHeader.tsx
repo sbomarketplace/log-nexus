@@ -2,7 +2,7 @@ import React from "react";
 import { Badge } from '@/components/ui/badge';
 import { getPreferredDateTime } from '@/utils/timelineParser';
 import { getEffectiveOrganizedDateTime } from '@/utils/organizedIncidentMigration';
-import { formatHeader, formatTimeOnly } from '@/utils/datetime';
+import { formatHeader, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 
 interface IncidentCardHeaderProps {
@@ -60,8 +60,9 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
     return "Unknown date";
   })();
 
-  // Derive time string
+  // Derive time string using fallback logic
   const timeStr = (() => {
+    // First try preferred time from timeline parsing
     if (preferred.time) {
       try {
         const [hours, minutes] = preferred.time.split(':');
@@ -73,22 +74,15 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
       }
     }
     
-    if (effectiveDateTime) {
-      return formatTimeOnly(effectiveDateTime);
+    // Use derive logic with timeline fallback
+    const derivedTime = deriveIncidentTime(incident);
+    if (derivedTime) {
+      return formatHHMMForUI(derivedTime);
     }
     
-    if (incident.when) {
-      try {
-        const [hours, minutes] = incident.when.split(':');
-        if (hours && minutes) {
-          const hour12 = parseInt(hours) % 12 || 12;
-          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-          return `${hour12}:${minutes} ${ampm}`;
-        }
-        return incident.when;
-      } catch {
-        return incident.when;
-      }
+    // Final fallback to effectiveDateTime
+    if (effectiveDateTime) {
+      return formatHeader(effectiveDateTime).split(' at ')[1] || null;
     }
     
     return null;
