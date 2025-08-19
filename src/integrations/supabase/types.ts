@@ -16,6 +16,8 @@ export type Database = {
     Tables: {
       incidents: {
         Row: {
+          case_number: string | null
+          case_number_norm: string | null
           created_at: string
           events: Json
           id: string
@@ -23,6 +25,8 @@ export type Database = {
           owner_id: string | null
         }
         Insert: {
+          case_number?: string | null
+          case_number_norm?: string | null
           created_at?: string
           events: Json
           id?: string
@@ -30,6 +34,8 @@ export type Database = {
           owner_id?: string | null
         }
         Update: {
+          case_number?: string | null
+          case_number_norm?: string | null
           created_at?: string
           events?: Json
           id?: string
@@ -43,7 +49,38 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      gtrgm_compress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_decompress: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_in: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      gtrgm_options: {
+        Args: { "": unknown }
+        Returns: undefined
+      }
+      gtrgm_out: {
+        Args: { "": unknown }
+        Returns: unknown
+      }
+      set_limit: {
+        Args: { "": number }
+        Returns: number
+      }
+      show_limit: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
+      show_trgm: {
+        Args: { "": string }
+        Returns: string[]
+      }
     }
     Enums: {
       [_ in never]: never

@@ -71,12 +71,20 @@ const Home = () => {
     // Apply search filter
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
+      // Normalize search term for case number matching (remove spaces, punctuation, lowercase)
+      const searchNorm = searchTerm.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+      
       filtered = filtered.filter(incident => 
         incident.what.toLowerCase().includes(searchLower) ||
         incident.who.toLowerCase().includes(searchLower) ||
         incident.where.toLowerCase().includes(searchLower) ||
         incident.categoryOrIssue.toLowerCase().includes(searchLower) ||
-        incident.notes.toLowerCase().includes(searchLower)
+        incident.notes.toLowerCase().includes(searchLower) ||
+        // Case number exact match
+        (incident.caseNumber && incident.caseNumber.toLowerCase().includes(searchLower)) ||
+        // Case number normalized partial match (strips punctuation/spaces for flexible matching)
+        (incident.caseNumber && searchNorm && 
+         incident.caseNumber.replace(/[^a-zA-Z0-9]/g, '').toLowerCase().includes(searchNorm))
       );
     }
 
@@ -513,7 +521,7 @@ const Home = () => {
             <div className="relative">
               <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search incidents..."
+                placeholder="Search by keyword, person, or Case #"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-10 rounded-lg"
