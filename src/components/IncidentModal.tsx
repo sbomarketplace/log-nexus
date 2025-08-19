@@ -37,7 +37,11 @@ interface IncidentModalProps {
 
 export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate }: IncidentModalProps) => {
   const [incident, setIncident] = useState<OrganizedIncident | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
+  
+  // Check if we should start in edit mode based on URL params
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialEditMode = urlParams.get('mode') === 'edit';
+  const [isEditMode, setIsEditMode] = useState(initialEditMode);
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<OrganizedIncident>>({});
   const [dateInput, setDateInput] = useState('');
@@ -53,6 +57,11 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     if (incidentId) {
       const foundIncident = organizedIncidentStorage.getById(incidentId);
       setIncident(foundIncident);
+      
+      // Check if we should start in edit mode based on URL params
+      const urlParams = new URLSearchParams(window.location.search);
+      const shouldEditMode = urlParams.get('mode') === 'edit';
+      setIsEditMode(shouldEditMode);
       
       if (foundIncident) {
         setFormData(foundIncident);

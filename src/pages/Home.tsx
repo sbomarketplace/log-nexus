@@ -349,7 +349,7 @@ const Home = () => {
   };
 
   const handleEditIncident = (incident: OrganizedIncident) => {
-    setSearchParams({ incidentId: incident.id });
+    setSearchParams({ incidentId: incident.id, mode: 'edit' });
   };
 
   const handleCloseIncidentModal = () => {
