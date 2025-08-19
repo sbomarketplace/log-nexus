@@ -384,7 +384,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
-          <h1 className="text-lg font-semibold">Incident</h1>
+          <h1 className="text-lg font-semibold">Incident Details</h1>
           <div className="flex items-center gap-2">
             {isEditMode ? (
               <>
@@ -684,15 +684,6 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
               </div>
             )}
 
-            {/* When field for time display */}
-            {(formData.when || incident.when) && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium">When</label>
-                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
-                  {formData.when || incident.when}
-                </div>
-              </div>
-            )}
 
             {/* Additional sections can be added here as needed */}
 
