@@ -541,7 +541,7 @@ export const ViewIncidentModal = ({
 
           {/* Scrollable Content */}
           <div 
-            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2 pb-20' : 'py-3'}`}
+            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2 pb-28' : 'py-3'}`}
             data-scroll-container
           >
             {/* Header row with date, case number and category - editable in edit mode */}
@@ -915,8 +915,8 @@ export const ViewIncidentModal = ({
                       value={formData.notes || ''}
                       onChange={(e) => handleFieldChange('notes', e.target.value)}
                       placeholder="Summarize the incident"
-                      className={`text-base min-h-[100px] resize-none ${validationErrors.notes ? 'border-destructive' : ''}`}
-                      rows={4}
+                      className={`text-base min-h-[200px] resize-none ${validationErrors.notes ? 'border-destructive' : ''}`}
+                      rows={8}
                     />
                     {validationErrors.notes && (
                       <div className="text-destructive mt-1">{validationErrors.notes}</div>
