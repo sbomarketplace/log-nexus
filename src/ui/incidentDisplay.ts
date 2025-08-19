@@ -6,7 +6,6 @@
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { parseISOToLocal } from '@/utils/incidentFormatting';
 import { getPreferredDateTime } from '@/utils/timelineParser';
-import { deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 
 export type Occurrence = {
   type: "occurrence" | "created";
@@ -71,21 +70,6 @@ export function deriveIncidentOccurrence(incident: OrganizedIncident): Occurrenc
         originalTime: preferred.time
       };
     }
-  }
-
-  // 1b) If no preferred date/time, try timeline fallback for time only
-  const timelineTime = deriveIncidentTime(incident);
-  if (timelineTime) {
-    const today = new Date();
-    const [hours, minutes] = timelineTime.split(':').map(Number);
-    today.setHours(hours, minutes, 0, 0);
-    return { 
-      type: "occurrence", 
-      dt: today, 
-      hasDate: false, 
-      hasTime: true,
-      originalTime: timelineTime
-    };
   }
 
   // 2) Full datetime
