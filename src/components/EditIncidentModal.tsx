@@ -13,10 +13,10 @@ interface EditIncidentModalProps {
   incident: OrganizedIncident | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: () => void;
+  onSaveAndView: (savedIncident: OrganizedIncident) => void;
 }
 
-export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: EditIncidentModalProps) => {
+export const EditIncidentModal = ({ incident, open, onOpenChange, onSaveAndView }: EditIncidentModalProps) => {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [existingFiles, setExistingFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -70,8 +70,7 @@ export const EditIncidentModal = ({ incident, open, onOpenChange, onSave }: Edit
         durationMs: 2500
       });
 
-      onSave();
-      onOpenChange(false);
+      onSaveAndView(processedIncident);
     } catch (error) {
       console.error('Error saving incident:', error);
       toast({

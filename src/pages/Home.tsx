@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
+import { EditIncidentModal } from '@/components/EditIncidentModal';
+import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
@@ -49,6 +51,14 @@ const Home = () => {
   // Query params for modal management
   const [searchParams, setSearchParams] = useSearchParams();
   const incidentId = searchParams.get('incidentId');
+  const mode = searchParams.get('mode'); // 'edit' or null (for view)
+
+  const handleSaveAndView = (savedIncident: OrganizedIncident) => {
+    // Reload incidents to reflect changes
+    loadIncidents();
+    // Switch to view mode
+    setSearchParams({ incidentId: savedIncident.id });
+  };
 
   const loadIncidents = () => {
     try {
@@ -685,11 +695,31 @@ const Home = () => {
           )}
         </div>
 
-        {/* Unified Incident Modal */}
+        {/* Unified Incident Modal - View Mode */}
+        {incidentId && mode !== 'edit' && (
+          <ViewIncidentModal 
+            incident={organizedIncidents.find(i => i.id === incidentId) || null}
+            open={!!incidentId && mode !== 'edit'}
+            onOpenChange={(open) => !open && handleCloseIncidentModal()}
+            onIncidentUpdate={loadIncidents}
+          />
+        )}
+
+        {/* Edit Modal */}
+        {incidentId && mode === 'edit' && (
+          <EditIncidentModal 
+            incident={organizedIncidents.find(i => i.id === incidentId) || null}
+            open={!!incidentId && mode === 'edit'}
+            onOpenChange={(open) => !open && handleCloseIncidentModal()}
+            onSaveAndView={handleSaveAndView}
+          />
+        )}
+
+        {/* Legacy Incident Modal for backwards compatibility */}
         <IncidentModal 
-          incidentId={incidentId}
-          open={!!incidentId}
-          onOpenChange={(open) => !open && handleCloseIncidentModal()}
+          incidentId={null}
+          open={false}
+          onOpenChange={() => {}}
           onIncidentUpdate={loadIncidents}
         />
 
