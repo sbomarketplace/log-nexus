@@ -27,6 +27,7 @@ import { prefillIncidentFromNotes, shouldRunOneTimePrefill } from '@/lib/notesPr
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, hasTimeOnly } from '@/ui/incidentDisplay';
 import { cn } from '@/lib/utils';
 import { formatWhoList, parseWhoFromString } from '@/helpers/people';
+import { extractFirstTimeFromNotes } from '@/lib/notesTime';
 
 interface IncidentModalProps {
   incidentId: string | null;
@@ -472,21 +473,18 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   </div>
                 ) : (
                   (() => {
+                    // Prefer time from raw notes; else fall back to stored time
+                    const notesTime = extractFirstTimeFromNotes(incident.notes);
                     const occ = deriveIncidentOccurrence(incident);
-                    const timeChip = formatTimeChip(occ);
-                    const timeOnlyBadge = hasTimeOnly(occ);
+                    const fallbackTime = formatTimeChip(occ);
+                    const timeText = notesTime?.text || fallbackTime;
                     
                     return (
                       <>
-                        {timeChip && (
+                        {timeText && (
                           <Badge variant="outline" className="h-8 px-3 rounded-full text-xs font-medium">
                             <Clock className="h-3 w-3 mr-1" />
-                            {timeChip}
-                          </Badge>
-                        )}
-                        {timeOnlyBadge && (
-                          <Badge variant="secondary" className="h-6 px-2 rounded-full text-xs font-medium ml-2">
-                            Time only
+                            {timeText}
                           </Badge>
                         )}
                       </>
