@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getDateSafely } from '@/utils/safeDate';
 import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInputValue, formatDateForStorage, parseISOToLocalDate, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
+import { formatWhoList, parseWhoFromString } from '@/helpers/people';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -334,6 +335,12 @@ export const ViewIncidentModal = ({
         policy: formData.policy ? normalizeToFirstPerson(formData.policy) : '',
         evidence: formData.evidence ? normalizeToFirstPerson(formData.evidence) : ''
       };
+
+      // Normalize "who" field when saving
+      if (formData.who) {
+        const normalizedWho = formatWhoList(parseWhoFromString(formData.who));
+        normalizedData.who = normalizedWho || formData.who;
+      }
 
       const updatedIncident: OrganizedIncident = {
         ...incident,
@@ -685,7 +692,10 @@ export const ViewIncidentModal = ({
                     />
                   ) : (
                     <p className="text-sm leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {renderTextWithPhoneLinks(incident.who)}
+                      {(() => {
+                        const whoText = formatWhoList(parseWhoFromString(incident.who || ''));
+                        return whoText ? renderTextWithPhoneLinks(whoText) : <span className="text-muted-foreground">Not specified</span>;
+                      })()}
                     </p>
                   )}
                 </div>

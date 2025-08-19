@@ -26,6 +26,7 @@ import { processIncident } from '@/services/incidentProcessor';
 import { prefillIncidentFromNotes, shouldRunOneTimePrefill } from '@/lib/notesPrefill';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, hasTimeOnly } from '@/ui/incidentDisplay';
 import { cn } from '@/lib/utils';
+import { formatWhoList, parseWhoFromString } from '@/helpers/people';
 
 interface IncidentModalProps {
   incidentId: string | null;
@@ -320,6 +321,12 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
 
     try {
       let updatedIncident = { ...incident, ...formData };
+
+      // Normalize "who" field when saving
+      if (formData.who) {
+        const normalizedWho = formatWhoList(parseWhoFromString(formData.who));
+        updatedIncident.who = normalizedWho;
+      }
 
       // Handle date/time saving rules
       if (dateInput && timeInput) {
@@ -620,11 +627,14 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   value={formData.who || ''}
                   onChange={(e) => handleFieldChange('who', e.target.value)}
                   placeholder="People involved..."
-                  className="min-h-[80px] rounded-lg"
+                  className="rounded-lg"
                 />
               ) : (
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px]">
-                  {formData.who || incident.who || 'No information provided'}
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
+                  {(() => {
+                    const whoText = formatWhoList(parseWhoFromString(formData.who || incident.who || ''));
+                    return whoText || <span className="text-muted-foreground">Not specified</span>;
+                  })()}
                 </div>
               )}
             </div>
@@ -637,10 +647,10 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   value={formData.what || ''}
                   onChange={(e) => handleFieldChange('what', e.target.value)}
                   placeholder="What happened..."
-                  className="min-h-[100px] rounded-lg"
+                  className="rounded-lg"
                 />
               ) : (
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[100px]">
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                   {formData.what || incident.what || 'No information provided'}
                 </div>
               )}
@@ -657,7 +667,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   className="rounded-lg"
                 />
               ) : (
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg">
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                   {formData.where || incident.where || 'No location provided'}
                 </div>
               )}
@@ -672,14 +682,14 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     value={formData.notes || ''}
                     onChange={(e) => handleFieldChange('notes', e.target.value)}
                     placeholder="Detailed notes..."
-                    className="min-h-[120px] rounded-lg"
+                    className="rounded-lg"
                   />
                   {validationErrors.notes && (
                     <p className="text-xs text-destructive">{validationErrors.notes}</p>
                   )}
                 </div>
               ) : (
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[120px] relative">
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0 relative">
                   {formData.notes || incident.notes || 'No notes provided'}
                   {!isEditMode && (
                     <Button
@@ -714,10 +724,10 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   value={formData.witnesses || ''}
                   onChange={(e) => handleFieldChange('witnesses', e.target.value)}
                   placeholder="Witness names..."
-                  className="min-h-[80px] rounded-lg"
+                  className="rounded-lg"
                 />
               ) : (
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px]">
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                   {formData.witnesses || incident.witnesses || 'No witnesses listed'}
                 </div>
               )}
@@ -732,10 +742,10 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     value={formData.quotes || ''}
                     onChange={(e) => handleFieldChange('quotes', e.target.value)}
                     placeholder="Important quotes..."
-                    className="min-h-[80px] rounded-lg"
+                    className="rounded-lg"
                   />
                 ) : (
-                  <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px] whitespace-pre-line">
+                  <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                     {formData.quotes || incident.quotes}
                   </div>
                 )}
@@ -751,10 +761,10 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     value={formData.requests || ''}
                     onChange={(e) => handleFieldChange('requests', e.target.value)}
                     placeholder="Requests or responses..."
-                    className="min-h-[80px] rounded-lg"
+                    className="rounded-lg"
                   />
                 ) : (
-                  <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px]">
+                  <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                     {formData.requests || incident.requests}
                   </div>
                 )}
@@ -765,7 +775,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
             {(formData.when || incident.when) && (
               <div className="space-y-2">
                 <label className="text-sm font-medium">When</label>
-                <div className="text-sm text-foreground p-3 bg-muted rounded-lg">
+                <div className="w-full rounded-xl bg-muted px-4 py-3 text-foreground/90 leading-snug whitespace-pre-wrap min-h-0">
                   {formData.when || incident.when}
                 </div>
               </div>

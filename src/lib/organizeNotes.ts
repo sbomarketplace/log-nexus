@@ -5,6 +5,7 @@
 
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { parseNotesToStructured } from './notesParser';
+import { formatWhoList } from '@/helpers/people';
 
 export interface OrganizedOutput {
   categoryOrIssue?: string;
@@ -71,7 +72,7 @@ export function organizeNotes(input: { incident: OrganizedIncident }): Organized
     }
   }
   
-  // Who - extract people as comma-separated list
+  // Who - extract people as comma-separated list using consistent formatting
   if (parsed.people?.length && !incident.who) {
     const people = parsed.people.map(name => {
       // Convert "I" references to "You"
@@ -82,7 +83,8 @@ export function organizeNotes(input: { incident: OrganizedIncident }): Organized
     if (hasFirstPerson(sourceText) && !people.some(p => p === 'You')) {
       people.unshift('You');
     }
-    result.who = people.join(', ');
+    // Use consistent formatting helper
+    result.who = formatWhoList(people);
   }
   
   // What - neutral summary based on content
