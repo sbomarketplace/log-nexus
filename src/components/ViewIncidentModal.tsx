@@ -504,37 +504,15 @@ export const ViewIncidentModal = ({
             </h2>
             <div className="flex items-center gap-2">
               {isEditMode ? (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancel}
-                    disabled={isSaving}
-                    className="h-8 px-3"
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                    className="h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
-                    aria-label="Save changes"
-                  >
-                    {isSaving ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                        Saving
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4 mr-1" />
-                        Save
-                      </>
-                    )}
-                  </Button>
-                </>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleCancel}
+                  disabled={isSaving}
+                  className="h-8 px-3"
+                >
+                  Cancel
+                </Button>
               ) : (
                 isOwner && (
                   <Button
@@ -563,7 +541,7 @@ export const ViewIncidentModal = ({
 
           {/* Scrollable Content */}
           <div 
-            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2' : 'py-3'}`}
+            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2 pb-20' : 'py-3'}`}
             data-scroll-container
           >
             {/* Header row with date, case number and category - editable in edit mode */}
@@ -966,6 +944,27 @@ export const ViewIncidentModal = ({
             )}
           </div>
         </div>
+        
+        {/* Sticky Bottom Bar for Save Button - Only in Edit Mode */}
+        {isEditMode && (
+          <div className="absolute bottom-0 left-0 right-0 bg-background border-t border-border px-6 py-4">
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="w-full h-12 text-base font-medium bg-orange-500 hover:bg-orange-600 text-white"
+              aria-label="Save changes"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                  Saving Changes...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
