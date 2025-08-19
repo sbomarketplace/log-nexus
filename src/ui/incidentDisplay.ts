@@ -197,7 +197,8 @@ function formatDate(d: Date, fmt: string): string {
   if (fmt === "MMM d") {
     return d.toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     });
   }
   if (fmt === "h:mm a") {
@@ -209,7 +210,8 @@ function formatDate(d: Date, fmt: string): string {
   if (fmt === "MMM d, h:mm a") {
     return d.toLocaleDateString('en-US', {
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
+      year: 'numeric'
     }) + ' at ' + d.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit'
