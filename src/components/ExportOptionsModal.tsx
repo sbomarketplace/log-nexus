@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Mail, FileText, Printer, Share, Save, File, FileImage } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
-import { formatDateForUI } from '@/utils/safeDate';
+import { IncidentCardHeader } from '@/components/IncidentCardHeader';
 import {
   exportPDF,
   exportPrint,
@@ -99,27 +99,14 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           <DialogTitle id="export-title" className="text-center">
             Export Incident
           </DialogTitle>
-          <p className="text-sm text-muted-foreground text-center">
-            Choose a format to save or share this report.
-          </p>
         </DialogHeader>
         
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          {/* Incident Info */}
-          <div className="mb-4 p-3 bg-muted/30 rounded-lg">
-          <div className="flex flex-wrap gap-2 mb-2">
-            <Badge variant="outline" className="text-xs">
-              {formatDateForUI(incident?.date)}
-            </Badge>
-            <Badge variant="secondary" className="text-xs">
-              {incident.categoryOrIssue}
-            </Badge>
+          {/* Incident Header - mirrors Incident Card layout */}
+          <div className="mb-4 p-3 bg-neutral-50/50 rounded-lg border border-neutral-100">
+            <IncidentCardHeader incident={incident} />
           </div>
-          <h3 className="text-sm font-medium text-foreground line-clamp-1">
-            {incident.categoryOrIssue}
-          </h3>
-        </div>
 
         {/* Export Options Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
