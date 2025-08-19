@@ -617,19 +617,27 @@ const Home = () => {
                                  {timeChip}
                                </Badge>
                              );
-                           })()}
-                           {(() => {
-                             const occ = deriveIncidentOccurrence(incident);
-                             return hasTimeOnly(occ) && (
-                               <Badge 
-                                 variant="secondary" 
-                                 className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
-                               >
-                                 Time only
-                               </Badge>
-                             );
-                           })()}
-                           <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
+                            })()}
+                            {(() => {
+                              const occ = deriveIncidentOccurrence(incident);
+                              return hasTimeOnly(occ) && (
+                                <Badge 
+                                  variant="secondary" 
+                                  className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
+                                >
+                                  Time only
+                                </Badge>
+                              );
+                            })()}
+                            {incident.caseNumber && (
+                              <Badge 
+                                variant="outline" 
+                                className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center border rounded-full"
+                              >
+                                Case #: {incident.caseNumber}
+                              </Badge>
+                            )}
+                            <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
                                 style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
                              {incident.categoryOrIssue}
                            </div>
