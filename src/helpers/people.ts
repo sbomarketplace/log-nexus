@@ -21,6 +21,6 @@ export function parseWhoFromString(input: string): string[] {
   if (!input) return [];
   return input
     .split(/[,;]|(?:\s+and\s+)/i)
-    .map(s => s.trim())
+    .map(s => s.trim().replace(/^Others?:\s*/i, '')) // Remove "Others:" or "Other:" prefix
     .filter(s => s.length > 0);
 }
