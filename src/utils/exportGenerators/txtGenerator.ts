@@ -4,8 +4,8 @@ export const generateTXT = (incident: StructuredIncident): string => {
   const lines: string[] = [];
 
   // Header
-  lines.push('INCIDENT REPORT');
-  lines.push('================');
+  lines.push('CLEARCASE - INCIDENT REPORT');
+  lines.push('============================');
   lines.push('');
   
   // Basic info

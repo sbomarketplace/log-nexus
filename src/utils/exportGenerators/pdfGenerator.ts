@@ -18,10 +18,18 @@ export const generatePDF = async (incident: StructuredIncident): Promise<Blob> =
     return y + (lines.length * (fontSize * 0.35));
   };
 
-  // Header
+  // Header with ClearCase branding
   doc.setFontSize(18);
   doc.setFont('helvetica', 'bold');
-  doc.text('INCIDENT REPORT', margin, yPosition);
+  doc.text('CLEARCASE - INCIDENT REPORT', margin, yPosition);
+  yPosition += 8;
+  
+  // Add subtitle
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(128, 128, 128);
+  doc.text('Professional Workplace Incident Management', margin, yPosition);
+  doc.setTextColor(0, 0, 0);
   yPosition += 15;
 
   // Date and Category chips

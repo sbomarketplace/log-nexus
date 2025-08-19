@@ -1,7 +1,8 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { HomeIcon, PlusIcon, FileIcon, SettingsIcon, AlertIcon } from './icons/CustomIcons';
+import { HomeIcon, PlusIcon, FileIcon, SettingsIcon } from './icons/CustomIcons';
 import { Footer } from './Footer';
+import { BrandLogo } from './BrandLogo';
 
 interface LayoutProps {
   children: ReactNode;
@@ -22,19 +23,13 @@ export const Layout = ({ children }: LayoutProps) => {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Logo on the left */}
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <AlertIcon className="text-primary-foreground" size={20} />
-            </div>
+            {/* Brand Logo */}
+            <Link to="/" aria-label="Go to Home" className="flex-shrink-0">
+              <BrandLogo size="sm" className="h-7 md:h-8" />
+            </Link>
             
-            {/* Centered title and subtitle */}
-            <div className="absolute left-1/2 transform -translate-x-1/2 flex flex-col text-center">
-              <h1 className="text-lg font-bold text-foreground">ClearCase</h1>
-              <p className="text-sm text-muted-foreground leading-none">Workplace Incident Manager</p>
-            </div>
-            
-            {/* Empty space for balance */}
-            <div className="w-8"></div>
+            {/* Spacer for mobile layout */}
+            <div className="flex-1 md:hidden"></div>
             
             <nav className="hidden md:flex space-x-8">
               {navItems.map(({ path, icon: Icon, label }) => (
