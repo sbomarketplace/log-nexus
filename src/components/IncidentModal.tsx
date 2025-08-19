@@ -174,38 +174,39 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     setIsOrganizing(true);
     
     try {
-      const prefillData = prefillIncidentFromNotes(incident);
+      const { organizeNotes } = await import('@/lib/organizeNotes');
+      const updates = organizeNotes({ incident });
       
-      if (Object.keys(prefillData).length > 0) {
-        // Apply prefill to current form data (only empty fields)
+      if (Object.keys(updates).length > 0) {
+        // Apply organized data to form state (only empty fields)
         const updatedFormData = { ...formData };
         
-        // Only update fields that are currently empty
-        Object.keys(prefillData).forEach(key => {
+        Object.keys(updates).forEach(key => {
           const typedKey = key as keyof OrganizedIncident;
+          const value = updates[typedKey as keyof typeof updates];
+          
+          // Only update if the current field is empty or whitespace
           if (!formData[typedKey] || (typeof formData[typedKey] === 'string' && !(formData[typedKey] as string).trim())) {
-            (updatedFormData as any)[typedKey] = prefillData[typedKey];
+            (updatedFormData as any)[typedKey] = value;
           }
         });
         
         setFormData(updatedFormData);
         
-        // Update date/time inputs if they were empty
-        if (!dateInput && !timeInput) {
-          if (prefillData.dateTime) {
-            const d = parseISOToLocal(prefillData.dateTime);
-            if (d) {
-              setDateInput(formatYYYYMMDD(d));
-              setTimeInput(formatHHmm(d));
-            }
-          } else {
-            if (prefillData.datePart && !dateInput) {
-              const d = parseISOToLocal(prefillData.datePart);
-              if (d) setDateInput(formatYYYYMMDD(d));
-            }
-            if (prefillData.timePart && !timeInput) {
-              setTimeInput(prefillData.timePart);
-            }
+        // Update date/time inputs if they were organized
+        if (updates.dateTime) {
+          const d = parseISOToLocal(updates.dateTime);
+          if (d) {
+            setDateInput(formatYYYYMMDD(d));
+            setTimeInput(formatHHmm(d));
+          }
+        } else {
+          if (updates.datePart && !dateInput) {
+            const d = parseISOToLocal(updates.datePart);
+            if (d) setDateInput(formatYYYYMMDD(d));
+          }
+          if (updates.timePart && !timeInput) {
+            setTimeInput(updates.timePart);
           }
         }
         
@@ -721,6 +722,54 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                 </div>
               )}
             </div>
+
+            {/* Important Quotes */}
+            {(formData.quotes || incident.quotes) && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Important Quotes</label>
+                {isEditMode ? (
+                  <Textarea
+                    value={formData.quotes || ''}
+                    onChange={(e) => handleFieldChange('quotes', e.target.value)}
+                    placeholder="Important quotes..."
+                    className="min-h-[80px] rounded-lg"
+                  />
+                ) : (
+                  <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px] whitespace-pre-line">
+                    {formData.quotes || incident.quotes}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Requests or Responses */}
+            {(formData.requests || incident.requests) && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Requests or Responses</label>
+                {isEditMode ? (
+                  <Textarea
+                    value={formData.requests || ''}
+                    onChange={(e) => handleFieldChange('requests', e.target.value)}
+                    placeholder="Requests or responses..."
+                    className="min-h-[80px] rounded-lg"
+                  />
+                ) : (
+                  <div className="text-sm text-foreground p-3 bg-muted rounded-lg min-h-[80px]">
+                    {formData.requests || incident.requests}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* When field for time display */}
+            {(formData.when || incident.when) && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">When</label>
+                <div className="text-sm text-foreground p-3 bg-muted rounded-lg">
+                  {formData.when || incident.when}
+                </div>
+              </div>
+            )}
 
             {/* Additional sections can be added here as needed */}
 

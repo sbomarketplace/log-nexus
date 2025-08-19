@@ -9,11 +9,12 @@ export interface OrganizedIncident {
   who: string;
   what: string;
   where: string;
-  when: string;
+  when?: string; // Human-readable time like "12:23 PM"
   witnesses: string;
   notes: string;
+  quotes?: string; // Important quotes section
+  requests?: string; // Requests or responses section
   timeline?: string;
-  requests?: string;
   policy?: string;
   evidence?: string;
   files?: string[];
