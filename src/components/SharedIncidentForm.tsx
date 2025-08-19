@@ -416,8 +416,8 @@ export const SharedIncidentForm = ({
           value={formData.notes}
           onChange={(e) => handleFieldChange('notes', e.target.value)}
           placeholder="Any additional information"
-          className="text-base min-h-[80px] resize-none"
-          rows={3}
+          className="text-base min-h-[240px] resize-none"
+          rows={10}
         />
       </div>
 
