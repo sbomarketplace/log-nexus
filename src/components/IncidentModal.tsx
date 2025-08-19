@@ -360,7 +360,11 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                     <PopoverTrigger asChild>
                       <Button variant="outline" className={cn("h-8 px-3 rounded-full text-xs font-medium", dateInput && "bg-muted")}>
                         <CalendarIcon className="h-3 w-3 mr-1" />
-                        {dateInput ? new Date(dateInput).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Choose date'}
+                        {dateInput ? (() => {
+                          const [year, month, day] = dateInput.split('-').map(Number);
+                          const date = new Date(year, month - 1, day);
+                          return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                        })() : 'Choose date'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
