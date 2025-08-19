@@ -606,27 +606,31 @@ export const ViewIncidentModal = ({
                      />
                    </div>
 
-                  {/* Category Select */}
-                  <div className="flex-1 min-w-0">
-                    <Select
-                      value={formData.categoryOrIssue || ''}
-                      onValueChange={(value) => handleFieldChange('categoryOrIssue', value)}
-                    >
-                      <SelectTrigger className={`text-base h-9 ${validationErrors.categoryOrIssue ? 'border-destructive' : ''}`}>
-                        <SelectValue placeholder="Select category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAllCategories().map((category) => (
-                          <SelectItem key={category} value={category} className="text-base">
-                            {category}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {validationErrors.categoryOrIssue && (
-                      <div className="text-destructive mt-1">{validationErrors.categoryOrIssue}</div>
-                    )}
-                  </div>
+                   {/* Category Select */}
+                   <div className="w-full">
+                     <label htmlFor="incident-category" className="cc-field-label text-slate-600 mb-1 block">Category</label>
+                     <Select
+                       value={formData.categoryOrIssue || ''}
+                       onValueChange={(value) => handleFieldChange('categoryOrIssue', value)}
+                     >
+                       <SelectTrigger 
+                         id="incident-category"
+                         className={`w-full text-[16px] h-9 ${validationErrors.categoryOrIssue ? 'border-destructive' : ''}`}
+                       >
+                         <SelectValue placeholder="Select category" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {getAllCategories().map((category) => (
+                           <SelectItem key={category} value={category} className="text-[16px]">
+                             {category}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                     {validationErrors.categoryOrIssue && (
+                       <div className="text-destructive mt-1">{validationErrors.categoryOrIssue}</div>
+                     )}
+                   </div>
                 </>
               ) : (
                 <>
