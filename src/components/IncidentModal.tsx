@@ -435,12 +435,6 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                </>
              ) : (
                <>
-                 {isDirty && (
-                   <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]" aria-label="Save and close">
-                     <Save className="h-4 w-4 mr-1" />
-                     {isSaving ? 'Saving...' : 'Save'}
-                   </Button>
-                 )}
                  <Button variant="outline" onClick={handleEditClick}>
                    Edit
                  </Button>
@@ -754,9 +748,6 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
          {!isEditMode && isDirty && (
            <div className="sticky bottom-0 left-0 right-0 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t px-6 py-3">
              <div className="flex items-center justify-end gap-2">
-               <Button variant="ghost" onClick={handleClose}>
-                 Cancel
-               </Button>
                <Button 
                  onClick={handleSave} 
                  disabled={isSaving} 
