@@ -61,9 +61,8 @@ const ViewIncident = () => {
       if (preferred.date && preferred.time) {
         try {
           const date = new Date(preferred.date).toLocaleDateString('en-US', {
-            weekday: 'long',
             year: 'numeric',
-            month: 'long',
+            month: 'short',
             day: 'numeric'
           });
           const [hours, minutes] = preferred.time.split(':');
@@ -79,9 +78,8 @@ const ViewIncident = () => {
       if (preferred.date) {
         try {
           const date = new Date(preferred.date).toLocaleDateString('en-US', {
-            weekday: 'long',
             year: 'numeric',
-            month: 'long',
+            month: 'short',
             day: 'numeric'
           });
           return { date, time: null };
@@ -91,11 +89,15 @@ const ViewIncident = () => {
       }
     }
     
-    // Fallback to original logic
-    return {
-      date: formatDate(getDateSafely(incident, '')),
-      time: formatTime(incident.time)
-    };
+    // Check for time in timeline even if no explicit time
+    const { deriveIncidentTime, formatHHMMForUI } = require('@/utils/datetime');
+    const timelineTime = deriveIncidentTime(incident);
+    
+    // Fallback to original logic for date
+    const date = formatDate(getDateSafely(incident, '')).replace(/,.*day,/, '').replace(/,.*\s/, ' ');
+    const time = incident.time ? formatTime(incident.time) : (timelineTime ? formatHHMMForUI(timelineTime) : null);
+    
+    return { date, time };
   };
 
   return (
@@ -108,12 +110,25 @@ const ViewIncident = () => {
           </Button>
           <div className="flex-1">
             <h1 className="text-lg font-medium text-foreground">{incident.title}</h1>
-            <p className="text-xs text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
+                {(() => {
+                  const info = getIncidentDisplayInfo(incident);
+                  return info.date;
+                })()}
+              </Badge>
               {(() => {
                 const info = getIncidentDisplayInfo(incident);
-                return info.time ? `${info.date} at ${info.time}` : info.date;
+                return info.time ? (
+                  <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
+                    {info.time}
+                  </Badge>
+                ) : null;
               })()}
-            </p>
+              <Badge variant="secondary" className="text-xs bg-neutral-200 text-neutral-800 font-medium">
+                {incident.category || "Uncategorized"}
+              </Badge>
+            </div>
           </div>
         </div>
 
