@@ -421,7 +421,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
           {/* Header Content Rows */}
           <div className="space-y-4">
-            {/* Row 1: Date, Time, Category */}
+            {/* Row 1: Date and Time */}
             <div className="flex flex-row gap-3 items-center">
               {/* Date Input */}
               <div className="flex-none">
@@ -492,31 +492,31 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
                   })()
                 )}
               </div>
+            </div>
 
-              {/* Category */}
-              <div className="flex-1 sm:flex sm:justify-end">
-                {isEditMode ? (
-                  <Select 
-                    value={formData.categoryOrIssue || ''} 
-                    onValueChange={(value) => handleFieldChange('categoryOrIssue', value)}
-                  >
-                    <SelectTrigger className="h-8 max-w-xs rounded-full text-xs">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAllCategories().map((category) => (
-                        <SelectItem key={category} value={category}>
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                ) : (
-                  <Badge className="rounded-full text-xs font-medium max-w-fit">
-                    {formData.categoryOrIssue || incident.categoryOrIssue}
-                  </Badge>
-                )}
-              </div>
+            {/* Row 2: Category */}
+            <div>
+              {isEditMode ? (
+                <Select 
+                  value={formData.categoryOrIssue || ''} 
+                  onValueChange={(value) => handleFieldChange('categoryOrIssue', value)}
+                >
+                  <SelectTrigger className="h-8 max-w-xs rounded-full text-xs">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAllCategories().map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className="rounded-full text-xs font-medium max-w-fit">
+                  {formData.categoryOrIssue || incident.categoryOrIssue}
+                </Badge>
+              )}
             </div>
 
             {/* Row 2: Case Number */}
