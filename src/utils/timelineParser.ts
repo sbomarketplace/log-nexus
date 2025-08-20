@@ -89,7 +89,8 @@ export function normalizeDateForInput(dateText: string, referenceDate = new Date
     
     if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
       let year = currentYear;
-      const testDate = new Date(year, month - 1, day);
+      // Create date at noon to avoid timezone issues
+      const testDate = new Date(year, month - 1, day, 12, 0, 0, 0);
       
       // If the date is in the future, use previous year
       if (testDate > referenceDate) {

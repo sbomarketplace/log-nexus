@@ -141,6 +141,7 @@ function parseAbsoluteDate(text: string, referenceDate: Date): { date: Date; con
     const day = parseInt(shortDateMatch[2]);
     
     if (month >= 0 && month <= 11 && day >= 1 && day <= 31) {
+      // Create date in local timezone at noon to avoid timezone conversion issues
       let date = new Date(currentYear, month, day, 12, 0, 0, 0);
       
       // If the date is in the future, use previous year
