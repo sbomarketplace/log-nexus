@@ -6,7 +6,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { useOrganizeNotes } from '@/hooks/useOrganizeNotes';
 import { organizeNotes } from '@/services/organizer';
 import { StructuredIncident } from '@/types/structured-incidents';
 import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
@@ -26,9 +25,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [parsedData, setParsedData] = useState<any>(null);
   const { toast } = useToast();
-  const organize = useOrganizeNotes();
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -72,25 +69,6 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
 
     setIsProcessing(true);
     setError(null);
-    
-    try {
-      // Use new fast parsing system
-      organize.run(rawNotes.trim(), (fast, full) => {
-        // Only process full results for the complete organization
-        if (full) {
-          // For now, fall back to the old system for structured incidents
-          // This maintains compatibility while we transition
-          handleLegacyOrganize();
-        }
-      }, true);
-    } catch (error) {
-      console.error('Error in new organize system:', error);
-      // Fall back to legacy system
-      await handleLegacyOrganize();
-    }
-  };
-
-  const handleLegacyOrganize = async () => {
     try {
       const apiIncidents = await organizeNotes(rawNotes.trim());
       
@@ -123,6 +101,9 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       }
       
       setError(errorMessage);
+      
+      // Keep the raw notes in the textarea so nothing is lost
+      // No need to clear rawNotes here
     } finally {
       setIsProcessing(false);
     }
@@ -145,11 +126,11 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         updatedAt: new Date().toISOString()
       };
       
-      // Save to the same storage system that home page uses - DISABLE grammar improvement here
+      // Save to the same storage system that home page uses with grammar improvement
       const processedIncident = await processIncident(organizedIncident, {
         authorPerspective: 'first_person',
         rawNotes: rawNotes,
-        improveGrammar: false // Disabled to use new batch system
+        improveGrammar: true
       });
       
       organizedIncidentStorage.save(processedIncident);
@@ -198,7 +179,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         return await processIncident(organizedIncident, {
           authorPerspective: 'first_person',
           rawNotes: rawNotes,
-          improveGrammar: false // Disabled to use new batch system
+          improveGrammar: true
         });
       }));
       
@@ -207,7 +188,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       
       toast({
         title: "Incidents saved",
-        description: `${organizedIncidents.length} incidents have been saved successfully.`,
+        description: `${organizedIncidents.length} incidents have been saved successfully with improved grammar.`,
       });
       
       resetModal();

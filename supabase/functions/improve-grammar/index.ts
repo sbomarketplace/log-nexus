@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { text, batchMode } = await req.json();
+    const { text } = await req.json();
 
     if (!text?.trim()) {
       return new Response(JSON.stringify({ 
@@ -26,28 +26,20 @@ serve(async (req) => {
       });
     }
 
-    console.log('Improving grammar for text:', batchMode ? 'batch mode' : text.substring(0, 100) + '...');
+    console.log('Improving grammar for text:', text.substring(0, 100) + '...');
 
-    let systemContent, userContent, responseFormat;
-
-    if (batchMode) {
-      // Batch mode: process multiple fields at once
-      systemContent = `You are a grammar correction assistant for workplace incident reports. Your job is to:
-
-1. Fix grammar, punctuation, capitalization, and spelling errors in ALL provided fields
-2. Maintain the exact meaning and content for each field
-3. Keep workplace-specific terms and names as they are
-4. Preserve the original structure and tone
-5. Make minimal changes - only fix clear errors
-6. Always maintain first-person perspective if present
-
-IMPORTANT: Return a valid JSON object with the same field names as input, containing only the corrected text for each field. Do not add explanations or comments.`;
-
-      userContent = `Please fix grammar, punctuation, and spelling errors in these incident report fields while preserving exact meaning:\n\n${text}`;
-      responseFormat = { type: "json_object" };
-    } else {
-      // Single mode: process one text
-      systemContent = `You are a grammar correction assistant for workplace incident reports. Your job is to:
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-mini-2025-08-07',
+        messages: [
+          { 
+            role: 'system', 
+            content: `You are a grammar correction assistant for workplace incident reports. Your job is to:
 
 1. Fix grammar, punctuation, capitalization, and spelling errors
 2. Maintain the exact meaning and content
@@ -56,31 +48,15 @@ IMPORTANT: Return a valid JSON object with the same field names as input, contai
 5. Make minimal changes - only fix clear errors
 6. Always maintain first-person perspective if present
 
-IMPORTANT: Only return the corrected text, nothing else. Do not add explanations, comments, or formatting. If the text is already correct, return it unchanged.`;
-
-      userContent = `Please fix any grammar, punctuation, and spelling errors in this incident report text while preserving the exact meaning and content:\n\n${text}`;
-    }
-
-    const requestBody: any = {
-      model: 'gpt-5-mini-2025-08-07',
-      messages: [
-        { role: 'system', content: systemContent },
-        { role: 'user', content: userContent }
-      ],
-      max_completion_tokens: 2000
-    };
-
-    if (responseFormat) {
-      requestBody.response_format = responseFormat;
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(requestBody),
+IMPORTANT: Only return the corrected text, nothing else. Do not add explanations, comments, or formatting. If the text is already correct, return it unchanged.`
+          },
+          { 
+            role: 'user', 
+            content: `Please fix any grammar, punctuation, and spelling errors in this incident report text while preserving the exact meaning and content:\n\n${text}` 
+          }
+        ],
+        max_completion_tokens: 1000
+      }),
     });
 
     if (!response.ok) {
@@ -92,32 +68,18 @@ IMPORTANT: Only return the corrected text, nothing else. Do not add explanations
     const data = await response.json();
     const improvedText = data.choices[0].message.content?.trim() || text;
     
-    let hasChanges = false;
-    let finalResponse;
+    // Check if there were any meaningful changes
+    const hasChanges = improvedText.toLowerCase().replace(/\s+/g, ' ') !== 
+                      text.toLowerCase().replace(/\s+/g, ' ');
 
-    if (batchMode) {
-      // For batch mode, return the JSON object directly
-      console.log('Batch grammar improvement completed');
-      finalResponse = { 
-        improvedText,
-        hasChanges: true, // Assume changes in batch mode
-        batchMode: true
-      };
-    } else {
-      // For single mode, check for changes
-      hasChanges = improvedText.toLowerCase().replace(/\s+/g, ' ') !== 
-                   text.toLowerCase().replace(/\s+/g, ' ');
-      
-      console.log('Grammar improvement completed. Changes made:', hasChanges);
-      finalResponse = { 
-        improvedText,
-        hasChanges,
-        originalLength: text.length,
-        improvedLength: improvedText.length
-      };
-    }
+    console.log('Grammar improvement completed. Changes made:', hasChanges);
 
-    return new Response(JSON.stringify(finalResponse), {
+    return new Response(JSON.stringify({ 
+      improvedText,
+      hasChanges,
+      originalLength: text.length,
+      improvedLength: improvedText.length
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
@@ -125,7 +87,7 @@ IMPORTANT: Only return the corrected text, nothing else. Do not add explanations
     console.error('Error in improve-grammar function:', error);
     
     // Return original text if grammar correction fails
-    const { text, batchMode } = await req.json().catch(() => ({ text: '', batchMode: false }));
+    const { text } = await req.json().catch(() => ({ text: '' }));
     
     return new Response(JSON.stringify({ 
       improvedText: text || '',

@@ -12,7 +12,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { AlertIcon } from '@/components/icons/CustomIcons';
 import { SearchIcon, X, Loader2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useOrganizeNotes } from '@/hooks/useOrganizeNotes';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
@@ -48,8 +47,6 @@ const Home = () => {
   const [isOrganizing, setIsOrganizing] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const organize = useOrganizeNotes();
-  const [previewData, setPreviewData] = useState<any>(null);
   
   // Query params for modal management
   const [searchParams, setSearchParams] = useSearchParams();
@@ -179,89 +176,12 @@ const Home = () => {
     }
 
     setIsOrganizing(true);
-    
-    try {
-      // Use new fast parsing system
-      organize.run(quickNotes.trim(), (fast, full) => {
-        // Update any preview with fast results
-        if (fast) {
-          setPreviewData(fast);
-        }
-        
-        // When full results are ready, process and save them
-        if (full) {
-          processParsedResults(full);
-        }
-      }, true);
-    } catch (error) {
-      console.error('Error in new organize system:', error);
-      // Fall back to legacy system
-      await handleLegacyOrganize();
-    }
-  };
-
-  const processParsedResults = async (parsedResult: any) => {
-    try {
-      // Convert parsed result to OrganizedIncident format
-      const baseIncident: OrganizedIncident = {
-        id: crypto.randomUUID(),
-        date: parsedResult.datePart || '',
-        categoryOrIssue: parsedResult.category || '',
-        who: parsedResult.peopleText || '',
-        what: parsedResult.what || '',
-        where: parsedResult.where || '',
-        when: parsedResult.time || '',
-        witnesses: parsedResult.witnessesText || '',
-        notes: parsedResult.notes || '',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Process incident with batch polishing (no individual field grammar improvement)
-      const processedIncident = await processIncident(baseIncident, {
-        authorPerspective: 'first_person',
-        rawNotes: quickNotes,
-        improveGrammar: false // Use batch system instead
-      });
-      
-      organizedIncidentStorage.save(processedIncident);
-      
-      // Clear the textarea and draft
-      setQuickNotes('');
-      setLimitReached(false);
-      setLimitAnnounce('');
-      setPreviewData(null);
-      localStorage.removeItem('quickNotesDraft');
-      loadIncidents();
-      
-      toast({
-        title: "Notes organized",
-        description: "Your notes have been organized successfully.",
-      });
-
-      // Scroll to incident reports section after organizing
-      setTimeout(() => {
-        const incidentSection = document.getElementById('incident-reports');
-        if (incidentSection) {
-          incidentSection.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-      
-    } catch (error) {
-      console.error('Error processing parsed results:', error);
-      await handleLegacyOrganize();
-    } finally {
-      setIsOrganizing(false);
-    }
-  };
-
-  const handleLegacyOrganize = async () => {
     try {
       const results = await organizeIncidents(quickNotes);
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
       } else {
-        // Save all organized incidents with DISABLED individual grammar processing
+        // Save all organized incidents with processing
         const incidentsToSave = await Promise.all(results.map(async incident => {
           const baseIncident: OrganizedIncident = {
             id: crypto.randomUUID(),
@@ -277,11 +197,11 @@ const Home = () => {
             updatedAt: new Date().toISOString()
           };
           
-          // Process incident with DISABLED individual grammar improvement
+          // Process incident for enhanced features including grammar improvement
           return await processIncident(baseIncident, {
             authorPerspective: 'first_person',
             rawNotes: quickNotes,
-            improveGrammar: false // Use batch system instead
+            improveGrammar: true
           });
         }));
         
@@ -294,39 +214,28 @@ const Home = () => {
         localStorage.removeItem('quickNotesDraft');
         loadIncidents();
         
-        // Success toast
-        toast({
-          title: "Notes organized",
-          description: `${results.length} incident${results.length !== 1 ? 's' : ''} organized successfully.`,
-        });
+        // Success toast is already shown by organizer.ts
 
         // Scroll to incident reports section after organizing
         setTimeout(() => {
-          const incidentSection = document.getElementById('incident-reports');
+          const incidentSection = document.querySelector('[data-incident-reports-section]');
           if (incidentSection) {
-            incidentSection.scrollIntoView({ behavior: 'smooth' });
+            incidentSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         }, 100);
-      }
-    } catch (error) {
-      console.error('Error organizing incidents:', error);
-      let errorMessage = 'Failed to organize notes. Please try again.';
-      
-      if (error instanceof Error) {
-        const message = error.message.toLowerCase();
-        if (message.includes('quota') || message.includes('insufficient_quota')) {
-          errorMessage = 'AI quota exhausted. Please add credits or raise your OpenAI monthly limit.';
-        } else {
-          errorMessage = error.message;
+
+        // Open the incident modal for the first organized incident
+        if (incidentsToSave.length > 0) {
+          setSearchParams({ incidentId: incidentsToSave[0].id });
         }
       }
-      
-      setQuickNotesError(errorMessage);
+    } catch (error: any) {
+      setQuickNotesError(error?.message || 'Failed to organize notes. Please try again.');
     } finally {
       setIsOrganizing(false);
     }
   };
-  
+
   const handleDeleteIncident = async (id: string) => {
     try {
       organizedIncidentStorage.delete(id);
