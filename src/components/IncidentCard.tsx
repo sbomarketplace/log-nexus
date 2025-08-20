@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { CalendarIcon, ClockIcon, Hash, Pencil, FileDown, Trash2 } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { CalendarIcon, ClockIcon, Hash, Pin, FileDown, Trash2 } from 'lucide-react';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
-import { showToast } from '@/components/SuccessToast';
+import { showSuccessToast, showErrorToast } from '@/lib/showToast';
 import { cn } from '@/lib/utils';
 
 type Draft = {
@@ -24,6 +25,7 @@ type Draft = {
   quotes?: string;             // bullets or lines
   requests?: string;
   notes?: string;              // raw notes
+  title?: string;              // Add title field
 };
 
 interface IncidentCardProps {
@@ -33,6 +35,8 @@ interface IncidentCardProps {
   onDelete: () => void;
   onUpdate: () => void;
   getCategoryTagClass: (category: string) => string;
+  isPinned?: boolean;
+  onTogglePin?: () => void;
 }
 
 export const IncidentCard = ({ 
@@ -41,7 +45,9 @@ export const IncidentCard = ({
   onExport, 
   onDelete, 
   onUpdate, 
-  getCategoryTagClass 
+  getCategoryTagClass,
+  isPinned = false,
+  onTogglePin 
 }: IncidentCardProps) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(buildDraft(incident));
@@ -68,6 +74,7 @@ export const IncidentCard = ({
       quotes: Array.isArray(i.quotes) ? i.quotes.map((q: string) => `- ${q}`).join("\n") : (i.quotes ?? ""),
       requests: i.requests ?? "",
       notes: i.notes ?? "",
+      title: i.title ?? "", // Add title to draft
     };
 
     if (i.datePart || i.timePart) {
@@ -136,8 +143,20 @@ export const IncidentCard = ({
       console.log('Save attempt - draft:', draft);
       console.log('Save attempt - incident before:', incident);
 
+      // Validate title
+      const cleanTitle = (draft.title || "").trim();
+      if (!cleanTitle) {
+        showErrorToast("Add a title", "Title is required.");
+        return;
+      }
+      if (cleanTitle.length > 80) {
+        showErrorToast("Title too long", "Keep it under 80 characters.");
+        return;
+      }
+
       // Build payload per rules
       const payload: any = {
+        title: cleanTitle,
         caseNumber: draft.caseNumber?.trim() || null,
         categoryOrIssue: draft.category || null,
         what: draft.what?.trim() ?? null,
@@ -193,22 +212,14 @@ export const IncidentCard = ({
       setDraft(buildDraft(updatedIncident));
 
       // Green toast 2.5s
-      showToast({ 
-        type: "success", 
-        message: "Incident updated successfully", 
-        durationMs: 2500 
-      });
+      showSuccessToast("Incident updated successfully", undefined); 
 
       // Notify parent to refresh
       onUpdate();
 
     } catch (e) {
       console.error('Error saving incident:', e);
-      showToast({ 
-        type: "error", 
-        message: "Could not save", 
-        durationMs: 2500 
-      });
+      showErrorToast("Could not save", undefined);
     } finally {
       setSaving(false);
     }
@@ -246,240 +257,264 @@ export const IncidentCard = ({
   const caseText = incident.caseNumber ? `Case ${incident.caseNumber}` : null;
   console.log('Chips debug:', { dateChip, timeChip, hasTime });
 
+  // Get title with fallback for existing incidents without titles
+  const getDisplayTitle = () => {
+    if (incident.title) return incident.title;
+    
+    // Backfill logic: what → summary → "{Category} — {Date}"
+    if (incident.what) return incident.what.slice(0, 80);
+    if ((incident as any).summary) return (incident as any).summary.slice(0, 80);
+    
+    const category = incident.categoryOrIssue || "Incident";
+    const date = dateChip || "Unknown date";
+    return `${category} — ${date}`;
+  };
+
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm">
-      <CardContent className="p-4 md:p-5">
-        <article>
-          {/* Row 1: chips + category */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {/* Date Chip */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-              <CalendarIcon className="h-4 w-4" aria-hidden />
-              {editing ? (
-                <Input
-                  ref={firstInputRef}
-                  type="date"
-                  value={draft.datePart || ""}
-                  onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
-                  className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-28"
-                  aria-label="Incident date"
-                />
-              ) : (
+    <Accordion type="single" collapsible className="w-full">
+      <AccordionItem value={incident.id} data-pinned={isPinned}>
+        <AccordionTrigger className="hover:no-underline">
+          <div className="flex w-full items-center gap-2 pr-4">
+            {/* Title - editable in edit mode */}
+            {editing ? (
+              <Input
+                className={cn(
+                  "truncate bg-white/80 border rounded-md px-2 py-1 text-base font-semibold flex-1",
+                  draft.title?.trim() ? "" : "border-red-500"
+                )}
+                value={draft.title ?? ""}
+                onChange={(e) => setDraft(v => ({ ...v, title: e.target.value.slice(0, 80) }))}
+                onBlur={() => setDraft(v => ({ ...v, title: (v.title || "").trim() }))}
+                required
+                maxLength={80}
+                aria-label="Incident title"
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <h3 className="truncate text-base font-semibold flex-1 text-left">
+                {getDisplayTitle()}
+              </h3>
+            )}
+            
+            {/* Header chips and actions */}
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              {/* Date Chip */}
+              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
+                <CalendarIcon className="h-3 w-3" aria-hidden />
                 <span>{dateChip}</span>
+              </div>
+
+              {/* Time Chip */}
+              {hasTime && (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
+                  <ClockIcon className="h-3 w-3" aria-hidden />
+                  <span>{timeChip}</span>
+                </div>
+              )}
+
+              {/* Case Chip */}
+              {caseText && (
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
+                  <Hash className="h-3 w-3" aria-hidden />
+                  <span>{caseText}</span>
+                </div>
+              )}
+
+              {/* Category Pill */}
+              <div className={cn(
+                getCategoryTagClass(incident.categoryOrIssue),
+                "text-white text-[10px] font-medium h-5 px-1.5 rounded-full flex items-center justify-center break-words min-w-0"
+              )}>
+                {incident.categoryOrIssue}
+              </div>
+
+              {/* Pin button */}
+              {onTogglePin && (
+                <button
+                  type="button"
+                  className="ml-1 rounded p-1 hover:bg-muted"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onTogglePin();
+                  }}
+                  aria-pressed={isPinned}
+                  title={isPinned ? "Unpin" : "Pin open"}
+                >
+                  <Pin className={cn("h-3 w-3", isPinned ? "rotate-45" : "")} />
+                </button>
               )}
             </div>
-
-            {/* Time Chip */}
-            {(hasTime || editing) && (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-                <ClockIcon className="h-4 w-4" aria-hidden />
-                {editing ? (
-                  <Input
-                    type="time"
-                    value={draft.timePart || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
-                    className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-20"
-                    aria-label="Incident time"
-                  />
-                ) : (
-                  <span>{timeChip}</span>
-                )}
-              </div>
-            )}
-
+          </div>
+        </AccordionTrigger>
+        
+        <AccordionContent>
+          <div className="px-4 pb-4">
             {/* Time Only Badge */}
             {!editing && hasTimeOnly(occ) && (
               <Badge 
                 variant="secondary" 
-                className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
+                className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full mb-3"
               >
                 Time only
               </Badge>
             )}
 
-            {/* Case Chip */}
-            {(caseText || editing) && (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-                <Hash className="h-4 w-4" aria-hidden />
-                {editing ? (
-                  <Input
-                    type="text"
-                    value={draft.caseNumber || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
-                    placeholder="Case"
-                    className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-28"
-                    aria-label="Case number"
-                  />
-                ) : (
-                  <span>{caseText}</span>
-                )}
+            {/* Main content */}
+            {editing ? (
+              <>
+                <Textarea
+                  value={draft.what || ""}
+                  onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
+                  rows={8}
+                  className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
+                  placeholder="What happened…"
+                />
+                
+                {/* Incident Details Section */}
+                <div className="grid gap-3 mb-3">
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Who</div>
+                    <Input
+                      className="w-full rounded-xl border px-3 py-2"
+                      placeholder="Comma-separated (e.g., Mark, Troy)"
+                      value={draft.who || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Where</div>
+                    <Input
+                      className="w-full rounded-xl border px-3 py-2"
+                      placeholder="e.g., Common area at work"
+                      value={draft.where || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Witnesses</div>
+                    <Textarea
+                      rows={2}
+                      className="w-full rounded-xl border px-3 py-2"
+                      placeholder="Comma or line-separated"
+                      value={draft.witnesses || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Important Quotes</div>
+                    <Textarea
+                      rows={2}
+                      className="w-full rounded-xl border px-3 py-2"
+                      placeholder='- Mark: "even the elephant hide?"'
+                      value={draft.quotes || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Requests / Responses</div>
+                    <Textarea
+                      rows={2}
+                      className="w-full rounded-xl border px-3 py-2"
+                      value={draft.requests || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <div className="text-sm font-semibold">Notes</div>
+                    <Textarea
+                      rows={10}
+                      className="w-full rounded-xl border px-3 py-2"
+                      value={draft.notes || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="min-h-[2.5rem] mb-3">
+                <div className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
+                  <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
+                </div>
               </div>
             )}
 
-            {/* Category Pill */}
-            <div className={cn(
-              getCategoryTagClass(incident.categoryOrIssue),
-              "text-white text-[10px] font-medium h-5 px-1.5 rounded-full flex items-center justify-center break-words min-w-0 ml-auto"
-            )}>
-              {incident.categoryOrIssue}
+            {/* Meta information */}
+            <div className="text-[10px] text-muted-foreground mb-2">
+              {(() => {
+                return occ.type === "occurrence" 
+                  ? formatSecondaryCreated(incident.createdAt) 
+                  : formatRelativeUpdate(incident.updatedAt);
+              })()}
+              {Boolean(incident.files?.length) && (
+                <span> • {incident.files.length} attachment{incident.files.length > 1 ? 's' : ''}</span>
+              )}
             </div>
-          </div>
 
-          {/* Row 2: summary and incident details */}
-          {editing ? (
-            <>
-              <Textarea
-                value={draft.what || ""}
-                onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
-                rows={8}
-                className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
-                placeholder="What happened…"
-              />
-              
-              {/* Incident Details Section */}
-              <div className="grid gap-3 mb-3">
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Who</div>
-                  <Input
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="Comma-separated (e.g., Mark, Troy)"
-                    value={draft.who || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Where</div>
-                  <Input
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="e.g., Common area at work"
-                    value={draft.where || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Witnesses</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="Comma or line-separated"
-                    value={draft.witnesses || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Important Quotes</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder='- Mark: "even the elephant hide?"'
-                    value={draft.quotes || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Requests / Responses</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    value={draft.requests || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Notes</div>
-                  <Textarea
-                    rows={10}
-                    className="w-full rounded-xl border px-3 py-2"
-                    value={draft.notes || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
-                  />
-                </div>
+            {/* Actions */}
+            {editing ? (
+              <div className="flex items-center gap-2">
+                <Button 
+                  size="sm"
+                  disabled={!dirty || saving}
+                  onClick={saveFromCard}
+                  className="text-[10px] px-2.5 py-1 h-7"
+                >
+                  {saving ? "Saving…" : "Save"}
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleCancel}
+                  className="text-[10px] px-2.5 py-1 h-7"
+                >
+                  Cancel
+                </Button>
+                <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">Esc to cancel</span>
               </div>
-            </>
-          ) : (
-            <div className="min-h-[2.5rem] mb-3">
-              <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
-                <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
-              </h3>
-            </div>
-          )}
-
-          {/* Row 3: meta */}
-          <div className="text-[10px] text-muted-foreground mb-2">
-            {(() => {
-              return occ.type === "occurrence" 
-                ? formatSecondaryCreated(incident.createdAt) 
-                : formatRelativeUpdate(incident.updatedAt);
-            })()}
-            {Boolean(incident.files?.length) && (
-              <span> • {incident.files.length} attachment{incident.files.length > 1 ? 's' : ''}</span>
+            ) : (
+              <div className="flex gap-1.5">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                  onClick={onView}
+                >
+                  View
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                  onClick={handleEditClick}
+                >
+                  Edit
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                  onClick={onExport}
+                >
+                  Export
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                  onClick={onDelete}
+                >
+                  Delete
+                </Button>
+              </div>
             )}
           </div>
-
-          {/* Row 4: actions */}
-          {editing ? (
-            <div className="flex items-center gap-2">
-              <Button 
-                size="sm"
-                disabled={!dirty || saving}
-                onClick={saveFromCard}
-                className="text-[10px] px-2.5 py-1 h-7"
-              >
-                {saving ? "Saving…" : "Save"}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleCancel}
-                className="text-[10px] px-2.5 py-1 h-7"
-              >
-                Cancel
-              </Button>
-              <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">Esc to cancel</span>
-            </div>
-          ) : (
-            <div className="flex gap-1.5">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onView}
-              >
-                View
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={handleEditClick}
-              >
-                Edit
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onExport}
-              >
-                Export
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onDelete}
-              >
-                Delete
-              </Button>
-            </div>
-          )}
-        </article>
-      </CardContent>
-    </Card>
+        </AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 };

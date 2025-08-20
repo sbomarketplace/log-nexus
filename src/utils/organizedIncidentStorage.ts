@@ -1,5 +1,6 @@
 export interface OrganizedIncident {
   id: string;
+  title?: string; // Add title field
   date: string;
   dateTime?: string; // ISO 8601 UTC string - new unified field
   datePart?: string; // YYYY-MM-DD date only

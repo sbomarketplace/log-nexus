@@ -37,6 +37,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
   const [filterCategory, setFilterCategory] = useState<string>('all');
+  const [pinnedIncidents, setPinnedIncidents] = useState<Set<string>>(new Set());
   // Quick notes state
   const [quickNotes, setQuickNotes] = useState('');
   const [quickNotesError, setQuickNotesError] = useState('');
@@ -85,6 +86,8 @@ const Home = () => {
       const searchNorm = searchTerm.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
       
       filtered = filtered.filter(incident => 
+        // Search in title (new field)
+        (incident.title && incident.title.toLowerCase().includes(searchLower)) ||
         incident.what.toLowerCase().includes(searchLower) ||
         incident.who.toLowerCase().includes(searchLower) ||
         incident.where.toLowerCase().includes(searchLower) ||
@@ -600,6 +603,16 @@ const Home = () => {
                 onDelete={() => setDeleteId(incident.id)}
                 onUpdate={loadIncidents}
                 getCategoryTagClass={getCategoryTagClass}
+                isPinned={pinnedIncidents.has(incident.id)}
+                onTogglePin={() => {
+                  const newPinned = new Set(pinnedIncidents);
+                  if (newPinned.has(incident.id)) {
+                    newPinned.delete(incident.id);
+                  } else {
+                    newPinned.add(incident.id);
+                  }
+                  setPinnedIncidents(newPinned);
+                }}
               />
             ))
           )}

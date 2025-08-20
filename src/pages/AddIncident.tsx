@@ -16,6 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { Wand2, Loader2 } from 'lucide-react';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
+import { cn } from '@/lib/utils';
 
 
 interface Person {
@@ -43,6 +44,8 @@ const AddIncident = () => {
     how: '',
   });
   
+  const [titleError, setTitleError] = useState('');
+  
   // Unified date/time state
   const [selectedDateTime, setSelectedDateTime] = useState(new Date());
   const [caseNumber, setCaseNumber] = useState('');
@@ -59,10 +62,39 @@ const AddIncident = () => {
   const [isRewriting, setIsRewriting] = useState(false);
   const [rewriteError, setRewriteError] = useState<string>('');
 
+  const validateAndSubmit = () => {
+    const t = (formData.title || "").trim();
+    if (!t) {
+      setTitleError("Title is required");
+      // Focus + shake
+      requestAnimationFrame(() => {
+        document.getElementById("incident-title")?.focus();
+      });
+      toast({
+        title: "Add a title",
+        description: "A title is required before you can save this incident.",
+        variant: "destructive",
+      });
+      // remove the shake class after it runs once
+      setTimeout(() => setTitleError((e) => e && "Title is required"), 350);
+      return false;
+    }
+    if (t.length > 80) {
+      setTitleError("Title must be 80 characters or fewer");
+      toast({
+        title: "Title too long",
+        description: "Keep it under 80 characters.",
+        variant: "destructive",
+      });
+      return false;
+    }
+    setTitleError('');
+    return validateForm();
+  };
+
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
     
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
     if (!formData.category.trim()) newErrors.category = 'Category is required';
     if (!formData.what.trim()) newErrors.what = 'What happened is required';
     if (!formData.where.trim()) newErrors.where = 'Location is required';
@@ -106,7 +138,16 @@ const AddIncident = () => {
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'title') {
+      // Limit to 80 characters and clear error on change
+      const trimmedValue = value.slice(0, 80);
+      setFormData(prev => ({ ...prev, [field]: trimmedValue }));
+      if (titleError) {
+        setTitleError('');
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
     
     // Auto-prefill from notes when "what" field changes and other fields are empty
     if (field === 'what' && value.trim()) {
@@ -195,12 +236,7 @@ const AddIncident = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
-      toast({
-        title: "Validation Error",
-        description: "Please fix the errors below and try again.",
-        variant: "destructive",
-      });
+    if (!validateAndSubmit()) {
       return;
     }
 
@@ -364,15 +400,29 @@ const AddIncident = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title">Incident Title *</Label>
+                <Label htmlFor="incident-title" className="block text-sm font-medium">
+                  Title <span className="text-red-600">*</span>
+                </Label>
                 <Input
-                  id="title"
+                  id="incident-title"
+                  type="text"
                   value={formData.title}
                   onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Brief description of the incident"
-                  className={errors.title ? 'border-destructive' : ''}
+                  onBlur={() => setFormData(prev => ({ ...prev, title: prev.title.trim() }))}
+                  required
+                  maxLength={80}
+                  placeholder="Short, clear title (max 80)"
+                  className={cn(
+                    "mt-1 w-full rounded-lg border px-3 py-2",
+                    titleError ? "border-red-500 animate-shake" : ""
+                  )}
+                  aria-invalid={Boolean(titleError)}
+                  aria-describedby={titleError ? "title-error" : undefined}
                 />
-                {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+                <div className="mt-1 text-xs text-muted-foreground">{80 - formData.title.length} characters left</div>
+                {titleError && (
+                  <p id="title-error" className="mt-1 text-xs text-red-600">{titleError}</p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">

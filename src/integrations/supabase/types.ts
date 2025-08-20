@@ -23,6 +23,8 @@ export type Database = {
           id: string
           is_shared: boolean
           owner_id: string | null
+          title: string | null
+          title_norm: string | null
         }
         Insert: {
           case_number?: string | null
@@ -32,6 +34,8 @@ export type Database = {
           id?: string
           is_shared?: boolean
           owner_id?: string | null
+          title?: string | null
+          title_norm?: string | null
         }
         Update: {
           case_number?: string | null
@@ -41,6 +45,8 @@ export type Database = {
           id?: string
           is_shared?: boolean
           owner_id?: string | null
+          title?: string | null
+          title_norm?: string | null
         }
         Relationships: []
       }

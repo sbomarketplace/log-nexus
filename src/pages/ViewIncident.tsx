@@ -109,7 +109,7 @@ const ViewIncident = () => {
             <ArrowLeftIcon size={16} />
           </Button>
           <div className="flex-1">
-            <h1 className="text-lg font-medium text-foreground">{incident.title}</h1>
+            <h1 className="text-lg font-medium text-foreground">{incident.title || incident.what || "Incident Details"}</h1>
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
                 {(() => {
