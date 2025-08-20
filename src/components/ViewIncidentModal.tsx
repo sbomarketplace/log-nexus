@@ -31,6 +31,7 @@ import { parseFromISO, formatHeader, formatTimeOnly, toDateInputValue, toTimeInp
 import { getEffectiveOrganizedDateTime as getOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 import { formatWhoList, parseWhoFromString } from '@/helpers/people';
 import { extractCaseNumberFlexible } from '@/lib/caseNumber';
+import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip } from '@/ui/incidentDisplay';
 
 interface ViewIncidentModalProps {
   incident: OrganizedIncident | null;
@@ -152,50 +153,16 @@ export const ViewIncidentModal = ({
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
   const effectiveDateTime = getOrganizedDateTime(incident);
 
-  // Derived display values
+  // Derived display values using centralized incident display logic
   const displayDate = (() => {
     if (isEditMode && selectedDateTime) {
       return selectedDateTime.toLocaleDateString();
     }
     
-    // Use preferred date/time from original text and timeline
+    // Use centralized date display logic that matches incident cards
     if (incident && !isEditMode) {
-      const preferred = getPreferredDateTime(incident);
-      
-      if (preferred.date && preferred.time) {
-        try {
-          const date = new Date(preferred.date);
-          const [hours, minutes] = preferred.time.split(':');
-          const hour12 = parseInt(hours) % 12 || 12;
-          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-          const formattedDate = date.toLocaleDateString('en-US', { 
-            month: 'numeric', 
-            day: 'numeric', 
-            year: 'numeric' 
-          });
-          return `${formattedDate} at ${hour12}:${minutes} ${ampm}`;
-        } catch {
-          // Fall through to date only
-        }
-      }
-      
-      if (preferred.date) {
-        try {
-          const date = new Date(preferred.date);
-          return date.toLocaleDateString('en-US', { 
-            month: 'numeric', 
-            day: 'numeric', 
-            year: 'numeric' 
-          });
-        } catch {
-          // Fall through to original text or formatted datetime
-        }
-      }
-      
-      // Show original date text as fallback
-      if (incident.originalEventDateText) {
-        return incident.originalEventDateText;
-      }
+      const occ = deriveIncidentOccurrence(incident);
+      return formatPrimaryChip(occ);
     }
     
     return effectiveDateTime ? formatHeader(effectiveDateTime) : 'No date';
@@ -206,20 +173,11 @@ export const ViewIncidentModal = ({
       return selectedDateTime.toTimeString().slice(0, 5);
     }
     
-    // Use preferred time from timeline
+    // Use centralized time display logic that matches incident cards
     if (incident && !isEditMode) {
-      const preferred = getPreferredDateTime(incident);
-      
-      if (preferred.time) {
-        try {
-          const [hours, minutes] = preferred.time.split(':');
-          const hour12 = parseInt(hours) % 12 || 12;
-          const ampm = parseInt(hours) >= 12 ? 'PM' : 'AM';
-          return `${hour12}:${minutes} ${ampm}`;
-        } catch {
-          // Fall through to effective datetime
-        }
-      }
+      const occ = deriveIncidentOccurrence(incident);
+      const timeChip = formatTimeChip(occ);
+      return timeChip || 'No time';
     }
     
     return effectiveDateTime ? formatTimeOnly(effectiveDateTime) : 'No time';
