@@ -426,25 +426,19 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         {/* Header */}
         <div className="flex items-center justify-between border-b px-6 py-4">
           <h1 className="text-lg font-semibold">Incident Details</h1>
-           <div className="flex items-center gap-2">
-             {isEditMode ? (
-               <>
-                 <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">
-                   {isSaving ? 'Saving...' : 'Save'}
-                 </Button>
-               </>
-             ) : (
-               <>
-                 <Button variant="outline" onClick={handleEditClick}>
-                   Edit
-                 </Button>
-               </>
-             )}
-             <Button variant="ghost" size="sm" onClick={handleClose} className="h-8 w-8 p-0 rounded-full">
-               <X className="h-4 w-4" />
-               <span className="sr-only">Close</span>
-             </Button>
-           </div>
+            <div className="flex items-center gap-2">
+              {isEditMode ? (
+                <>
+                  <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">
+                    {isSaving ? 'Saving...' : 'Save'}
+                  </Button>
+                </>
+              ) : null}
+              <Button variant="ghost" size="sm" onClick={handleClose} className="h-8 w-8 p-0 rounded-full">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </div>
         </div>
 
         {/* Scrollable Content */}

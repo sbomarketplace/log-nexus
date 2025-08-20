@@ -461,20 +461,7 @@ export const ViewIncidentModal = ({
               Incident Details
             </h2>
             <div className="flex items-center gap-2">
-              {!isEditMode && (
-                isOwner && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleEditClick}
-                    className="h-8 px-3 hover:underline focus:ring-2 focus:ring-offset-2"
-                    aria-label="Edit incident"
-                  >
-                    <Edit3 className="h-4 w-4 mr-1" />
-                    Edit
-                  </Button>
-                )
-              )}
+              {/* Edit button removed */}
               <Button
                 variant="ghost"
                 size="sm"
