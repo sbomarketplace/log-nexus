@@ -248,6 +248,14 @@ All colors MUST be HSL.
   }
   .animate-shake { animation: shake 320ms ease-in-out; }
 
+  /* Chip micro-tuning for smallest phones */
+  @media (max-width: 380px) {
+    .chip-xs { 
+      font-size: 10px; 
+      padding: 2px 6px; 
+    }
+  }
+
   /* Prevent iOS zoom on date/time inputs */
   .cc-field-label + input[type="date"],
   .cc-field-label + input[type="time"],
