@@ -24,7 +24,7 @@ export async function processIncident(
   incident: OrganizedIncident, 
   options: ProcessIncidentOptions = {}
 ): Promise<ProcessedIncident> {
-  const { authorPerspective = 'first_person', rawNotes, improveGrammar = true } = options;
+  const { authorPerspective = 'first_person', rawNotes, improveGrammar = false } = options;
   
   // Apply prefill data from notes first
   let processedIncident = { ...incident };
@@ -37,9 +37,9 @@ export async function processIncident(
     processedIncident = { ...processedIncident, ...prefillData };
   }
   
-  // Improve grammar for text fields if enabled
+  // Improve grammar for text fields if enabled (only process critical field for speed)
   if (improveGrammar) {
-    const fieldsToImprove = ['notes', 'what', 'who', 'where', 'when', 'witnesses'] as (keyof OrganizedIncident)[];
+    const fieldsToImprove = ['notes'] as (keyof OrganizedIncident)[];
     processedIncident = await improveGrammarForFields(processedIncident, fieldsToImprove);
   }
   

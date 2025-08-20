@@ -197,11 +197,11 @@ const Home = () => {
             updatedAt: new Date().toISOString()
           };
           
-          // Process incident for enhanced features including grammar improvement
+          // Process incident for enhanced features (fast parsing)
           return await processIncident(baseIncident, {
             authorPerspective: 'first_person',
             rawNotes: quickNotes,
-            improveGrammar: true
+            improveGrammar: false
           });
         }));
         

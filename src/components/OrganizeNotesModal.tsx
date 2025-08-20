@@ -126,11 +126,11 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         updatedAt: new Date().toISOString()
       };
       
-      // Save to the same storage system that home page uses with grammar improvement
+      // Save to the same storage system that home page uses (fast parsing)
       const processedIncident = await processIncident(organizedIncident, {
         authorPerspective: 'first_person',
         rawNotes: rawNotes,
-        improveGrammar: true
+        improveGrammar: false
       });
       
       organizedIncidentStorage.save(processedIncident);
@@ -179,7 +179,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
         return await processIncident(organizedIncident, {
           authorPerspective: 'first_person',
           rawNotes: rawNotes,
-          improveGrammar: true
+          improveGrammar: false
         });
       }));
       
