@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
-// EditIncidentModal import removed - old Edit behavior disabled
+import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
@@ -592,117 +592,16 @@ const Home = () => {
             </Card>
           ) : (
             filteredIncidents.map((incident) => (
-                <Card key={incident.id} className="border rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                  <CardContent className="p-3">
-                    <div className="space-y-2">
-                       {/* Created timestamp and category badges in responsive header row */}
-                       <div className="flex flex-col gap-1 mb-2">
-                         <div className="flex flex-wrap items-center gap-2">
-                           <Badge 
-                             variant="secondary" 
-                             className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-muted text-muted-foreground border rounded-full"
-                           >
-                             {(() => {
-                               const occ = deriveIncidentOccurrence(incident);
-                               return formatPrimaryChip(occ);
-                             })()}
-                           </Badge>
-                           {(() => {
-                             const occ = deriveIncidentOccurrence(incident);
-                             const timeChip = formatTimeChip(occ);
-                             return timeChip && (
-                               <Badge 
-                                 variant="outline" 
-                                 className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center rounded-full"
-                               >
-                                 {timeChip}
-                               </Badge>
-                             );
-                            })()}
-                            {(() => {
-                              const occ = deriveIncidentOccurrence(incident);
-                              return hasTimeOnly(occ) && (
-                                <Badge 
-                                  variant="secondary" 
-                                  className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
-                                >
-                                  Time only
-                                </Badge>
-                              );
-                            })()}
-                            {incident.caseNumber && (
-                              <Badge 
-                                variant="outline" 
-                                className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center border rounded-full"
-                              >
-                                Case #: {incident.caseNumber}
-                              </Badge>
-                            )}
-                            <div className={`${getCategoryTagClass(incident.categoryOrIssue)} text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0`}
-                                style={{ fontSize: 'clamp(10px, 1.6vw, 11px)' }}>
-                             {incident.categoryOrIssue}
-                           </div>
-                         </div>
-                       </div>
-
-                       {/* Title/Description - compact and clean, with phone number support */}
-                       <div className="min-h-[2.5rem]">
-                         <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
-                           <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
-                         </h3>
-                       </div>
-
-                       {/* Secondary metadata line */}
-                       <div className="text-[10px] text-muted-foreground">
-                         {(() => {
-                           const occ = deriveIncidentOccurrence(incident);
-                           return occ.type === "occurrence" 
-                             ? formatSecondaryCreated(incident.createdAt) 
-                             : formatRelativeUpdate(incident.updatedAt);
-                         })()}
-                       </div>
-
-                       {/* Compact action bar */}
-                       <div className="flex gap-1.5 pt-1">
-                         <Button 
-                           variant="outline" 
-                           size="sm" 
-                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                           onClick={() => handleViewIncident(incident)}
-                         >
-                           View
-                         </Button>
-                          <Button 
-                            variant="outline" 
-                            size="sm" 
-                            className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                            onClick={(e) => e.preventDefault()}
-                            aria-disabled="true"
-                            disabled
-                          >
-                            Edit
-                          </Button>
-                         <Button 
-                           variant="outline" 
-                           size="sm" 
-                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                           onClick={() => handleExport(incident)}
-                         >
-                          Export
-                        </Button>
-                        <Button 
-                          variant="destructive" 
-                          size="sm" 
-                          className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                          onClick={() => setDeleteId(incident.id)}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
+              <IncidentCard
+                key={incident.id}
+                incident={incident}
+                onView={() => handleViewIncident(incident)}
+                onExport={() => handleExport(incident)}
+                onDelete={() => setDeleteId(incident.id)}
+                onUpdate={loadIncidents}
+                getCategoryTagClass={getCategoryTagClass}
+              />
+            ))
           )}
         </div>
 
