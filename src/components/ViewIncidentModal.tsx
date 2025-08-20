@@ -105,11 +105,10 @@ export const ViewIncidentModal = ({
           setSelectedDateTime(now);
         }
       } else {
-        // Initialize with current date/time if no existing data
-        const now = new Date();
-        setSelectedDateTime(now);
-        setDateInput(toDateInputValue(now.toISOString()));
-        setTimeInput(toTimeInputValue(now.toTimeString().slice(0, 5)));
+        // Leave fields empty if no existing data - don't auto-populate with current date/time
+        setSelectedDateTime(null);
+        setDateInput('');
+        setTimeInput('');
       }
       
       setCaseNumber(incident.caseNumber || '');
