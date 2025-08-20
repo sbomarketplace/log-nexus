@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
-import { EditIncidentModal } from '@/components/EditIncidentModal';
+// EditIncidentModal import removed - old Edit behavior disabled
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 
@@ -367,9 +367,10 @@ const Home = () => {
     setSearchParams({ incidentId: incident.id });
   };
 
-  const handleEditIncident = (incident: OrganizedIncident) => {
-    setSearchParams({ incidentId: incident.id, mode: 'edit' });
-  };
+  // handleEditIncident removed - old Edit behavior disabled
+  // const handleEditIncident = (incident: OrganizedIncident) => {
+  //   setSearchParams({ incidentId: incident.id, mode: 'edit' });
+  // };
 
   const handleCloseIncidentModal = () => {
     setSearchParams({});
@@ -671,14 +672,16 @@ const Home = () => {
                          >
                            View
                          </Button>
-                         <Button 
-                           variant="outline" 
-                           size="sm" 
-                           className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                           onClick={() => handleEditIncident(incident)}
-                         >
-                           Edit
-                         </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="text-[10px] px-2.5 py-1 h-7 flex-1"
+                            onClick={(e) => e.preventDefault()}
+                            aria-disabled="true"
+                            disabled
+                          >
+                            Edit
+                          </Button>
                          <Button 
                            variant="outline" 
                            size="sm" 
@@ -713,15 +716,15 @@ const Home = () => {
           />
         )}
 
-        {/* Edit Modal */}
-        {incidentId && mode === 'edit' && (
+        {/* Edit Modal - disabled, old Edit behavior removed */}
+        {/* {incidentId && mode === 'edit' && (
           <EditIncidentModal 
             incident={organizedIncidents.find(i => i.id === incidentId) || null}
             open={!!incidentId && mode === 'edit'}
             onOpenChange={(open) => !open && handleCloseIncidentModal()}
             onSaveAndView={handleSaveAndView}
           />
-        )}
+        )} */}
 
         {/* Legacy Incident Modal for backwards compatibility */}
         <IncidentModal 
