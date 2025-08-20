@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { CalendarIcon, ClockIcon, Hash, Pencil, FileDown, Trash2 } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { CalendarIcon, ClockIcon, Hash, Eye, Pencil, Download, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
@@ -46,6 +47,7 @@ export const IncidentCard = ({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(buildDraft(incident));
   const [saving, setSaving] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
   const dirty = isDirty(incident, draft);
@@ -247,239 +249,296 @@ export const IncidentCard = ({
   console.log('Chips debug:', { dateChip, timeChip, hasTime });
 
   return (
-    <Card className="rounded-2xl border bg-card shadow-sm">
-      <CardContent className="p-4 md:p-5">
-        <article>
-          {/* Row 1: chips + category */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            {/* Date Chip */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-              <CalendarIcon className="h-4 w-4" aria-hidden />
+    <Collapsible open={!collapsed} onOpenChange={(open) => setCollapsed(!open)}>
+      <Card className="rounded-xl border bg-card shadow-md hover:shadow-lg transition-shadow duration-200">
+        <CardContent className="p-0">
+          <div className="p-4">
+            {/* Header Row - always visible */}
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex flex-wrap items-center gap-2 flex-1">
+                {/* Date Chip */}
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium">
+                  <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                  {editing ? (
+                    <Input
+                      ref={firstInputRef}
+                      type="date"
+                      value={draft.datePart || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
+                      className="bg-card border-0 p-0 text-xs h-auto w-28 font-medium"
+                      aria-label="Incident date"
+                    />
+                  ) : (
+                    <span>{dateChip}</span>
+                  )}
+                </div>
+
+                {/* Time Chip */}
+                {(hasTime || editing) && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium">
+                    <ClockIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                    {editing ? (
+                      <Input
+                        type="time"
+                        value={draft.timePart || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
+                        className="bg-card border-0 p-0 text-xs h-auto w-20 font-medium"
+                        aria-label="Incident time"
+                      />
+                    ) : (
+                      <span>{timeChip}</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Time Only Badge */}
+                {!editing && hasTimeOnly(occ) && (
+                  <Badge className="bg-orange-100 text-orange-800 hover:bg-orange-100 text-xs px-2 py-0.5 font-medium rounded-full border-0">
+                    Time Only
+                  </Badge>
+                )}
+
+                {/* Case Number Chip */}
+                {(caseText || editing) && (
+                  <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-medium">
+                    <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    {editing ? (
+                      <Input
+                        type="text"
+                        value={draft.caseNumber || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
+                        placeholder="Case #"
+                        className="bg-card border-0 p-0 text-xs h-auto w-24 font-medium"
+                        aria-label="Case number"
+                      />
+                    ) : (
+                      <span>{caseText}</span>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Category Pill and Collapse Toggle */}
+              <div className="flex items-center gap-2 ml-2">
+                <div className={cn(
+                  getCategoryTagClass(incident.categoryOrIssue),
+                  "text-white text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"
+                )}>
+                  {incident.categoryOrIssue}
+                </div>
+                
+                {/* Collapse Toggle Button */}
+                <CollapsibleTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0 hover:bg-muted"
+                    aria-label={collapsed ? "Expand incident" : "Collapse incident"}
+                  >
+                    {collapsed ? (
+                      <ChevronDown className="h-4 w-4" />
+                    ) : (
+                      <ChevronUp className="h-4 w-4" />
+                    )}
+                  </Button>
+                </CollapsibleTrigger>
+              </div>
+            </div>
+
+            {/* Summary text - visible when collapsed */}
+            {collapsed && !editing && (
+              <div className="mb-3">
+                <p className="text-sm text-foreground line-clamp-2 leading-snug">
+                  <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Collapsible Content */}
+          <CollapsibleContent>
+            <div className="px-4 pb-4">
+              {/* Main Content Area */}
               {editing ? (
-                <Input
-                  ref={firstInputRef}
-                  type="date"
-                  value={draft.datePart || ""}
-                  onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
-                  className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-28"
-                  aria-label="Incident date"
-                />
+                <div className="space-y-4">
+                  {/* What Happened Textarea */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">What happened</label>
+                    <Textarea
+                      value={draft.what || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
+                      rows={8}
+                      className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none"
+                      placeholder="Describe what happened…"
+                    />
+                  </div>
+                  
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Who</label>
+                      <Input
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2"
+                        placeholder="People involved (comma-separated)"
+                        value={draft.who || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Where</label>
+                      <Input
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2"
+                        placeholder="Location"
+                        value={draft.where || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Additional Details */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Witnesses</label>
+                      <Textarea
+                        rows={2}
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none"
+                        placeholder="Witnesses present"
+                        value={draft.witnesses || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Important Quotes</label>
+                      <Textarea
+                        rows={2}
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none"
+                        placeholder="Key quotes or statements"
+                        value={draft.quotes || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Requests/Responses</label>
+                      <Textarea
+                        rows={2}
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none"
+                        placeholder="Requests made and responses received"
+                        value={draft.requests || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-semibold text-foreground">Notes</label>
+                      <Textarea
+                        rows={10}
+                        className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none"
+                        placeholder="Additional notes and details"
+                        value={draft.notes || ""}
+                        onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <span>{dateChip}</span>
+                <div className="space-y-4">
+                  {/* Summary Text */}
+                  <div>
+                    <h3 className="text-sm font-medium leading-relaxed text-foreground">
+                      <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
+                    </h3>
+                  </div>
+
+                  {/* Meta Information */}
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <div>
+                      {(() => {
+                        return occ.type === "occurrence" 
+                          ? formatSecondaryCreated(incident.createdAt) 
+                          : formatRelativeUpdate(incident.updatedAt);
+                      })()}
+                    </div>
+                    {Boolean(incident.files?.length) && (
+                      <div>Attachments: {incident.files.length}</div>
+                    )}
+                  </div>
+                </div>
               )}
-            </div>
 
-            {/* Time Chip */}
-            {(hasTime || editing) && (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-                <ClockIcon className="h-4 w-4" aria-hidden />
+              {/* Action Buttons */}
+              <div className="mt-6 pt-4 border-t border-border">
                 {editing ? (
-                  <Input
-                    type="time"
-                    value={draft.timePart || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
-                    className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-20"
-                    aria-label="Incident time"
-                  />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        size="sm"
+                        disabled={!dirty || saving}
+                        onClick={saveFromCard}
+                        className="px-4 py-2 font-medium"
+                      >
+                        {saving ? "Saving…" : "Save"}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={handleCancel}
+                        className="px-4 py-2 font-medium"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                    <span className="text-xs text-muted-foreground hidden sm:inline">
+                      Esc to cancel
+                    </span>
+                  </div>
                 ) : (
-                  <span>{timeChip}</span>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="default" 
+                      size="sm" 
+                      className="flex-1 font-medium"
+                      onClick={onView}
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 font-medium"
+                      onClick={handleEditClick}
+                    >
+                      <Pencil className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="flex-1 font-medium"
+                      onClick={onExport}
+                    >
+                      <Download className="h-4 w-4 mr-1" />
+                      Export
+                    </Button>
+                    <Button 
+                      variant="destructive" 
+                      size="sm" 
+                      className="flex-1 font-medium"
+                      onClick={onDelete}
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
                 )}
               </div>
-            )}
-
-            {/* Time Only Badge */}
-            {!editing && hasTimeOnly(occ) && (
-              <Badge 
-                variant="secondary" 
-                className="text-xs px-2 py-1 font-medium shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full"
-              >
-                Time only
-              </Badge>
-            )}
-
-            {/* Case Chip */}
-            {(caseText || editing) && (
-              <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs md:text-sm">
-                <Hash className="h-4 w-4" aria-hidden />
-                {editing ? (
-                  <Input
-                    type="text"
-                    value={draft.caseNumber || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
-                    placeholder="Case"
-                    className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-28"
-                    aria-label="Case number"
-                  />
-                ) : (
-                  <span>{caseText}</span>
-                )}
-              </div>
-            )}
-
-            {/* Category Pill */}
-            <div className={cn(
-              getCategoryTagClass(incident.categoryOrIssue),
-              "text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0 ml-auto"
-            )}>
-              {incident.categoryOrIssue}
             </div>
-          </div>
-
-          {/* Row 2: summary and incident details */}
-          {editing ? (
-            <>
-              <Textarea
-                value={draft.what || ""}
-                onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
-                rows={8}
-                className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
-                placeholder="What happened…"
-              />
-              
-              {/* Incident Details Section */}
-              <div className="grid gap-3 mb-3">
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Who</div>
-                  <Input
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="Comma-separated (e.g., Mark, Troy)"
-                    value={draft.who || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Where</div>
-                  <Input
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="e.g., Common area at work"
-                    value={draft.where || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Witnesses</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder="Comma or line-separated"
-                    value={draft.witnesses || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Important Quotes</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    placeholder='- Mark: "even the elephant hide?"'
-                    value={draft.quotes || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Requests / Responses</div>
-                  <Textarea
-                    rows={2}
-                    className="w-full rounded-xl border px-3 py-2"
-                    value={draft.requests || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <div className="text-sm font-semibold">Notes</div>
-                  <Textarea
-                    rows={10}
-                    className="w-full rounded-xl border px-3 py-2"
-                    value={draft.notes || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
-                  />
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="min-h-[2.5rem] mb-3">
-              <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
-                <span dangerouslySetInnerHTML={{ __html: makePhoneNumbersClickable(incident.what) }} />
-              </h3>
-            </div>
-          )}
-
-          {/* Row 3: meta */}
-          <div className="text-[10px] text-muted-foreground mb-2">
-            {(() => {
-              return occ.type === "occurrence" 
-                ? formatSecondaryCreated(incident.createdAt) 
-                : formatRelativeUpdate(incident.updatedAt);
-            })()}
-            {Boolean(incident.files?.length) && (
-              <span> • {incident.files.length} attachment{incident.files.length > 1 ? 's' : ''}</span>
-            )}
-          </div>
-
-          {/* Row 4: actions */}
-          {editing ? (
-            <div className="flex items-center gap-2">
-              <Button 
-                size="sm"
-                disabled={!dirty || saving}
-                onClick={saveFromCard}
-                className="text-[10px] px-2.5 py-1 h-7"
-              >
-                {saving ? "Saving…" : "Save"}
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={handleCancel}
-                className="text-[10px] px-2.5 py-1 h-7"
-              >
-                Cancel
-              </Button>
-              <span className="ml-2 text-xs text-muted-foreground hidden sm:inline">Esc to cancel</span>
-            </div>
-          ) : (
-            <div className="flex gap-1.5">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onView}
-              >
-                View
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={handleEditClick}
-              >
-                Edit
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onExport}
-              >
-                Export
-              </Button>
-              <Button 
-                variant="destructive" 
-                size="sm" 
-                className="text-[10px] px-2.5 py-1 h-7 flex-1"
-                onClick={onDelete}
-              >
-                Delete
-              </Button>
-            </div>
-          )}
-        </article>
-      </CardContent>
-    </Card>
+          </CollapsibleContent>
+        </CardContent>
+      </Card>
+    </Collapsible>
   );
 };
