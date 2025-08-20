@@ -331,7 +331,7 @@ export const IncidentCard = ({
               <Textarea
                 value={draft.what || ""}
                 onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
-                rows={5}
+                rows={8}
                 className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
                 placeholder="What happened…"
               />
@@ -393,7 +393,7 @@ export const IncidentCard = ({
                 <div className="space-y-1.5">
                   <div className="text-sm font-semibold">Notes</div>
                   <Textarea
-                    rows={6}
+                    rows={10}
                     className="w-full rounded-xl border px-3 py-2"
                     value={draft.notes || ""}
                     onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
