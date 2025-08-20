@@ -133,6 +133,8 @@ export const IncidentCard = ({
   const saveFromCard = async () => {
     try {
       setSaving(true);
+      console.log('Save attempt - draft:', draft);
+      console.log('Save attempt - incident before:', incident);
 
       // Build payload per rules
       const payload: any = {
@@ -153,6 +155,7 @@ export const IncidentCard = ({
 
       const hasDate = Boolean(draft.datePart);
       const hasTime = Boolean(draft.timePart);
+      console.log('Date/time processing:', { hasDate, hasTime, datePart: draft.datePart, timePart: draft.timePart });
 
       if (hasDate && hasTime) {
         // Combine local date+time -> UTC ISO
@@ -160,22 +163,29 @@ export const IncidentCard = ({
         payload.dateTime = local.toISOString();
         payload.datePart = null;
         payload.timePart = null;
+        console.log('Combined date+time:', { local: local.toString(), utc: payload.dateTime });
       } else if (hasDate) {
         payload.datePart = draft.datePart;
         payload.timePart = null;
         payload.dateTime = null;
+        console.log('Date only:', payload.datePart);
       } else if (hasTime) {
         payload.timePart = draft.timePart;
         payload.datePart = null;
         payload.dateTime = null;
+        console.log('Time only:', payload.timePart);
       } else {
         payload.dateTime = null;
         payload.datePart = null;
         payload.timePart = null;
+        console.log('No date/time');
       }
+
+      console.log('Final payload:', payload);
 
       // Update the incident
       const updatedIncident = { ...incident, ...payload };
+      console.log('Updated incident:', updatedIncident);
       organizedIncidentStorage.save(updatedIncident);
 
       // Exit edit mode
@@ -227,11 +237,14 @@ export const IncidentCard = ({
   }, [editing, dirty, saving]);
 
   // Derived display values
+  console.log('IncidentCard debug:', { incident, draft, editing });
   const occ = deriveIncidentOccurrence(incident);
+  console.log('Occurrence debug:', occ);
   const dateChip = formatPrimaryChip(occ);
   const timeChip = formatTimeChip(occ);
   const hasTime = Boolean(timeChip);
   const caseText = incident.caseNumber ? `Case ${incident.caseNumber}` : null;
+  console.log('Chips debug:', { dateChip, timeChip, hasTime });
 
   return (
     <Card className="rounded-2xl border bg-card shadow-sm">
