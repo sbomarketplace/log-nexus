@@ -26,6 +26,7 @@ import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { getDateSafely, hasValidDate } from '@/utils/safeDate';
 import { getPreferredDateTime } from '@/utils/timelineParser';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
+import { cn } from '@/lib/utils';
 
 import jsPDF from 'jspdf';
 
@@ -40,7 +41,9 @@ const Home = () => {
   const [pinnedIncidents, setPinnedIncidents] = useState<Set<string>>(new Set());
   // Quick notes state
   const [quickNotes, setQuickNotes] = useState('');
+  const [quickNotesTitle, setQuickNotesTitle] = useState('');
   const [quickNotesError, setQuickNotesError] = useState('');
+  const [titleError, setTitleError] = useState('');
   const MAX_CHARS = 10000;
   const WARN_THRESHOLD = 8000;
   const [limitReached, setLimitReached] = useState(false);
@@ -120,8 +123,12 @@ const Home = () => {
     loadIncidents();
     // Restore quick notes draft from localStorage
     const saved = localStorage.getItem('quickNotesDraft');
+    const savedTitle = localStorage.getItem('quickNotesTitleDraft');
     if (saved) {
       setQuickNotes(saved);
+    }
+    if (savedTitle) {
+      setQuickNotesTitle(savedTitle);
     }
   }, []);
 
@@ -133,10 +140,16 @@ const Home = () => {
       } else {
         localStorage.removeItem('quickNotesDraft');
       }
+      
+      if (quickNotesTitle.trim()) {
+        localStorage.setItem('quickNotesTitleDraft', quickNotesTitle);
+      } else {
+        localStorage.removeItem('quickNotesTitleDraft');
+      }
     }, 500);
 
     return () => clearTimeout(timeoutId);
-  }, [quickNotes]);
+  }, [quickNotes, quickNotesTitle]);
 
   // Auto-grow textarea up to max height
   const quickNotesRef = useRef<HTMLTextAreaElement | null>(null);
@@ -172,6 +185,29 @@ const Home = () => {
 
   const handleQuickNotesOrganize = async () => {
     setQuickNotesError('');
+    setTitleError('');
+    
+    // Validate title
+    const trimmedTitle = quickNotesTitle.trim();
+    if (!trimmedTitle) {
+      setTitleError('Title is required');
+      toast({
+        title: "Add a title",
+        description: "A title is required before you can organize notes.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (trimmedTitle.length > 80) {
+      setTitleError('Title must be 80 characters or fewer');
+      toast({
+        title: "Title too long",
+        description: "Keep it under 80 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     if (!quickNotes.trim()) {
       setQuickNotesError('Please enter notes to organize.');
@@ -188,6 +224,7 @@ const Home = () => {
         const incidentsToSave = await Promise.all(results.map(async incident => {
           const baseIncident: OrganizedIncident = {
             id: crypto.randomUUID(),
+            title: trimmedTitle, // Use the provided title
             date: getDateSafely(incident, ''),
             categoryOrIssue: incident.categoryOrIssue,
             who: incident.who,
@@ -212,9 +249,11 @@ const Home = () => {
         
         // Clear the textarea and draft
         setQuickNotes('');
+        setQuickNotesTitle('');
         setLimitReached(false);
         setLimitAnnounce('');
         localStorage.removeItem('quickNotesDraft');
+        localStorage.removeItem('quickNotesTitleDraft');
         loadIncidents();
         
         // Success toast is already shown by organizer.ts
@@ -399,9 +438,48 @@ const Home = () => {
                   Use ClearCase to document workplace incidents, protect your rights, and stay organized.
                 </p>
 
-                <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-2">
+                <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-3">
                   Include Who, What, When, Where, Why, and How for best results.
                 </p>
+
+                {/* Title Input */}
+                <div className="mb-3">
+                  <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
+                    <label htmlFor="quick-title-input" className="text-xs font-medium text-foreground block">
+                      Title <span className="text-red-600">*</span>
+                    </label>
+                    <span className="text-xs text-muted-foreground">
+                      {80 - quickNotesTitle.length} characters left
+                    </span>
+                  </div>
+                  <Input
+                    id="quick-title-input"
+                    type="text"
+                    value={quickNotesTitle}
+                    onChange={(e) => {
+                      const value = e.target.value.slice(0, 80);
+                      setQuickNotesTitle(value);
+                      if (titleError) {
+                        setTitleError('');
+                      }
+                    }}
+                    onBlur={() => setQuickNotesTitle(prev => prev.trim())}
+                    required
+                    maxLength={80}
+                    placeholder="Short, clear title (max 80)"
+                    className={cn(
+                      "rounded-2xl shadow-sm border border-border",
+                      titleError ? "border-red-500 animate-shake" : ""
+                    )}
+                    aria-invalid={Boolean(titleError)}
+                    aria-describedby={titleError ? "title-error" : undefined}
+                  />
+                  {titleError && (
+                    <div id="title-error" className="mt-1 text-xs text-red-600">
+                      {titleError}
+                    </div>
+                  )}
+                </div>
 
                 <div className="mb-2">
                   <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
