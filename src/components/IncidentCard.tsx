@@ -319,7 +319,7 @@ export const IncidentCard = ({
             {/* Category Pill */}
             <div className={cn(
               getCategoryTagClass(incident.categoryOrIssue),
-              "text-white text-xs font-medium h-6 px-2 rounded-full flex items-center justify-center break-words min-w-0 ml-auto"
+              "text-white text-[10px] font-medium h-5 px-1.5 rounded-full flex items-center justify-center break-words min-w-0 ml-auto"
             )}>
               {incident.categoryOrIssue}
             </div>
