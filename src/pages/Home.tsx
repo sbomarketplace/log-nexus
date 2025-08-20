@@ -18,6 +18,8 @@ import { IncidentModal } from '@/components/IncidentModal';
 import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
+import { IncidentListControls } from '@/components/IncidentListControls';
+import { BulkBarMobile } from '@/components/BulkBarMobile';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
@@ -661,40 +663,50 @@ const Home = () => {
                 </p>
               </CardContent>
             </Card>
-          ) : filteredIncidents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="text-sm font-medium mb-1">No incidents found</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Try adjusting your search terms or filters.
-                </p>
-              </CardContent>
-            </Card>
           ) : (
-            filteredIncidents.map((incident) => (
-              <IncidentCard
-                key={incident.id}
-                incident={incident}
-                onView={() => handleViewIncident(incident)}
-                onExport={() => handleExport(incident)}
-                onDelete={() => setDeleteId(incident.id)}
-                onUpdate={loadIncidents}
-                getCategoryTagClass={getCategoryTagClass}
-                isPinned={pinnedIncidents.has(incident.id)}
-                onTogglePin={() => {
-                  const newPinned = new Set(pinnedIncidents);
-                  if (newPinned.has(incident.id)) {
-                    newPinned.delete(incident.id);
-                  } else {
-                    newPinned.add(incident.id);
-                  }
-                  setPinnedIncidents(newPinned);
-                }}
-              />
-            ))
+            <>
+              <IncidentListControls visibleIds={filteredIncidents.map(i => i.id)} />
+              
+              {filteredIncidents.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
+                    <h3 className="text-sm font-medium mb-1">No incidents found</h3>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Try adjusting your search terms or filters.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                filteredIncidents.map((incident, index) => (
+                  <IncidentCard
+                    key={incident.id}
+                    incident={incident}
+                    index={index}
+                    pageIds={filteredIncidents.map(i => i.id)}
+                    onView={() => handleViewIncident(incident)}
+                    onExport={() => handleExport(incident)}
+                    onDelete={() => setDeleteId(incident.id)}
+                    onUpdate={loadIncidents}
+                    getCategoryTagClass={getCategoryTagClass}
+                    isPinned={pinnedIncidents.has(incident.id)}
+                    onTogglePin={() => {
+                      const newPinned = new Set(pinnedIncidents);
+                      if (newPinned.has(incident.id)) {
+                        newPinned.delete(incident.id);
+                      } else {
+                        newPinned.add(incident.id);
+                      }
+                      setPinnedIncidents(newPinned);
+                    }}
+                  />
+                ))
+              )}
+            </>
           )}
         </div>
+        
+        <BulkBarMobile />
 
         {/* Unified Incident Modal - View Mode */}
         {incidentId && mode !== 'edit' && (

@@ -4,12 +4,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CalendarIcon, ClockIcon, Hash, Pin, FileDown, Trash2 } from 'lucide-react';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { showSuccessToast, showErrorToast } from '@/lib/showToast';
+import { useSelection } from "@/state/selection";
 import { cn } from '@/lib/utils';
 
 // Ultra-compact chip component for mobile
@@ -55,6 +57,8 @@ interface IncidentCardProps {
   getCategoryTagClass: (category: string) => string;
   isPinned?: boolean;
   onTogglePin?: () => void;
+  index?: number;
+  pageIds?: string[];
 }
 
 export const IncidentCard = ({ 
@@ -65,12 +69,16 @@ export const IncidentCard = ({
   onUpdate, 
   getCategoryTagClass,
   isPinned = false,
-  onTogglePin 
+  onTogglePin,
+  index,
+  pageIds = []
 }: IncidentCardProps) => {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState<Draft>(buildDraft(incident));
   const [saving, setSaving] = useState(false);
   const firstInputRef = useRef<HTMLInputElement>(null);
+  const { isSelected, toggle } = useSelection();
+  const checked = isSelected(incident.id);
 
   const dirty = isDirty(incident, draft);
 
@@ -293,14 +301,28 @@ export const IncidentCard = ({
       <AccordionItem 
         value={incident.id} 
         data-pinned={isPinned}
-        className="
-          rounded-2xl border border-black/10 bg-card shadow-sm
-          ring-1 ring-black/5 overflow-hidden
-          data-[state=open]:shadow-md hover:shadow-md transition-shadow
-        "
+        data-selected={checked}
+        className={cn(
+          "rounded-2xl border border-black/10 bg-card shadow-sm",
+          "ring-1 ring-black/5 overflow-hidden",
+          "data-[state=open]:shadow-md hover:shadow-md transition-shadow",
+          checked && "ring-2 ring-primary/50"
+        )}
       >
         <AccordionTrigger className="px-3 py-2 sm:px-4 sm:py-3 hover:no-underline">
-          <div className="w-full min-w-0 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+          <div className="w-full min-w-0 flex items-start gap-2">
+            <Checkbox
+              checked={checked}
+              onCheckedChange={(checked) => {
+                const event = window.event as MouseEvent;
+                toggle(incident.id, index, event?.shiftKey, pageIds);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              aria-label={`Select incident ${incident.title || getDisplayTitle()}`}
+              className="mt-0.5 flex-shrink-0"
+            />
+            
+            <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
             {/* Title - editable in edit mode, 2-line on mobile */}
             {editing ? (
               <Input
@@ -411,6 +433,7 @@ export const IncidentCard = ({
                   <Pin className={cn("h-3.5 w-3.5", isPinned ? "rotate-45" : "")} />
                 </button>
               )}
+            </div>
             </div>
           </div>
         </AccordionTrigger>
