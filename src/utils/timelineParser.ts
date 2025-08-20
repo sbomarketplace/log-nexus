@@ -128,9 +128,15 @@ export function getPreferredDateTime(incident: any): ExtractedDateTime {
   // Prioritize original date text (like "6/8")
   if (incident.originalEventDateText?.trim()) {
     result.date = normalizeDateForInput(incident.originalEventDateText);
+    
+    // Also try to extract time from originalEventDateText if it contains time info
+    const timeFromOriginalText = extractFirstTimeFromTimeline(incident.originalEventDateText);
+    if (timeFromOriginalText) {
+      result.time = normalizeTimeForInput(timeFromOriginalText);
+    }
   }
   
-  // Extract first time from timeline (like "12:23pm")
+  // Extract first time from timeline (like "12:23pm") - this can override originalEventDateText time
   const firstTime = extractFirstTimeFromTimeline(incident.timeline);
   if (firstTime) {
     result.time = normalizeTimeForInput(firstTime);
@@ -140,6 +146,7 @@ export function getPreferredDateTime(incident: any): ExtractedDateTime {
   console.log('getPreferredDateTime debug:', {
     originalEventDateText: incident.originalEventDateText,
     timeline: incident.timeline,
+    timeFromOriginal: incident.originalEventDateText ? extractFirstTimeFromTimeline(incident.originalEventDateText) : null,
     extractedTime: firstTime,
     normalizedTime: result.time,
     result
