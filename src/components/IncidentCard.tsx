@@ -16,7 +16,14 @@ type Draft = {
   timePart?: string | null;    // "HH:mm" 24h
   dateTime?: string | null;    // ISO (UTC)
   caseNumber?: string | null;
-  summary?: string | null;
+  category?: string | null;
+  who?: string;                // comma-separated
+  what?: string | null;        // summary / what
+  where?: string | null;
+  witnesses?: string;          // comma- or line-separated
+  quotes?: string;             // bullets or lines
+  requests?: string;
+  notes?: string;              // raw notes
 };
 
 interface IncidentCardProps {
@@ -51,12 +58,23 @@ export const IncidentCard = ({
   // Helper functions
   function buildDraft(i: OrganizedIncident): Draft {
     // Prefer parts if present, else split dateTime into local for inputs
+    const base: Draft = {
+      caseNumber: i.caseNumber ?? "",
+      category: i.categoryOrIssue ?? "",
+      who: Array.isArray(i.who) ? i.who.join(", ") : (i.who ?? ""),
+      what: i.what ?? "",
+      where: i.where ?? "",
+      witnesses: Array.isArray(i.witnesses) ? i.witnesses.join(", ") : (i.witnesses ?? ""),
+      quotes: Array.isArray(i.quotes) ? i.quotes.map((q: string) => `- ${q}`).join("\n") : (i.quotes ?? ""),
+      requests: i.requests ?? "",
+      notes: i.notes ?? "",
+    };
+
     if (i.datePart || i.timePart) {
       return {
+        ...base,
         datePart: i.datePart ?? null,
         timePart: i.timePart ?? null,
-        caseNumber: i.caseNumber ?? "",
-        summary: i.what ?? "",
         dateTime: null
       };
     }
@@ -68,18 +86,16 @@ export const IncidentCard = ({
       const hh = String(d.getHours()).padStart(2, "0");
       const mm = String(d.getMinutes()).padStart(2, "0");
       return { 
+        ...base,
         datePart: `${y}-${m}-${day}`, 
         timePart: `${hh}:${mm}`, 
-        caseNumber: i.caseNumber ?? "", 
-        summary: i.what ?? "",
         dateTime: null 
       };
     }
     return { 
+      ...base,
       datePart: null, 
       timePart: null, 
-      caseNumber: i.caseNumber ?? "", 
-      summary: i.what ?? "", 
       dateTime: null 
     };
   }
@@ -121,10 +137,19 @@ export const IncidentCard = ({
       // Build payload per rules
       const payload: any = {
         caseNumber: draft.caseNumber?.trim() || null,
-        summary: draft.summary?.trim() ?? null,
-        what: draft.summary?.trim() ?? incident.what, // Update what field as well
+        categoryOrIssue: draft.category || null,
+        what: draft.what?.trim() ?? null,
+        where: draft.where?.trim() ?? null,
+        requests: draft.requests?.trim() ?? null,
+        notes: draft.notes?.trim() ?? null,
         updatedAt: new Date().toISOString()
       };
+
+      // Parse people, witnesses, quotes
+      const split = (s?: string) => (s || "").split(/[\n,]+/).map(t => t.trim()).filter(Boolean);
+      payload.who = split(draft.who);
+      payload.witnesses = split(draft.witnesses);
+      payload.quotes = draft.quotes ? draft.quotes.split(/\n+/).map(l => l.replace(/^-\s*/, "").trim()).filter(Boolean) : [];
 
       const hasDate = Boolean(draft.datePart);
       const hasTime = Boolean(draft.timePart);
@@ -287,15 +312,82 @@ export const IncidentCard = ({
             </div>
           </div>
 
-          {/* Row 2: summary */}
+          {/* Row 2: summary and incident details */}
           {editing ? (
-            <Textarea
-              value={draft.summary || ""}
-              onChange={(e) => setDraft(v => ({ ...v, summary: e.target.value }))}
-              rows={3}
-              className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
-              placeholder="What happened…"
-            />
+            <>
+              <Textarea
+                value={draft.what || ""}
+                onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
+                rows={3}
+                className="w-full mb-3 rounded-xl border px-3 py-2 text-xs"
+                placeholder="What happened…"
+              />
+              
+              {/* Incident Details Section */}
+              <div className="grid gap-3 mb-3">
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Who</div>
+                  <Input
+                    className="w-full rounded-xl border px-3 py-2"
+                    placeholder="Comma-separated (e.g., Mark, Troy)"
+                    value={draft.who || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Where</div>
+                  <Input
+                    className="w-full rounded-xl border px-3 py-2"
+                    placeholder="e.g., Common area at work"
+                    value={draft.where || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Witnesses</div>
+                  <Textarea
+                    rows={2}
+                    className="w-full rounded-xl border px-3 py-2"
+                    placeholder="Comma or line-separated"
+                    value={draft.witnesses || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Important Quotes</div>
+                  <Textarea
+                    rows={2}
+                    className="w-full rounded-xl border px-3 py-2"
+                    placeholder='- Mark: "even the elephant hide?"'
+                    value={draft.quotes || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Requests / Responses</div>
+                  <Textarea
+                    rows={2}
+                    className="w-full rounded-xl border px-3 py-2"
+                    value={draft.requests || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="text-sm font-semibold">Notes</div>
+                  <Textarea
+                    rows={3}
+                    className="w-full rounded-xl border px-3 py-2"
+                    value={draft.notes || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
+                  />
+                </div>
+              </div>
+            </>
           ) : (
             <div className="min-h-[2.5rem] mb-3">
               <h3 className="text-xs font-medium leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
