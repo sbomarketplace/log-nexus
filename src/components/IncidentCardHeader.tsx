@@ -100,19 +100,19 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
+        <Badge variant="outline" className="text-xs font-medium bg-neutral-50 border-neutral-200 text-neutral-700">
           {dateStr}
         </Badge>
         {timeStr && (
-          <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
+          <Badge variant="outline" className="text-xs font-medium bg-neutral-50 border-neutral-200 text-neutral-700">
             {timeStr}
           </Badge>
         )}
-        <Badge variant="secondary" className="text-xs bg-neutral-200 text-neutral-800 font-medium">
+        <Badge variant="secondary" className="text-xs font-medium bg-neutral-200 text-neutral-800">
           {category}
         </Badge>
         {caseNumber && (
-          <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700 inline-flex items-center gap-1">
+          <Badge variant="outline" className="text-xs font-medium bg-neutral-50 border-neutral-200 text-neutral-700 inline-flex items-center gap-1">
             <Hash className="h-3 w-3" aria-hidden />
             <span className="sm:hidden">{caseTxt.mobile}</span>
             <span className="hidden sm:inline">{caseTxt.desktop}</span>
