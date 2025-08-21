@@ -273,32 +273,40 @@ export const IncidentCard = ({
     }
   }, [editing, dirty, saving]);
 
-  // Auto-scroll when accordion opens to ensure full visibility
+  // Auto-scroll when accordion opens or edit mode starts
   useEffect(() => {
-    if (!isAccordionOpen || editing) return;
-    
-    // Wait for layout
-    requestAnimationFrame(() => {
-      const card = cardRef.current;
-      const body = bodyRef.current;
-      if (!card || !body) return;
+    if (editing) {
+      // For edit mode, scroll card to top of viewport
+      requestAnimationFrame(() => {
+        const card = cardRef.current;
+        if (!card) return;
+        
+        const rect = card.getBoundingClientRect();
+        const scrollTop = window.pageYOffset + rect.top - 20; // 20px from top
+        
+        window.scrollTo({ top: scrollTop, behavior: "smooth" });
+      });
+    } else if (isAccordionOpen) {
+      // For expand mode, ensure full content is visible above bottom bar
+      requestAnimationFrame(() => {
+        const card = cardRef.current;
+        const body = bodyRef.current;
+        if (!card || !body) return;
 
-      const barH = Number(getComputedStyle(document.documentElement)
-        .getPropertyValue("--cc-bottom-bar-h")
-        .replace("px", "")) || 72;
+        const barH = Number(getComputedStyle(document.documentElement)
+          .getPropertyValue("--cc-bottom-bar-h")
+          .replace("px", "")) || 72;
 
-      const viewportH = window.innerHeight;
-      const rect = body.getBoundingClientRect();
-      const overflow = rect.bottom - (viewportH - barH - 8); // small pad
-      
-      if (overflow > 0) {
-        // Scroll just enough so the whole dropdown is visible
-        window.scrollBy({ top: overflow, left: 0, behavior: "smooth" });
-      } else {
-        // Ensure top is at least visible when opening near top
-        card.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      }
-    });
+        const viewportH = window.innerHeight;
+        const rect = body.getBoundingClientRect();
+        const overflow = rect.bottom - (viewportH - barH - 16); // 16px buffer
+        
+        if (overflow > 0) {
+          // Scroll just enough so the whole dropdown is visible
+          window.scrollBy({ top: overflow, left: 0, behavior: "smooth" });
+        }
+      });
+    }
   }, [isAccordionOpen, editing]);
 
   // Derived display values
