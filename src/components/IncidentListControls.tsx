@@ -69,7 +69,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
-          className="text-[13px] h-auto py-1 px-2 hover:underline flex-shrink-0"
+          className="text-[12px] h-6 py-0.5 px-1.5 hover:underline flex-shrink-0"
         >
           Clear
         </Button>
@@ -82,7 +82,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkExport}
           disabled={isExporting || isDeleting}
-          className="px-3 py-1.5 text-[13px] h-auto whitespace-nowrap"
+          className="px-2 py-1 text-[12px] h-6 whitespace-nowrap"
         >
           {isExporting ? "Exporting..." : "Export"}
         </Button>
@@ -91,7 +91,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkDelete}
           disabled={isExporting || isDeleting}
-          className="px-3 py-1.5 text-[13px] h-auto whitespace-nowrap"
+          className="px-2 py-1 text-[12px] h-6 whitespace-nowrap"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </Button>
