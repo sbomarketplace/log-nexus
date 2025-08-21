@@ -43,10 +43,10 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const qty = count();
 
   return (
-    <div className="flex items-center justify-between text-[13px] sm:text-sm w-full py-2 px-1 min-w-0">
+    <div className="flex items-center justify-between text-[11px] w-full py-2 px-1 min-w-0">
       {/* Left side: Select all + count + clear */}
-      <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap flex-1 min-w-0">
-        <label className="inline-flex items-center gap-2 flex-shrink-0">
+      <div className="flex items-center gap-1.5 whitespace-nowrap flex-1 min-w-0">
+        <label className="inline-flex items-center gap-1.5 flex-shrink-0">
           <input
             type="checkbox"
             checked={allChecked}
@@ -69,7 +69,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
-          className="text-[12px] h-6 py-0.5 px-1.5 hover:underline flex-shrink-0"
+          className="text-[10px] h-5 py-0.5 px-1 hover:underline flex-shrink-0"
         >
           Clear
         </Button>
@@ -82,7 +82,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkExport}
           disabled={isExporting || isDeleting}
-          className="px-2 py-1 text-[12px] h-6 whitespace-nowrap"
+          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           {isExporting ? "Exporting..." : "Export"}
         </Button>
@@ -91,7 +91,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkDelete}
           disabled={isExporting || isDeleting}
-          className="px-2 py-1 text-[12px] h-6 whitespace-nowrap"
+          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </Button>
