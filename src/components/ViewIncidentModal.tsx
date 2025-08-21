@@ -91,19 +91,18 @@ export const ViewIncidentModal = ({
           setSelectedDateTime(null);
         }
       } else if (preferred.date || preferred.time) {
-        // Use preferred values from original date text and timeline
-        const now = new Date();
-        setDateInput(preferred.date || toDateInputValue(now.toISOString()));
-        setTimeInput(preferred.time || toTimeInputValue(now.toTimeString().slice(0, 5)));
+        // Use preferred values from original date text and timeline - no auto-fill with current date/time
+        setDateInput(preferred.date || '');
+        setTimeInput(preferred.time || '');
         
-        // Create combined date object if we have both
+        // Create combined date object only if we have both date and time
         if (preferred.date && preferred.time) {
           const [hours, minutes] = preferred.time.split(':').map(Number);
           const dateObj = new Date(preferred.date + 'T00:00:00');
           dateObj.setHours(hours, minutes, 0, 0);
           setSelectedDateTime(dateObj);
         } else {
-          setSelectedDateTime(now);
+          setSelectedDateTime(null);
         }
       } else {
         // Leave fields empty if no existing data - don't auto-populate with current date/time
@@ -485,16 +484,18 @@ export const ViewIncidentModal = ({
                 <>
                     {/* Date Field - Native calendar picker */}
                     <div className="flex-1 min-w-0">
-                      <Input
-                        ref={firstEditFieldRef}
-                        id="incident-date"
-                        type="date"
-                        value={dateInput}
-                        onChange={(e) => handleDateInputChange(e.target.value)}
-                        className={`text-base h-9 cc-field-label ${validationErrors.date ? 'border-destructive' : ''}`}
-                        aria-label="Incident date"
-                        style={{ fontSize: '16px' }}
-                      />
+                      <div className="pill-field date">
+                        <Input
+                          ref={firstEditFieldRef}
+                          id="incident-date"
+                          type="date"
+                          value={dateInput}
+                          onChange={(e) => handleDateInputChange(e.target.value)}
+                          className={`min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3 ${validationErrors.date ? 'border-destructive' : ''}`}
+                          aria-label="Incident date"
+                          style={{ fontSize: '16px' }}
+                        />
+                      </div>
                       {dateInput && (
                         <div className="text-muted-foreground mt-1">
                           Selected: {new Date(dateInput).toLocaleDateString()}
@@ -507,16 +508,18 @@ export const ViewIncidentModal = ({
 
                     {/* Time Field - Native time picker */}
                     <div className="flex-1 min-w-0">
-                      <Input
-                        id="incident-time-header"
-                        type="time"
-                        step="60"
-                        value={timeInput}
-                        onChange={(e) => handleTimeInputChange(e.target.value)}
-                        className="text-base h-9 cc-field-label"
-                        aria-label="Incident time"
-                        style={{ fontSize: '16px' }}
-                      />
+                      <div className="pill-field time">
+                        <Input
+                          id="incident-time-header"
+                          type="time"
+                          step="60"
+                          value={timeInput}
+                          onChange={(e) => handleTimeInputChange(e.target.value)}
+                          className="min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3"
+                          aria-label="Incident time"
+                          style={{ fontSize: '16px' }}
+                        />
+                      </div>
                       {timeInput && (
                         <div className="text-muted-foreground mt-1">
                           {new Date(`2000-01-01T${timeInput}`).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}
@@ -698,37 +701,39 @@ export const ViewIncidentModal = ({
 
               {((isEditMode || incident.where) && (isEditMode || incident.when)) && <div className="border-t border-border/50 my-2"></div>}
 
-                <div>
-                  <h4 className="cc-field-label text-slate-600 mb-1">Time</h4>
-                  {isEditMode ? (
-                    <Input
-                      id="incident-time-edit"
-                      type="time"
-                      step="60"
-                      value={timeInput}
-                      onChange={(e) => handleTimeInputChange(e.target.value)}
-                      className="text-base h-9 cc-field-label"
-                      aria-label="Incident time"
-                      style={{ fontSize: '16px' }}
-                    />
-                  ) : (
-                     <div className="flex items-center gap-2">
-                       <div className="break-words">
-                         {(() => {
-                           // Use derived time with timeline fallback for display
-                           const derivedTime = deriveIncidentTime(incident);
-                           if (derivedTime) {
-                             return formatHHMMForUI(derivedTime);
-                           }
-                           if (effectiveDateTime) {
-                             return formatTimeOnly(effectiveDateTime);
-                           }
-                           return <span className="text-muted-foreground italic">No time specified</span>;
-                         })()}
-                       </div>
+                 <div>
+                   <h4 className="cc-field-label text-slate-600 mb-1">Time</h4>
+                   {isEditMode ? (
+                     <div className="pill-field time">
+                       <Input
+                         id="incident-time-edit"
+                         type="time"
+                         step="60"
+                         value={timeInput}
+                         onChange={(e) => handleTimeInputChange(e.target.value)}
+                         className="min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3"
+                         aria-label="Incident time"
+                         style={{ fontSize: '16px' }}
+                       />
                      </div>
-                  )}
-                </div>
+                   ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="break-words">
+                          {(() => {
+                            // Use derived time with timeline fallback for display
+                            const derivedTime = deriveIncidentTime(incident);
+                            if (derivedTime) {
+                              return formatHHMMForUI(derivedTime);
+                            }
+                            if (effectiveDateTime) {
+                              return formatTimeOnly(effectiveDateTime);
+                            }
+                            return <span className="text-muted-foreground italic">No time specified</span>;
+                          })()}
+                        </div>
+                      </div>
+                   )}
+                 </div>
 
               {((isEditMode || incident.when) && (isEditMode || incident.witnesses)) && <div className="border-t border-border/50 my-2"></div>}
 
