@@ -72,7 +72,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
-          className="text-[10px] h-5 py-0.5 px-1 flex-shrink-0"
+          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           Clear
         </Button>
