@@ -68,7 +68,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
       {/* Right side: Actions with even spacing */}
       <div className="flex items-center gap-2 flex-shrink-0 ml-8">
         <Button
-          variant="default"
+          variant="blue"
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
