@@ -152,6 +152,13 @@ export const ViewIncidentModal = ({
   const isOwner = !currentUserId || currentUserId === 'mock-user' || true; // TODO: Implement actual ownership check
   const effectiveDateTime = getOrganizedDateTime(incident);
 
+  // Safe who list parsing with defensive fallback
+  const whoList = React.useMemo(() => {
+    // Use the who field directly with safe parsing
+    const raw = incident?.who ?? "";
+    return parseWhoFromString(raw);
+  }, [incident]);
+
   // Derived display values using centralized incident display logic
   const displayDate = (() => {
     if (isEditMode && selectedDateTime) {
@@ -647,10 +654,11 @@ export const ViewIncidentModal = ({
                     />
                   ) : (
                     <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {(() => {
-                        const whoText = formatWhoList(parseWhoFromString(incident.who || ''));
-                        return whoText ? renderTextWithPhoneLinks(whoText) : <span className="text-muted-foreground">Not specified</span>;
-                      })()}
+                      {whoList.length > 0 ? (
+                        renderTextWithPhoneLinks(formatWhoList(whoList))
+                      ) : (
+                        <span className="text-muted-foreground">Not specified</span>
+                      )}
                     </p>
                   )}
                 </div>

@@ -335,7 +335,7 @@ export const IncidentCard = ({
   const dateChip = formatPrimaryChip(occ);
   const timeChip = formatTimeChip(occ);
   const hasTime = Boolean(timeChip);
-  const caseTxt = caseChipText(incident.caseNumber);
+  const { mobile: caseMobile, desktop: caseDesktop } = caseChipText(incident.caseNumber);
   console.log('Chips debug:', { dateChip, timeChip, hasTime });
 
   // Get title with fallback for existing incidents without titles
@@ -457,8 +457,8 @@ export const IncidentCard = ({
                       </div>
                     ) : (
                       <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
-                        <span className="sm:hidden chip-xs-text">{caseTxt.mobile}</span>
-                        <span className="hidden sm:inline chip-xs-text">{caseTxt.desktop}</span>
+                        <span className="sm:hidden chip-xs-text">{caseMobile}</span>
+                        <span className="hidden sm:inline chip-xs-text">{caseDesktop}</span>
                       </ChipXs>
                     )
                   )}
