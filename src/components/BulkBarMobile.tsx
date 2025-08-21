@@ -73,7 +73,7 @@ export function BulkBarMobile() {
           variant="destructive" 
           size="sm" 
           onClick={handleDeleteClick}
-          disabled={isDeleting}
+          disabled={isDeleting || count() === 0}
           className="h-8"
         >
           Delete

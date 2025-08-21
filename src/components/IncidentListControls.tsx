@@ -118,7 +118,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           variant="destructive" 
           size="sm" 
           onClick={handleDeleteClick}
-          disabled={isDeleting}
+          disabled={isDeleting || count() === 0}
           className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           Delete
