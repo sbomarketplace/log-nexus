@@ -278,7 +278,7 @@ Rules:
           📂 Import Notes
         </Button>
       </DialogTrigger>
-      <DialogContent className="cc-modal max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="import-notes-description">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="import-notes-description">
         <DialogHeader>
           <DialogTitle>Import & Organize Incident Notes</DialogTitle>
         </DialogHeader>

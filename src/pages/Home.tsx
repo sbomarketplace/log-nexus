@@ -430,28 +430,28 @@ const Home = () => {
       <div className="space-y-4 -mt-4">
         {/* Action Buttons */}
         <div className="mb-4">
-        <div className="mx-auto w-full max-w-xl">
-          <div className="cc-typography bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
-            <section aria-labelledby="quick-entry-title">
-              <div className="mb-2 text-center">
-                <h2 id="quick-entry-title" className="cc-title">Quick Incident Entry</h2>
-              </div>
+          <div className="mx-auto w-full max-w-xl">
+            <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
+              <section aria-labelledby="quick-entry-title">
+                <div className="mb-2 text-center">
+                  <h2 id="quick-entry-title" className="text-sm font-semibold">Quick Incident Entry</h2>
+                </div>
 
-              <p className="cc-body text-muted-foreground mb-2">
-                Use ClearCase to document workplace incidents, protect your rights, and stay organized.
-              </p>
+                <p className="text-xs text-muted-foreground mb-2">
+                  Use ClearCase to document workplace incidents, protect your rights, and stay organized.
+                </p>
 
-              <p id="quick-entry-guidance" className="cc-body text-muted-foreground mb-3">
-                Include Who, What, When, Where, Why, and How for best results.
-              </p>
+                <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-3">
+                  Include Who, What, When, Where, Why, and How for best results.
+                </p>
 
                 {/* Title Input */}
                 <div className="mb-3">
                   <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
-                    <label htmlFor="quick-title-input" className="cc-label block">
+                    <label htmlFor="quick-title-input" className="text-xs font-medium text-foreground block">
                       Title <span className="text-red-600">*</span>
                     </label>
-                    <span className="cc-meta">
+                    <span className="text-xs text-muted-foreground">
                       {80 - quickNotesTitle.length} characters left
                     </span>
                   </div>
@@ -478,22 +478,22 @@ const Home = () => {
                     aria-describedby={titleError ? "title-error" : undefined}
                   />
                   {titleError && (
-                     <div id="title-error" className="cc-meta text-red-600">
-                       {titleError}
-                     </div>
+                    <div id="title-error" className="mt-1 text-xs text-red-600">
+                      {titleError}
+                    </div>
                   )}
                 </div>
 
                 <div className="mb-2">
                   <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
-                    <label htmlFor="quick-notes-input" className="cc-label block">
+                    <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground block">
                       Notes
                     </label>
                     <span
                       id="quick-notes-counter"
                       role="status"
                       aria-live="polite"
-                      className={`cc-meta ${quickNotes.length >= MAX_CHARS ? 'text-destructive' : quickNotes.length >= WARN_THRESHOLD ? 'text-primary' : ''} ml-auto`}
+                      className={`text-xs ${quickNotes.length >= MAX_CHARS ? 'text-destructive' : quickNotes.length >= WARN_THRESHOLD ? 'text-primary' : 'text-muted-foreground'} ml-auto`}
                     >
                       {quickNotes.length} / 10,000
                     </span>
@@ -597,7 +597,7 @@ const Home = () => {
                       </Button>
                     </Link>
                   </div>
-                  <p className="cc-body text-muted-foreground">AI will structure your notes into a report.</p>
+                  <p className="mt-2 text-xs text-muted-foreground">AI will structure your notes into a report.</p>
                 </div>
               </section>
             </div>

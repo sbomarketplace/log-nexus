@@ -24,7 +24,7 @@ function ChipXs({ children, icon }: { children: React.ReactNode; icon?: React.Re
         inline-flex items-center gap-1 rounded-full
         bg-muted/80 text-foreground/80
         px-2 py-[3px]
-        cc-pill leading-tight
+        text-[11px] sm:text-[12px] leading-tight
         max-w-full
       "
     >
@@ -436,13 +436,13 @@ export const IncidentCard = ({
           </div>
         </AccordionTrigger>
         
-        <AccordionContent className="cc-typography px-3 sm:px-4 pb-3 sm:pb-4">
-          <div className="cc-typography space-y-2 leading-relaxed font-normal text-foreground/90">
+        <AccordionContent className="px-3 sm:px-4 pb-3 sm:pb-4">
+          <div className="space-y-2 text-[14px] sm:text-[15px] leading-relaxed font-normal text-foreground/90">
             {/* Time Only Badge */}
             {!editing && hasTimeOnly(occ) && (
               <Badge 
                 variant="secondary" 
-                className="cc-pill px-2 py-1 font-normal shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full mb-3"
+                className="text-xs px-2 py-1 font-normal shrink-0 h-6 flex items-center bg-orange-100 text-orange-800 rounded-full mb-3"
               >
                 Time only
               </Badge>
@@ -451,20 +451,20 @@ export const IncidentCard = ({
             {/* Main content */}
             {editing ? (
               <>
-                  <Textarea
-                    value={draft.what || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
-                    rows={8}
-                    className="cc-textarea w-full mb-3 rounded-xl border px-3 py-2 font-normal"
-                    placeholder="What happened…"
-                  />
+                <Textarea
+                  value={draft.what || ""}
+                  onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
+                  rows={8}
+                  className="w-full mb-3 rounded-xl border px-3 py-2 text-sm font-normal"
+                  placeholder="What happened…"
+                />
                 
                 {/* Incident Details Section */}
                 <div className="grid gap-3 mb-3">
                   <div className="space-y-1.5">
-                    <div className="cc-label">Who</div>
+                    <div className="text-sm font-medium">Who</div>
                     <Input
-                      className="cc-input w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       placeholder="Comma-separated (e.g., Mark, Troy)"
                       value={draft.who || ""}
                       onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
@@ -472,9 +472,9 @@ export const IncidentCard = ({
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="cc-label">Where</div>
+                    <div className="text-sm font-medium">Where</div>
                     <Input
-                      className="cc-input w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       placeholder="e.g., Common area at work"
                       value={draft.where || ""}
                       onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
@@ -482,10 +482,10 @@ export const IncidentCard = ({
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="cc-label">Witnesses</div>
+                    <div className="text-sm font-medium">Witnesses</div>
                     <Textarea
                       rows={2}
-                      className="cc-textarea w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       placeholder="Comma or line-separated"
                       value={draft.witnesses || ""}
                       onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
@@ -493,10 +493,10 @@ export const IncidentCard = ({
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="cc-label">Important Quotes</div>
+                    <div className="text-sm font-medium">Important Quotes</div>
                     <Textarea
                       rows={2}
-                      className="cc-textarea w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       placeholder='- Mark: "even the elephant hide?"'
                       value={draft.quotes || ""}
                       onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
@@ -504,20 +504,20 @@ export const IncidentCard = ({
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="cc-label">Requests / Responses</div>
+                    <div className="text-sm font-medium">Requests / Responses</div>
                     <Textarea
                       rows={2}
-                      className="cc-textarea w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       value={draft.requests || ""}
                       onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
                     />
                   </div>
 
                   <div className="space-y-1.5">
-                    <div className="cc-label">Notes</div>
+                    <div className="text-sm font-medium">Notes</div>
                     <Textarea
                       rows={10}
-                      className="cc-textarea w-full rounded-xl border px-3 py-2 font-normal"
+                      className="w-full rounded-xl border px-3 py-2 font-normal"
                       value={draft.notes || ""}
                       onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
                     />
@@ -533,7 +533,7 @@ export const IncidentCard = ({
             )}
 
             {/* Meta information */}
-            <div className="cc-meta mb-2 font-normal">
+            <div className="text-[11px] sm:text-[12px] text-muted-foreground mb-2 font-normal">
               {(() => {
                 return occ.type === "occurrence" 
                   ? formatSecondaryCreated(incident.createdAt) 
