@@ -28,7 +28,7 @@ function ChipXs({ children, icon }: { children: React.ReactNode; icon?: React.Re
       "
     >
       {icon}
-      <span className="truncate">{children}</span>
+      <span className="truncate chip-xs-text">{children}</span>
     </span>
   );
 }
