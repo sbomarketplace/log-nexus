@@ -43,9 +43,9 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const qty = count();
 
   return (
-    <div className="flex items-center justify-between gap-2 text-[13px] sm:text-sm w-full py-2 px-1 min-w-0">
+    <div className="flex items-center text-[13px] sm:text-sm w-full py-2 px-1 min-w-0">
       {/* Left side: Select all + count + clear */}
-      <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap min-w-0 flex-shrink">
+      <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap flex-1 min-w-0">
         <label className="inline-flex items-center gap-2 flex-shrink-0">
           <input
             type="checkbox"
@@ -75,8 +75,8 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         </Button>
       </div>
 
-      {/* Right side: Actions */}
-      <div className="flex items-center gap-2 flex-shrink-0">
+      {/* Right side: Actions with margin to prevent overlap */}
+      <div className="flex items-center gap-2 flex-shrink-0 ml-4">
         <Button 
           variant="default" 
           size="sm" 
