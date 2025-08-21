@@ -25,8 +25,11 @@ interface ExportOptionsModalProps {
 export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptionsModalProps) => {
   const [loadingOption, setLoadingOption] = useState<string | null>(null);
 
+  console.log('ExportOptionsModal render:', { open, incident: incident ? 'present' : 'null' });
+
   // Guard against null incident values
   if (!incident) {
+    console.log('ExportOptionsModal: No incident provided');
     return null;
   }
 

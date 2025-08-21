@@ -24,7 +24,38 @@ export const BulkExportModal = ({ isOpen, onClose, incidents }: BulkExportModalP
   
   const incidentCount = incidents?.length || 0;
   
-  if (!isOpen || incidentCount < 2) return null;
+  console.log('BulkExportModal render:', { isOpen, incidentCount, incidents: incidents?.length });
+  
+  if (!isOpen) return null;
+  
+  // Allow modal to open with any number of incidents, just show appropriate message
+  if (incidentCount === 0) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>No Incidents Selected</DialogTitle>
+          </DialogHeader>
+          <p>Please select incidents to export.</p>
+          <Button onClick={onClose}>Close</Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+  
+  if (incidentCount === 1) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Single Incident Export</DialogTitle>
+          </DialogHeader>
+          <p>Use the single incident export modal for individual incidents.</p>
+          <Button onClick={onClose}>Close</Button>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const executeExport = async (optionId: string, handler: () => Promise<any> | any) => {
     setLoadingOption(optionId);
