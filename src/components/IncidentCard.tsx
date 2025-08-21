@@ -294,24 +294,25 @@ export const IncidentCard = ({
       }, 100); // Small delay to ensure DOM is updated
     } else if (isAccordionOpen) {
       // For expand mode, ensure full content is visible above bottom bar
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         const card = cardRef.current;
-        const body = bodyRef.current;
-        if (!card || !body) return;
+        if (!card) return;
 
         const barH = Number(getComputedStyle(document.documentElement)
           .getPropertyValue("--cc-bottom-bar-h")
           .replace("px", "")) || 72;
 
         const viewportH = window.innerHeight;
-        const rect = body.getBoundingClientRect();
-        const overflow = rect.bottom - (viewportH - barH - 16); // 16px buffer
+        const cardRect = card.getBoundingClientRect();
+        const cardBottom = cardRect.bottom;
+        const availableSpace = viewportH - barH - 8; // 8px buffer above bottom bar
         
-        if (overflow > 0) {
-          // Scroll just enough so the whole dropdown is visible
-          window.scrollBy({ top: overflow, left: 0, behavior: "smooth" });
+        if (cardBottom > availableSpace) {
+          // Calculate how much we need to scroll to fit the whole card
+          const overflow = cardBottom - availableSpace;
+          window.scrollBy({ top: overflow, behavior: "smooth" });
         }
-      });
+      }, 100); // Small delay to ensure accordion animation completes
     }
   }, [isAccordionOpen, editing]);
 
