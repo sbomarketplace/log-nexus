@@ -298,21 +298,29 @@ export const IncidentCard = ({
         const card = cardRef.current;
         if (!card) return;
 
+        // Get bottom bar height
         const barH = Number(getComputedStyle(document.documentElement)
           .getPropertyValue("--cc-bottom-bar-h")
           .replace("px", "")) || 72;
 
-        const viewportH = window.innerHeight;
+        // Calculate viewport and card positions
+        const viewportHeight = window.innerHeight;
+        const availableHeight = viewportHeight - barH - 8; // 8px buffer above bottom bar
         const cardRect = card.getBoundingClientRect();
-        const cardBottom = cardRect.bottom;
-        const availableSpace = viewportH - barH - 8; // 8px buffer above bottom bar
         
-        if (cardBottom > availableSpace) {
-          // Calculate how much we need to scroll to fit the whole card
-          const overflow = cardBottom - availableSpace;
-          window.scrollBy({ top: overflow, behavior: "smooth" });
+        // Check if card bottom exceeds available space
+        if (cardRect.bottom > availableHeight) {
+          // Calculate how much to scroll to fit the whole card
+          const overflow = cardRect.bottom - availableHeight;
+          const currentScrollY = window.pageYOffset;
+          const targetScrollY = currentScrollY + overflow;
+          
+          window.scrollTo({ 
+            top: targetScrollY, 
+            behavior: "smooth" 
+          });
         }
-      }, 100); // Small delay to ensure accordion animation completes
+      }, 200); // Increased delay to ensure accordion animation completes
     }
   }, [isAccordionOpen, editing]);
 
