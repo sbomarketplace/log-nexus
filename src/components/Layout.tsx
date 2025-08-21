@@ -23,13 +23,16 @@ export const Layout = ({ children }: LayoutProps) => {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* New Logo */}
-            <Link to="/" aria-label="Go to Home" className="flex-shrink-0">
+            {/* Logo and Brand Text */}
+            <Link to="/" aria-label="Go to Home" className="flex items-center gap-2 flex-shrink-0">
               <img 
                 src="/lovable-uploads/581b2158-980b-43c9-89b0-e73fc6de832d.png" 
-                alt="Logo" 
+                alt="ClearCase Logo" 
                 className="h-8 w-auto"
               />
+              <span className="text-xl font-semibold tracking-tight text-foreground">
+                ClearCase
+              </span>
             </Link>
             
             {/* Spacer for mobile layout */}
