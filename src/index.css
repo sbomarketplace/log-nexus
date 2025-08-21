@@ -281,6 +281,6 @@ All colors MUST be HSL.
   
   /* Extra spacing when last card is expanded */
   .incident-list > div:last-child[data-state="open"] {
-    margin-bottom: calc(var(--cc-bottom-bar-h) + 8px) !important;
+    margin-bottom: var(--cc-bottom-bar-h) !important;
   }
 }
