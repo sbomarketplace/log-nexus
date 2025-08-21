@@ -23,10 +23,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <header className="sticky top-0 z-50 bg-card border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            {/* Brand Logo */}
-            <Link to="/" aria-label="Go to Home" className="flex-shrink-0">
-              <BrandLogo size="sm" className="h-7 md:h-8" />
-            </Link>
+            {/* Logo removed */}
             
             {/* Spacer for mobile layout */}
             <div className="flex-1 md:hidden"></div>
