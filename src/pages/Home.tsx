@@ -653,7 +653,7 @@ const Home = () => {
         )}
 
         {/* Incidents List */}
-        <div id="incidents-list" className="space-y-3">
+        <div className="space-y-3 incident-list">
           {organizedIncidents.length === 0 ? (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">

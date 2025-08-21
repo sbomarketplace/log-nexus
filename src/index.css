@@ -41,6 +41,8 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
+    --cc-bottom-bar-h: 72px;
+
     --sidebar-background: 0 0% 98%;
 
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -270,5 +272,10 @@ All colors MUST be HSL.
   input[type="date"]::-webkit-calendar-picker-indicator,
   input[type="time"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
+  }
+
+  /* Incident card spacing for bottom bar */
+  .incident-list > *:last-child {
+    margin-bottom: calc(var(--cc-bottom-bar-h) + 16px);
   }
 }
