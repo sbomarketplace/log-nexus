@@ -127,18 +127,6 @@ export async function bulkDelete() {
   const ids = Array.from(selected);
   if (!ids.length) return;
 
-  // Get incident titles for preview
-  const incidents = organizedIncidentStorage.getAll();
-  const previewTitles = ids
-    .slice(0, 5)
-    .map(id => incidents.find(i => i.id === id)?.title || 'Untitled')
-    .filter(Boolean);
-
-  const message = `This will permanently delete ${ids.length} incident${ids.length > 1 ? 's' : ''}:\n\n${previewTitles.join('\n')}${ids.length > 5 ? `\n...and ${ids.length - 5} more` : ''}`;
-
-  const confirmed = window.confirm(message);
-  if (!confirmed) return;
-
   try {
     // Delete from Supabase if using database
     const { error } = await supabase

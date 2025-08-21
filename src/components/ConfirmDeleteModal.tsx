@@ -26,7 +26,7 @@ export function ConfirmDeleteModal({
 }: ConfirmDeleteModalProps) {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent>
+      <AlertDialogContent className="rounded-xl shadow-2xl border-0 bg-background/95 backdrop-blur-sm">
         <AlertDialogHeader>
           <AlertDialogTitle>Confirm Delete</AlertDialogTitle>
           <AlertDialogDescription>
