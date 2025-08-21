@@ -389,7 +389,7 @@ export const IncidentCard = ({
                 }}
                 onClick={(e) => e.stopPropagation()}
                 aria-label={`Select incident ${incident.title || getDisplayTitle()}`}
-                className="mt-0.5 flex-shrink-0"
+                className="mt-0.5 flex-shrink-0 h-3.5 w-3.5"
               />
               
               <div className="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
@@ -409,7 +409,7 @@ export const IncidentCard = ({
                     onClick={(e) => e.stopPropagation()}
                   />
                 ) : (
-                  <div className="min-w-0 flex-1 text-[15px] sm:text-[16px] font-normal leading-snug
+                  <div className="min-w-0 flex-1 text-[13px] sm:text-[14px] font-normal leading-snug
                                   whitespace-normal line-clamp-2 sm:line-clamp-1 text-left">
                     {getDisplayTitle()}
                   </div>
