@@ -474,8 +474,8 @@ export const IncidentCard = ({
                       </div>
                     ) : (
                       <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
-                        <span className="sm:hidden">{caseTxt.mobile}</span>
-                        <span className="hidden sm:inline">{caseTxt.desktop}</span>
+                        <span className="sm:hidden chip-xs-text">{caseTxt.mobile}</span>
+                        <span className="hidden sm:inline chip-xs-text">{caseTxt.desktop}</span>
                       </ChipXs>
                     )
                   )}
