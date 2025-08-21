@@ -119,6 +119,18 @@ All colors MUST be HSL.
   /* Make default text sizes smaller */
   p, div, span { @apply text-sm; }
   label { @apply text-xs font-medium; }
+  
+  /* Override for chip components to match category pill size */
+  .chip-xs-text {
+    font-size: 10px !important;
+  }
+  
+  @media (min-width: 640px) {
+    .chip-xs-text {
+      font-size: 11px !important;
+    }
+  }
+  
   /* Prevent mobile zoom on inputs - use 16px minimum font-size */
   input, textarea, select { @apply text-base; }
 }
