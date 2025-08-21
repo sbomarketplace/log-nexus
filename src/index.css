@@ -276,11 +276,11 @@ All colors MUST be HSL.
 
   /* Incident card spacing for bottom bar */
   .incident-list > div:last-child {
-    margin-bottom: var(--cc-bottom-bar-h) !important;
+    margin-bottom: calc(var(--cc-bottom-bar-h) + 32px) !important;
   }
   
   /* Extra spacing when last card is expanded */
   .incident-list > div:last-child[data-state="open"] {
-    margin-bottom: var(--cc-bottom-bar-h) !important;
+    margin-bottom: calc(var(--cc-bottom-bar-h) + 32px) !important;
   }
 }
