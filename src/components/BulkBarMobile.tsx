@@ -1,22 +1,43 @@
 import { useSelection } from "@/state/selection";
 import { Button } from "@/components/ui/button";
-import { bulkExport, bulkDelete } from "@/lib/bulkActions";
+import { bulkDelete } from "@/lib/bulkActions";
 import { useState } from "react";
+import { BulkExportModal } from "@/components/BulkExportModal";
+import { ExportOptionsModal } from "@/components/ExportOptionsModal";
+import { organizedIncidentStorage } from "@/utils/organizedIncidentStorage";
 
 export function BulkBarMobile() {
-  const { count, clear } = useSelection();
-  const [isExporting, setIsExporting] = useState(false);
+  const { count, clear, selected } = useSelection();
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showBulkExport, setShowBulkExport] = useState(false);
+  const [showSingleExport, setShowSingleExport] = useState(false);
+  const [singleIncident, setSingleIncident] = useState(null);
   
   if (count() === 0) return null;
 
-  async function handleBulkExport() {
-    setIsExporting(true);
-    try {
-      await bulkExport();
-    } finally {
-      setIsExporting(false);
+  function handleExportClick() {
+    const selectedCount = count();
+    if (selectedCount === 0) return;
+    
+    if (selectedCount === 1) {
+      // Open single export modal
+      const incidentId = Array.from(selected)[0];
+      const incident = organizedIncidentStorage.getAll().find(i => i.id === incidentId);
+      if (incident) {
+        setSingleIncident(incident);
+        setShowSingleExport(true);
+      }
+    } else {
+      // Open bulk export modal
+      setShowBulkExport(true);
     }
+  }
+
+  function getSelectedIncidents() {
+    const allIncidents = organizedIncidentStorage.getAll();
+    return Array.from(selected).map(id => 
+      allIncidents.find(incident => incident.id === id)
+    ).filter(Boolean);
   }
 
   async function handleBulkDelete() {
@@ -34,17 +55,17 @@ export function BulkBarMobile() {
       <div className="ml-auto flex items-center gap-2">
         <Button 
           size="sm" 
-          onClick={handleBulkExport}
-          disabled={isExporting || isDeleting}
+          onClick={handleExportClick}
+          disabled={isDeleting || count() === 0}
           className="h-8"
         >
-          {isExporting ? "Exporting..." : "Export"}
+          Export
         </Button>
         <Button 
           variant="destructive" 
           size="sm" 
           onClick={handleBulkDelete}
-          disabled={isExporting || isDeleting}
+          disabled={isDeleting}
           className="h-8"
         >
           {isDeleting ? "Deleting..." : "Delete"}
@@ -53,12 +74,24 @@ export function BulkBarMobile() {
           variant="ghost" 
           size="sm" 
           onClick={clear}
-          disabled={isExporting || isDeleting}
+          disabled={isDeleting}
           className="h-8"
         >
           Clear
         </Button>
       </div>
+      
+      <BulkExportModal
+        isOpen={showBulkExport}
+        onClose={() => setShowBulkExport(false)}
+        incidents={getSelectedIncidents()}
+      />
+      
+      <ExportOptionsModal
+        open={showSingleExport}
+        onOpenChange={setShowSingleExport}
+        incident={singleIncident}
+      />
     </div>
   );
 }
