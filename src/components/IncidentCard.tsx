@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CalendarIcon, ClockIcon, Hash, X, FileDown, Trash2 } from 'lucide-react';
+import { PillInput } from '@/components/PillInputs';
 import { caseChipText } from '@/lib/caseFormat';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
@@ -509,17 +510,43 @@ export const IncidentCard = ({
                     placeholder="What happened…"
                   />
                   
-                  {/* Incident Details Section */}
-                  <div className="grid gap-3 mb-3">
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Who</div>
-                      <Input
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        placeholder="Comma-separated (e.g., Mark, Troy)"
-                        value={draft.who || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
-                      />
-                    </div>
+                   {/* Incident Details Section */}
+                   <div className="grid gap-3 mb-3">
+                     {/* --- WHEN ----------------------------------------------------- */}
+                     <div className="space-y-1.5">
+                       <div className="text-sm font-medium">When</div>
+
+                       <div className="flex flex-wrap items-center gap-2">
+                         <PillInput
+                           icon="date"
+                           ariaLabel="Incident date"
+                           value={draft.datePart ?? ""}
+                           onChange={(v) => setDraft((d) => ({ ...d, datePart: v }))}
+                         />
+
+                         <PillInput
+                           icon="time"
+                           ariaLabel="Incident time"
+                           value={draft.timePart ?? ""}
+                           onChange={(v) => setDraft((d) => ({ ...d, timePart: v }))}
+                         />
+                       </div>
+
+                       {/* Helper text */}
+                       <div className="text-xs text-foreground/60">
+                         Set either date, time, or both. We never default to the current time.
+                       </div>
+                     </div>
+                     
+                     <div className="space-y-1.5">
+                       <div className="text-sm font-medium">Who</div>
+                       <Input
+                         className="w-full rounded-xl border px-3 py-2 font-normal"
+                         placeholder="Comma-separated (e.g., Mark, Troy)"
+                         value={draft.who || ""}
+                         onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
+                       />
+                     </div>
 
                     <div className="space-y-1.5">
                       <div className="text-sm font-medium">Where</div>
