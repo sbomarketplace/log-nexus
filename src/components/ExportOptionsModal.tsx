@@ -104,14 +104,6 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
         
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
-          {/* Incident Header - mirrors Incident Card layout */}
-          <div className="mb-4 p-3 bg-neutral-50/50 rounded-lg border border-neutral-100">
-            <IncidentCardHeader incident={incident} />
-            <p className="mt-2 text-base text-neutral-900">
-              {briefIncidentSummary(incident)}
-            </p>
-          </div>
-
         {/* Export Options Grid */}
         <div className="grid grid-cols-2 gap-3 mb-4">
           {exportOptions.map((option) => {
