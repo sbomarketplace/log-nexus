@@ -5,6 +5,7 @@ import { bulkDelete } from "@/lib/bulkActions";
 import { useState } from "react";
 import { BulkExportModal } from "@/components/BulkExportModal";
 import { ExportOptionsModal } from "@/components/ExportOptionsModal";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 import { organizedIncidentStorage } from "@/utils/organizedIncidentStorage";
 
 interface IncidentListControlsProps {
@@ -16,6 +17,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBulkExport, setShowBulkExport] = useState(false);
   const [showSingleExport, setShowSingleExport] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [singleIncident, setSingleIncident] = useState(null);
   
   const allChecked = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
@@ -51,10 +53,15 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
     ).filter(Boolean);
   }
 
-  async function handleBulkDelete() {
+  function handleDeleteClick() {
+    setShowConfirmDelete(true);
+  }
+
+  async function handleConfirmDelete() {
     setIsDeleting(true);
     try {
       await bulkDelete();
+      setShowConfirmDelete(false);
     } finally {
       setIsDeleting(false);
     }
@@ -110,11 +117,11 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         <Button 
           variant="destructive" 
           size="sm" 
-          onClick={handleBulkDelete}
+          onClick={handleDeleteClick}
           disabled={isDeleting}
           className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
-          {isDeleting ? "Deleting..." : "Delete"}
+          Delete
         </Button>
       </div>
 
@@ -128,6 +135,14 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         open={showSingleExport}
         onOpenChange={setShowSingleExport}
         incident={singleIncident}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showConfirmDelete}
+        onClose={() => setShowConfirmDelete(false)}
+        onConfirm={handleConfirmDelete}
+        count={count()}
+        isDeleting={isDeleting}
       />
     </div>
   );

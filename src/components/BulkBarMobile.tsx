@@ -4,6 +4,7 @@ import { bulkDelete } from "@/lib/bulkActions";
 import { useState } from "react";
 import { BulkExportModal } from "@/components/BulkExportModal";
 import { ExportOptionsModal } from "@/components/ExportOptionsModal";
+import { ConfirmDeleteModal } from "@/components/ConfirmDeleteModal";
 import { organizedIncidentStorage } from "@/utils/organizedIncidentStorage";
 
 export function BulkBarMobile() {
@@ -11,6 +12,7 @@ export function BulkBarMobile() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showBulkExport, setShowBulkExport] = useState(false);
   const [showSingleExport, setShowSingleExport] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [singleIncident, setSingleIncident] = useState(null);
   
   if (count() === 0) return null;
@@ -41,10 +43,15 @@ export function BulkBarMobile() {
     ).filter(Boolean);
   }
 
-  async function handleBulkDelete() {
+  function handleDeleteClick() {
+    setShowConfirmDelete(true);
+  }
+
+  async function handleConfirmDelete() {
     setIsDeleting(true);
     try {
       await bulkDelete();
+      setShowConfirmDelete(false);
     } finally {
       setIsDeleting(false);
     }
@@ -65,11 +72,11 @@ export function BulkBarMobile() {
         <Button 
           variant="destructive" 
           size="sm" 
-          onClick={handleBulkDelete}
+          onClick={handleDeleteClick}
           disabled={isDeleting}
           className="h-8"
         >
-          {isDeleting ? "Deleting..." : "Delete"}
+          Delete
         </Button>
         <Button 
           variant="ghost" 
@@ -92,6 +99,14 @@ export function BulkBarMobile() {
         open={showSingleExport}
         onOpenChange={setShowSingleExport}
         incident={singleIncident}
+      />
+
+      <ConfirmDeleteModal
+        isOpen={showConfirmDelete}
+        onClose={() => setShowConfirmDelete(false)}
+        onConfirm={handleConfirmDelete}
+        count={count()}
+        isDeleting={isDeleting}
       />
     </div>
   );
