@@ -1,6 +1,6 @@
 import jsPDF from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
-import { deriveIncidentTime, formatHHMMForUI, normalizeTimeToHHMM } from "@/utils/datetime";
+import { deriveIncidentTime, formatHHMMForUI, normalizeTimeToHHMM, firstTimeFromTimeline } from "@/utils/datetime";
 import { briefIncidentSummary } from "@/utils/briefSummary";
 
 type Incident = {
@@ -202,4 +202,109 @@ export async function emailIncident(incident: Incident) {
   const subject = encodeURIComponent(`Incident Report ${incident.id}`);
   const body = encodeURIComponent(`Summary: ${briefIncidentSummary(incident)}\n\n${buildPlainText(incident)}`);
   window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+// CSV Export Helper Functions
+function sanitizeCSV(v: any): string {
+  const s = (v ?? "").toString().replace(/"/g, '""').replace(/\r?\n|\r/g, " ");
+  return `"${s}"`;
+}
+
+function dateISO(s?: string) {
+  if (!s) return "";
+  const d = new Date(String(s));
+  return isNaN(d.getTime()) ? "" : d.toISOString().slice(0,10);
+}
+
+function oneLine(text?: string) {
+  return (text ?? "").toString().replace(/\s+/g, " ").trim();
+}
+
+function countArray(x: any): number {
+  if (!x) return 0;
+  if (Array.isArray(x)) return x.length;
+  if (typeof x === "string") return x.length ? x.split(",").length : 0;
+  return 0;
+}
+
+function getTags(i:any): string {
+  const t = i?.tags;
+  if (Array.isArray(t)) return t.join(", ");
+  if (typeof t === "string") return t;
+  return "";
+}
+
+function maybeRedact(text:string, on:boolean){
+  // conservative pass: mask Proper Names like "John Doe" -> "J. D."
+  return on ? text.replace(/\b([A-Z])[a-z]+(?:\s+[A-Z][a-z]+)?\b/g, (_,a) => `${a}.`) : text;
+}
+
+export type BulkExportOptions = {
+  order?: "asc" | "desc";
+  includeDetails?: boolean;   // respected in other formats
+  redact?: boolean;           // masks names in text fields
+};
+
+export async function exportBulkCSV(incidents:any[], opts:BulkExportOptions = {}){
+  const redact = !!opts.redact;
+
+  // Sort by date asc/desc for predictable sheets
+  const sorted = [...incidents].sort((a,b)=> new Date(a?.date||0).getTime() - new Date(b?.date||0).getTime());
+  if (opts.order === "desc") sorted.reverse();
+
+  const header = [
+    "id","date_iso","time_hhmm","category","title","summary_brief",
+    "what","where","who","witnesses",
+    "timeline_first_time","timeline",
+    "case_number","tags","attachments_count",
+    "created_at","updated_at","created_by","status","severity","redact_applied"
+  ];
+
+  const rows = sorted.map((i:any) => {
+    const hhmm = normalizeTimeToHHMM(deriveIncidentTime(i)) || "";
+    const tlFirst = normalizeTimeToHHMM(firstTimeFromTimeline(i?.summary || i?.notes)) || "";
+    const title = i?.title || i?.category || "";
+    const brief = briefIncidentSummary(i);
+    const timelineText = oneLine(i?.timeline || i?.summary || "");
+    const attachmentsCount =
+      countArray(i?.attachments) || countArray(i?.files) || (typeof i?.attachments_count === "number" ? i.attachments_count : 0);
+    const createdBy = i?.created_by_email || i?.created_by || i?.owner_email || "";
+
+    return [
+      i?.id ?? "",
+      dateISO(i?.date),
+      hhmm,
+      i?.category ?? "",
+      maybeRedact(title, redact),
+      maybeRedact(brief, redact),
+      maybeRedact(oneLine(i?.what), redact),
+      maybeRedact(oneLine(i?.where), redact),
+      maybeRedact(oneLine(i?.who), redact),
+      maybeRedact(oneLine(i?.witnesses), redact),
+      tlFirst,
+      maybeRedact(timelineText, redact),
+      i?.case_number ?? i?.caseNo ?? "",
+      getTags(i),
+      attachmentsCount,
+      i?.created_at ?? "",
+      i?.updated_at ?? "",
+      createdBy,
+      i?.status ?? "",
+      i?.severity ?? "",
+      redact ? "true" : "false"
+    ].map(sanitizeCSV).join(",");
+  });
+
+  const csv = [header.join(","), ...rows].join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const name = `clearcase_incidents_${new Date().toISOString().slice(0,10)}.csv`;
+
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
