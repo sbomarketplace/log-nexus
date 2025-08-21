@@ -122,12 +122,12 @@ All colors MUST be HSL.
   
   /* Override for chip components to match category pill size */
   .chip-xs-text {
-    font-size: 10px !important;
+    font-size: 8px !important;
   }
   
   @media (min-width: 640px) {
     .chip-xs-text {
-      font-size: 11px !important;
+      font-size: 9px !important;
     }
   }
   
