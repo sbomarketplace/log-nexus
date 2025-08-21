@@ -24,8 +24,6 @@ export const BulkExportModal = ({ isOpen, onClose, incidents }: BulkExportModalP
   
   const incidentCount = incidents?.length || 0;
   
-  console.log('BulkExportModal render:', { isOpen, incidentCount, incidents: incidents?.length });
-  
   if (!isOpen) return null;
   
   // Allow modal to open with any number of incidents, just show appropriate message

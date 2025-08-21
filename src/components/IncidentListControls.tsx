@@ -1,8 +1,11 @@
 import { useSelection } from "@/state/selection";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
-import { bulkExport, bulkDelete } from "@/lib/bulkActions";
+import { bulkDelete } from "@/lib/bulkActions";
 import { useState } from "react";
+import { BulkExportModal } from "@/components/BulkExportModal";
+import { ExportOptionsModal } from "@/components/ExportOptionsModal";
+import { organizedIncidentStorage } from "@/utils/organizedIncidentStorage";
 
 interface IncidentListControlsProps {
   visibleIds: string[];
@@ -10,8 +13,10 @@ interface IncidentListControlsProps {
 
 export function IncidentListControls({ visibleIds }: IncidentListControlsProps) {
   const { selected, setMany, clear, count } = useSelection();
-  const [isExporting, setIsExporting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showBulkExport, setShowBulkExport] = useState(false);
+  const [showSingleExport, setShowSingleExport] = useState(false);
+  const [singleIncident, setSingleIncident] = useState(null);
   
   const allChecked = visibleIds.length > 0 && visibleIds.every((id) => selected.has(id));
   const someChecked = !allChecked && visibleIds.some((id) => selected.has(id));
@@ -20,13 +25,30 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
     allChecked ? clear() : setMany(visibleIds);
   }
 
-  async function handleBulkExport() {
-    setIsExporting(true);
-    try {
-      await bulkExport();
-    } finally {
-      setIsExporting(false);
+  function handleExportClick() {
+    const selectedCount = count();
+    
+    if (selectedCount === 0) return;
+    
+    if (selectedCount === 1) {
+      // Open single export modal
+      const incidentId = Array.from(selected)[0];
+      const incident = organizedIncidentStorage.getAll().find(i => i.id === incidentId);
+      if (incident) {
+        setSingleIncident(incident);
+        setShowSingleExport(true);
+      }
+    } else {
+      // Open bulk export modal
+      setShowBulkExport(true);
     }
+  }
+
+  function getSelectedIncidents() {
+    const allIncidents = organizedIncidentStorage.getAll();
+    return Array.from(selected).map(id => 
+      allIncidents.find(incident => incident.id === id)
+    ).filter(Boolean);
   }
 
   async function handleBulkDelete() {
@@ -71,7 +93,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           variant="blue"
           size="sm"
           onClick={clear}
-          disabled={isExporting || isDeleting}
+          disabled={isDeleting}
           className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           Clear
@@ -79,22 +101,34 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         <Button 
           variant="default" 
           size="sm" 
-          onClick={handleBulkExport}
-          disabled={isExporting || isDeleting}
+          onClick={handleExportClick}
+          disabled={isDeleting || count() === 0}
           className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
-          {isExporting ? "Exporting..." : "Export"}
+          Export
         </Button>
         <Button 
           variant="destructive" 
           size="sm" 
           onClick={handleBulkDelete}
-          disabled={isExporting || isDeleting}
+          disabled={isDeleting}
           className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </Button>
       </div>
+
+      <BulkExportModal
+        isOpen={showBulkExport}
+        onClose={() => setShowBulkExport(false)}
+        incidents={getSelectedIncidents()}
+      />
+      
+      <ExportOptionsModal
+        open={showSingleExport}
+        onOpenChange={setShowSingleExport}
+        incident={singleIncident}
+      />
     </div>
   );
 }

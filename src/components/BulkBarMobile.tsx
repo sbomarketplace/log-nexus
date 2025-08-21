@@ -17,7 +17,6 @@ export function BulkBarMobile() {
 
   function handleExportClick() {
     const selectedCount = count();
-    console.log('Export clicked, selected count:', selectedCount);
     
     if (selectedCount === 0) return;
     
@@ -25,14 +24,12 @@ export function BulkBarMobile() {
       // Open single export modal
       const incidentId = Array.from(selected)[0];
       const incident = organizedIncidentStorage.getAll().find(i => i.id === incidentId);
-      console.log('Single incident found:', incident ? 'yes' : 'no');
       if (incident) {
         setSingleIncident(incident);
         setShowSingleExport(true);
       }
     } else {
       // Open bulk export modal
-      console.log('Opening bulk export modal');
       setShowBulkExport(true);
     }
   }
