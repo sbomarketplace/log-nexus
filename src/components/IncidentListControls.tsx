@@ -43,45 +43,46 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const qty = count();
 
   return (
-    <div className="flex items-center gap-3 text-[13px] sm:text-sm whitespace-nowrap w-full py-2 px-1">
-      {/* Select all + count (single line) */}
-      <label className="inline-flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={allChecked}
-          ref={(el) => { if (el) el.indeterminate = someChecked; }}
-          onChange={toggleAll}
-          aria-label="Select all visible incidents"
-          className="h-4 w-4"
-        />
-        <span className="leading-none text-foreground/80">Select all</span>
-      </label>
+    <div className="flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-sm whitespace-nowrap w-full py-1.5 px-1">
+      {/* Left side: Select all + count + clear */}
+      <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-0">
+        <label className="inline-flex items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={allChecked}
+            ref={(el) => { if (el) el.indeterminate = someChecked; }}
+            onChange={toggleAll}
+            aria-label="Select all visible incidents"
+            className="h-3.5 w-3.5"
+          />
+          <span className="leading-none text-foreground/80">Select all</span>
+        </label>
 
-      <span className="opacity-50">•</span>
+        <span className="opacity-50 text-xs">•</span>
 
-      <span className="leading-none text-foreground/70">
-        <span className="tabular-nums">{qty}</span> selected
-      </span>
+        <span className="leading-none text-foreground/70">
+          <span className="tabular-nums">{qty}</span> selected
+        </span>
 
-      {/* Clear */}
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={clear}
-        disabled={isExporting || isDeleting}
-        className="ml-2 text-[13px] sm:text-sm h-auto p-1 hover:underline"
-      >
-        Clear
-      </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={clear}
+          disabled={isExporting || isDeleting}
+          className="ml-1 text-[13px] h-auto py-0.5 px-1 hover:underline"
+        >
+          Clear
+        </Button>
+      </div>
 
-      {/* Actions, pushed to the right */}
-      <div className="ml-auto flex items-center gap-2">
+      {/* Right side: Actions */}
+      <div className="ml-auto flex items-center gap-1.5">
         <Button 
           variant="default" 
           size="sm" 
           onClick={handleBulkExport}
           disabled={isExporting || isDeleting}
-          className="px-3 py-1.5 text-[13px] sm:text-sm h-auto"
+          className="px-2.5 py-1 text-[13px] h-auto"
         >
           {isExporting ? "Exporting..." : "Export"}
         </Button>
@@ -90,7 +91,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkDelete}
           disabled={isExporting || isDeleting}
-          className="px-3 py-1.5 text-[13px] sm:text-sm h-auto"
+          className="px-2.5 py-1 text-[13px] h-auto"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </Button>
