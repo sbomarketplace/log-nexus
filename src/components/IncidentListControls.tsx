@@ -63,20 +63,19 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         <span className="leading-none text-foreground/70 flex-shrink-0">
           <span className="tabular-nums">{qty}</span> selected
         </span>
+      </div>
 
+      {/* Right side: Actions with even spacing */}
+      <div className="flex items-center gap-2 flex-shrink-0 ml-8">
         <Button
-          variant="ghost"
+          variant="default"
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
-          className="text-[10px] h-5 py-0.5 px-1 hover:underline flex-shrink-0"
+          className="text-[10px] h-5 py-0.5 px-1 flex-shrink-0"
         >
           Clear
         </Button>
-      </div>
-
-      {/* Right side: Actions with margin to prevent overlap */}
-      <div className="flex items-center gap-2 flex-shrink-0 ml-8">
         <Button 
           variant="default" 
           size="sm" 
