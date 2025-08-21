@@ -426,7 +426,7 @@ export const IncidentCard = ({
                          value={draft.datePart || ""}
                          onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
                          className="bg-white border rounded-full px-1.5 py-0 text-[10px] h-5 w-20 text-center"
-                         style={{ fontSize: '10px' }}
+                         style={{ fontSize: '10px !important', lineHeight: '1.2' }}
                          aria-label="Incident date"
                          onClick={(e) => e.stopPropagation()}
                        />
@@ -447,7 +447,7 @@ export const IncidentCard = ({
                            value={draft.timePart || ""}
                            onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
                            className="bg-white border rounded-full px-1.5 py-0 text-[10px] h-5 w-14 text-center"
-                           style={{ fontSize: '10px' }}
+                           style={{ fontSize: '10px !important', lineHeight: '1.2' }}
                            aria-label="Incident time"
                            onClick={(e) => e.stopPropagation()}
                          />
