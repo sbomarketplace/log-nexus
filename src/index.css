@@ -275,7 +275,7 @@ All colors MUST be HSL.
   }
 
   /* Incident card spacing for bottom bar */
-  .incident-list > *:last-child {
-    margin-bottom: calc(var(--cc-bottom-bar-h) + 24px);
+  .incident-list > div:last-child {
+    margin-bottom: calc(var(--cc-bottom-bar-h) + 32px) !important;
   }
 }

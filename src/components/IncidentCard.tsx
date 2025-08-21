@@ -276,16 +276,22 @@ export const IncidentCard = ({
   // Auto-scroll when accordion opens or edit mode starts
   useEffect(() => {
     if (editing) {
-      // For edit mode, scroll card to top of viewport
-      requestAnimationFrame(() => {
+      // For edit mode, scroll card to be right under the sticky top bar
+      setTimeout(() => {
         const card = cardRef.current;
         if (!card) return;
         
-        const rect = card.getBoundingClientRect();
-        const scrollTop = window.pageYOffset + rect.top - 20; // 20px from top
+        // Get sticky header height (estimate 60px if not found)
+        const stickyHeader = document.querySelector('[data-sticky-header]') || 
+                           document.querySelector('header') || 
+                           document.querySelector('.sticky');
+        const headerHeight = stickyHeader ? stickyHeader.getBoundingClientRect().height : 60;
         
-        window.scrollTo({ top: scrollTop, behavior: "smooth" });
-      });
+        const rect = card.getBoundingClientRect();
+        const scrollTop = window.pageYOffset + rect.top - headerHeight - 16; // 16px buffer under header
+        
+        window.scrollTo({ top: Math.max(0, scrollTop), behavior: "smooth" });
+      }, 100); // Small delay to ensure DOM is updated
     } else if (isAccordionOpen) {
       // For expand mode, ensure full content is visible above bottom bar
       requestAnimationFrame(() => {
