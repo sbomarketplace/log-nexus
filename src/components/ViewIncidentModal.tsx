@@ -491,9 +491,9 @@ export const ViewIncidentModal = ({
                           type="date"
                           value={dateInput}
                           onChange={(e) => handleDateInputChange(e.target.value)}
-                          className={`min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3 ${validationErrors.date ? 'border-destructive' : ''}`}
+                          className={`min-w-[110px] text-sm h-7 cc-field-label border-0 bg-white rounded-full px-2 ${validationErrors.date ? 'border-destructive' : ''}`}
                           aria-label="Incident date"
-                          style={{ fontSize: '16px' }}
+                          style={{ fontSize: '14px' }}
                         />
                       </div>
                       {dateInput && (
@@ -515,9 +515,9 @@ export const ViewIncidentModal = ({
                           step="60"
                           value={timeInput}
                           onChange={(e) => handleTimeInputChange(e.target.value)}
-                          className="min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3"
+                          className="min-w-[100px] text-sm h-7 cc-field-label border-0 bg-white rounded-full px-2"
                           aria-label="Incident time"
-                          style={{ fontSize: '16px' }}
+                          style={{ fontSize: '14px' }}
                         />
                       </div>
                       {timeInput && (
@@ -711,9 +711,9 @@ export const ViewIncidentModal = ({
                          step="60"
                          value={timeInput}
                          onChange={(e) => handleTimeInputChange(e.target.value)}
-                         className="min-w-[140px] text-base h-9 cc-field-label border-0 bg-white rounded-full px-3"
-                         aria-label="Incident time"
-                         style={{ fontSize: '16px' }}
+                          className="min-w-[100px] text-sm h-7 cc-field-label border-0 bg-white rounded-full px-2"
+                          aria-label="Incident time"
+                          style={{ fontSize: '14px' }}
                        />
                      </div>
                    ) : (
