@@ -29,6 +29,7 @@ import { getDateSafely, hasValidDate } from '@/utils/safeDate';
 import { getPreferredDateTime } from '@/utils/timelineParser';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { cn } from '@/lib/utils';
+import { usePin } from '@/state/pin';
 
 import jsPDF from 'jspdf';
 
@@ -40,7 +41,7 @@ const Home = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'category'>('date');
   const [filterCategory, setFilterCategory] = useState<string>('all');
-  const [pinnedIncidents, setPinnedIncidents] = useState<Set<string>>(new Set());
+  const orderWithPins = usePin((s) => s.orderWithPins);
   // Quick notes state
   const [quickNotes, setQuickNotes] = useState('');
   const [quickNotesTitle, setQuickNotesTitle] = useState('');
@@ -678,27 +679,17 @@ const Home = () => {
                   </CardContent>
                 </Card>
               ) : (
-                filteredIncidents.map((incident, index) => (
+                orderWithPins(filteredIncidents).map((incident, index) => (
                   <IncidentCard
                     key={incident.id}
                     incident={incident}
                     index={index}
-                    pageIds={filteredIncidents.map(i => i.id)}
+                    pageIds={orderWithPins(filteredIncidents).map(i => i.id)}
                     onView={() => handleViewIncident(incident)}
                     onExport={() => handleExport(incident)}
                     onDelete={() => setDeleteId(incident.id)}
                     onUpdate={loadIncidents}
                     getCategoryTagClass={getCategoryTagClass}
-                    isPinned={pinnedIncidents.has(incident.id)}
-                    onTogglePin={() => {
-                      const newPinned = new Set(pinnedIncidents);
-                      if (newPinned.has(incident.id)) {
-                        newPinned.delete(incident.id);
-                      } else {
-                        newPinned.add(incident.id);
-                      }
-                      setPinnedIncidents(newPinned);
-                    }}
                   />
                 ))
               )}

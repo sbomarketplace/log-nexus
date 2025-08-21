@@ -4,7 +4,8 @@ import { getPreferredDateTime } from '@/utils/timelineParser';
 import { getEffectiveOrganizedDateTime } from '@/utils/organizedIncidentMigration';
 import { formatHeader, deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
-import { extractCaseNumberFlexible } from '@/lib/caseNumber';
+import { caseChipText } from '@/lib/caseFormat';
+import { Hash } from 'lucide-react';
 
 interface IncidentCardHeaderProps {
   incident: OrganizedIncident;
@@ -93,7 +94,8 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
   const title = incident.what || category;
   
   // Get case number from incident or extract from notes
-  const caseText = incident.caseNumber || extractCaseNumberFlexible(incident.notes) || null;
+  const caseNumber = incident.caseNumber || null;
+  const caseTxt = caseChipText(caseNumber);
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -109,9 +111,11 @@ export const IncidentCardHeader = ({ incident, className = "" }: IncidentCardHea
         <Badge variant="secondary" className="text-xs bg-neutral-200 text-neutral-800 font-medium">
           {category}
         </Badge>
-        {caseText && (
-          <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
-            Case {caseText}
+        {caseNumber && (
+          <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700 inline-flex items-center gap-1">
+            <Hash className="h-3 w-3" aria-hidden />
+            <span className="sm:hidden">{caseTxt.mobile}</span>
+            <span className="hidden sm:inline">{caseTxt.desktop}</span>
           </Badge>
         )}
       </div>

@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { CalendarIcon, ClockIcon, Hash, Pin, FileDown, Trash2 } from 'lucide-react';
+import { caseChipText } from '@/lib/caseFormat';
+import { usePin } from '@/state/pin';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
@@ -55,8 +57,6 @@ interface IncidentCardProps {
   onDelete: () => void;
   onUpdate: () => void;
   getCategoryTagClass: (category: string) => string;
-  isPinned?: boolean;
-  onTogglePin?: () => void;
   index?: number;
   pageIds?: string[];
 }
@@ -68,8 +68,6 @@ export const IncidentCard = ({
   onDelete, 
   onUpdate, 
   getCategoryTagClass,
-  isPinned = false,
-  onTogglePin,
   index,
   pageIds = []
 }: IncidentCardProps) => {
@@ -79,6 +77,8 @@ export const IncidentCard = ({
   const firstInputRef = useRef<HTMLInputElement>(null);
   const { isSelected, toggle } = useSelection();
   const checked = isSelected(incident.id);
+  const { isPinned, toggle: togglePin } = usePin();
+  const pinned = isPinned(incident.id);
 
   const dirty = isDirty(incident, draft);
 
@@ -280,7 +280,7 @@ export const IncidentCard = ({
   const dateChip = formatPrimaryChip(occ);
   const timeChip = formatTimeChip(occ);
   const hasTime = Boolean(timeChip);
-  const caseText = incident.caseNumber ? `Case ${incident.caseNumber}` : null;
+  const caseTxt = caseChipText(incident.caseNumber);
   console.log('Chips debug:', { dateChip, timeChip, hasTime });
 
   // Get title with fallback for existing incidents without titles
@@ -300,7 +300,7 @@ export const IncidentCard = ({
     <Accordion type="single" collapsible className="w-full">
       <AccordionItem 
         value={incident.id} 
-        data-pinned={isPinned}
+        data-pinned={pinned}
         data-selected={checked}
         className={cn(
           "rounded-2xl border border-black/10 bg-card shadow-sm",
@@ -388,7 +388,7 @@ export const IncidentCard = ({
               )}
 
               {/* Case Chip - short on mobile, full on desktop */}
-              {(caseText || editing) && (
+              {(incident.caseNumber || editing) && (
                 editing ? (
                   <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
                     <Hash className="h-3 w-3" aria-hidden />
@@ -404,8 +404,8 @@ export const IncidentCard = ({
                   </div>
                 ) : (
                   <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
-                    <span className="sm:hidden">#{incident.caseNumber}</span>
-                    <span className="hidden sm:inline">Case {incident.caseNumber}</span>
+                    <span className="sm:hidden">{caseTxt.mobile}</span>
+                    <span className="hidden sm:inline">{caseTxt.desktop}</span>
                   </ChipXs>
                 )
               )}
@@ -419,20 +419,18 @@ export const IncidentCard = ({
               </span>
 
               {/* Pin button */}
-              {onTogglePin && (
-                <button
-                  type="button"
-                  className="ml-1 rounded p-1 hover:bg-muted min-h-[32px] min-w-[32px] flex items-center justify-center"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onTogglePin();
-                  }}
-                  aria-pressed={isPinned}
-                  title={isPinned ? "Unpin" : "Pin open"}
-                >
-                  <Pin className={cn("h-3.5 w-3.5", isPinned ? "rotate-45" : "")} />
-                </button>
-              )}
+              <button
+                type="button"
+                className="ml-1 rounded p-1 hover:bg-muted min-h-[32px] min-w-[32px] flex items-center justify-center"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  togglePin(incident.id);
+                }}
+                aria-pressed={pinned}
+                title={pinned ? "Unpin (return to position)" : "Pin to top"}
+              >
+                <Pin className={cn("h-3.5 w-3.5", pinned ? "rotate-45 text-blue-600" : "")} />
+              </button>
             </div>
             </div>
           </div>
