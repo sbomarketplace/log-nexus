@@ -43,24 +43,24 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const qty = count();
 
   return (
-    <div className="flex items-center gap-1.5 sm:gap-2 text-[13px] sm:text-sm whitespace-nowrap w-full py-1.5 px-1">
+    <div className="flex items-center justify-between gap-2 text-[13px] sm:text-sm w-full py-2 px-1 min-w-0">
       {/* Left side: Select all + count + clear */}
-      <div className="flex items-center gap-1.5 sm:gap-2 whitespace-nowrap min-w-0">
-        <label className="inline-flex items-center gap-1.5">
+      <div className="flex items-center gap-2 sm:gap-3 whitespace-nowrap min-w-0 flex-shrink">
+        <label className="inline-flex items-center gap-2 flex-shrink-0">
           <input
             type="checkbox"
             checked={allChecked}
             ref={(el) => { if (el) el.indeterminate = someChecked; }}
             onChange={toggleAll}
             aria-label="Select all visible incidents"
-            className="h-3.5 w-3.5"
+            className="h-4 w-4 flex-shrink-0"
           />
           <span className="leading-none text-foreground/80">Select all</span>
         </label>
 
-        <span className="opacity-50 text-xs">•</span>
+        <span className="opacity-50 flex-shrink-0">•</span>
 
-        <span className="leading-none text-foreground/70">
+        <span className="leading-none text-foreground/70 flex-shrink-0">
           <span className="tabular-nums">{qty}</span> selected
         </span>
 
@@ -69,20 +69,20 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm"
           onClick={clear}
           disabled={isExporting || isDeleting}
-          className="ml-1 text-[13px] h-auto py-0.5 px-1 hover:underline"
+          className="text-[13px] h-auto py-1 px-2 hover:underline flex-shrink-0"
         >
           Clear
         </Button>
       </div>
 
       {/* Right side: Actions */}
-      <div className="ml-auto flex items-center gap-1.5">
+      <div className="flex items-center gap-2 flex-shrink-0">
         <Button 
           variant="default" 
           size="sm" 
           onClick={handleBulkExport}
           disabled={isExporting || isDeleting}
-          className="px-2.5 py-1 text-[13px] h-auto"
+          className="px-3 py-1.5 text-[13px] h-auto whitespace-nowrap"
         >
           {isExporting ? "Exporting..." : "Export"}
         </Button>
@@ -91,7 +91,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
           size="sm" 
           onClick={handleBulkDelete}
           disabled={isExporting || isDeleting}
-          className="px-2.5 py-1 text-[13px] h-auto"
+          className="px-3 py-1.5 text-[13px] h-auto whitespace-nowrap"
         >
           {isDeleting ? "Deleting..." : "Delete"}
         </Button>
