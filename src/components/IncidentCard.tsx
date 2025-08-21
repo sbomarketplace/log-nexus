@@ -294,33 +294,36 @@ export const IncidentCard = ({
       }, 100); // Small delay to ensure DOM is updated
     } else if (isAccordionOpen) {
       // For expand mode, ensure full content is visible above bottom bar
+      // Wait for accordion animation to complete, then use RAF for smooth scroll
       setTimeout(() => {
-        const card = cardRef.current;
-        if (!card) return;
+        requestAnimationFrame(() => {
+          const card = cardRef.current;
+          if (!card) return;
 
-        // Get bottom bar height
-        const barH = Number(getComputedStyle(document.documentElement)
-          .getPropertyValue("--cc-bottom-bar-h")
-          .replace("px", "")) || 72;
+          // Get bottom bar height
+          const barH = Number(getComputedStyle(document.documentElement)
+            .getPropertyValue("--cc-bottom-bar-h")
+            .replace("px", "")) || 72;
 
-        // Calculate viewport and card positions
-        const viewportHeight = window.innerHeight;
-        const availableHeight = viewportHeight - barH - 8; // 8px buffer above bottom bar
-        const cardRect = card.getBoundingClientRect();
-        
-        // Check if card bottom exceeds available space
-        if (cardRect.bottom > availableHeight) {
-          // Calculate how much to scroll to fit the whole card
-          const overflow = cardRect.bottom - availableHeight;
-          const currentScrollY = window.pageYOffset;
-          const targetScrollY = currentScrollY + overflow;
+          // Calculate viewport and card positions
+          const viewportHeight = window.innerHeight;
+          const availableHeight = viewportHeight - barH - 16; // 16px buffer above bottom bar
+          const cardRect = card.getBoundingClientRect();
           
-          window.scrollTo({ 
-            top: targetScrollY, 
-            behavior: "smooth" 
-          });
-        }
-      }, 200); // Increased delay to ensure accordion animation completes
+          // Check if card bottom exceeds available space
+          if (cardRect.bottom > availableHeight) {
+            // Calculate how much to scroll to fit the whole card
+            const overflow = cardRect.bottom - availableHeight;
+            const currentScrollY = window.pageYOffset;
+            const targetScrollY = currentScrollY + overflow;
+            
+            window.scrollTo({ 
+              top: targetScrollY, 
+              behavior: "smooth" 
+            });
+          }
+        });
+      }, 250); // Wait for accordion animation (200ms) plus buffer
     }
   }, [isAccordionOpen, editing]);
 
