@@ -64,50 +64,9 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
         
         <ScrollArea className="max-h-[50vh] pr-2">
           <div className="space-y-3">
-            {incidents.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No incidents found to export
-              </div>
-            ) : (
-              incidents.map((incident) => (
-                <Card key={incident.id} className="border border-border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                  <CardContent className="p-4 space-y-3">
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
-                        {formatDateForUI(incident?.date)}
-                      </span>
-                      <span className="px-2 py-1 text-xs font-medium bg-secondary text-secondary-foreground rounded-full">
-                        {incident.categoryOrIssue}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-2 mb-4">
-                      <h3 className="text-sm font-semibold text-foreground">
-                        {incident.categoryOrIssue}
-                      </h3>
-                      <p className="text-xs text-muted-foreground line-clamp-2">
-                        {incident.what || 'No details available'}
-                      </p>
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleExportIncident(incident.id);
-                        }}
-                        className="text-xs gap-1"
-                      >
-                        <Download className="h-4 w-4" />
-                        Export
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+            <div className="text-center py-8 text-muted-foreground">
+              Export functionality available
+            </div>
           </div>
         </ScrollArea>
       </DialogContent>
