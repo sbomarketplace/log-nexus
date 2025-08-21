@@ -419,17 +419,17 @@ export const IncidentCard = ({
                 <div className="flex flex-wrap items-center gap-x-1.5 gap-y-1 sm:ml-auto">
                   {/* Date Chip */}
                   {editing ? (
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
-                      <CalendarIcon className="h-3 w-3" aria-hidden />
-                      <Input
-                        type="date"
-                        value={draft.datePart || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
-                        className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-24"
-                        aria-label="Incident date"
-                        onClick={(e) => e.stopPropagation()}
-                      />
-                    </div>
+                     <div className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px]">
+                       <CalendarIcon className="h-2.5 w-2.5" aria-hidden />
+                       <Input
+                         type="date"
+                         value={draft.datePart || ""}
+                         onChange={(e) => setDraft(v => ({ ...v, datePart: e.target.value || null }))}
+                         className="bg-white border rounded-full px-1.5 py-0 text-[10px] h-5 w-20"
+                         aria-label="Incident date"
+                         onClick={(e) => e.stopPropagation()}
+                       />
+                     </div>
                   ) : (
                     <ChipXs icon={<CalendarIcon className="h-3.5 w-3.5" aria-hidden />}>
                       {dateChip}
@@ -439,17 +439,17 @@ export const IncidentCard = ({
                   {/* Time Chip */}
                   {(hasTime || editing) && (
                     editing ? (
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
-                        <ClockIcon className="h-3 w-3" aria-hidden />
-                        <Input
-                          type="time"
-                          value={draft.timePart || ""}
-                          onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
-                          className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-16"
-                          aria-label="Incident time"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
+                       <div className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px]">
+                         <ClockIcon className="h-2.5 w-2.5" aria-hidden />
+                         <Input
+                           type="time"
+                           value={draft.timePart || ""}
+                           onChange={(e) => setDraft(v => ({ ...v, timePart: e.target.value || null }))}
+                           className="bg-white border rounded-full px-1.5 py-0 text-[10px] h-5 w-14"
+                           aria-label="Incident time"
+                           onClick={(e) => e.stopPropagation()}
+                         />
+                       </div>
                     ) : (
                       <ChipXs icon={<ClockIcon className="h-3.5 w-3.5" aria-hidden />}>
                         {timeChip}
