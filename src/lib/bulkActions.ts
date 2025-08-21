@@ -147,8 +147,8 @@ export async function bulkDelete() {
     showSuccessToast(`Deleted ${ids.length} incident${ids.length > 1 ? 's' : ''}`);
     clear();
     
-    // Force page refresh to update the incident list
-    window.location.reload();
+    // Trigger a custom event to notify components to reload
+    window.dispatchEvent(new CustomEvent('incidentsUpdated'));
   } catch (error) {
     console.error('Bulk delete failed:', error);
     showErrorToast("Delete failed", "Please try again");

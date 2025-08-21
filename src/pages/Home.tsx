@@ -124,6 +124,14 @@ const Home = () => {
 
   useEffect(() => {
     loadIncidents();
+    
+    // Listen for incidents updates from bulk operations
+    const handleIncidentsUpdated = () => {
+      loadIncidents();
+    };
+    
+    window.addEventListener('incidentsUpdated', handleIncidentsUpdated);
+    
     // Restore quick notes draft from localStorage
     const saved = localStorage.getItem('quickNotesDraft');
     const savedTitle = localStorage.getItem('quickNotesTitleDraft');
@@ -133,6 +141,10 @@ const Home = () => {
     if (savedTitle) {
       setQuickNotesTitle(savedTitle);
     }
+    
+    return () => {
+      window.removeEventListener('incidentsUpdated', handleIncidentsUpdated);
+    };
   }, []);
 
   // Save quick notes draft to localStorage (throttled)
