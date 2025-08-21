@@ -76,7 +76,7 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
       </div>
 
       {/* Right side: Actions with margin to prevent overlap */}
-      <div className="flex items-center gap-2 flex-shrink-0 ml-6">
+      <div className="flex items-center gap-2 flex-shrink-0 ml-8">
         <Button 
           variant="default" 
           size="sm" 
