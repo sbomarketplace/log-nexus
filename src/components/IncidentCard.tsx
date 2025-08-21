@@ -350,7 +350,7 @@ export const IncidentCard = ({
           <AccordionTrigger 
             className={cn(
               "px-3 py-2 sm:px-4 sm:py-3 hover:no-underline",
-              !canToggle && "cursor-default [&[data-state=open]>svg]:rotate-0"
+              !canToggle && "cursor-default [&[data-state=open]>svg]:hidden"
             )}
             disabled={!canToggle}
           >
@@ -466,15 +466,15 @@ export const IncidentCard = ({
             </div>
           </AccordionTrigger>
           
-          {/* Edit mode close button */}
+          {/* Edit mode close button - positioned outside the accordion trigger area */}
           {editing && (
             <button
               type="button"
-              className="absolute right-3 top-3 z-10 inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
+              className="absolute right-2 top-2 z-20 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/90 hover:bg-white border border-neutral-200 shadow-sm transition-colors"
               aria-label="Close edit"
               onClick={handleCancel}
             >
-              <X className="h-4 w-4" />
+              <X className="h-3.5 w-3.5 text-neutral-600" />
             </button>
           )}
           
