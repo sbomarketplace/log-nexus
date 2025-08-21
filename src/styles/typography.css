@@ -1,37 +1,48 @@
 :root{
-  --cc-font-base:16px;
-  --cc-line:1.5;
-  --cc-h1:clamp(20px, 2.2vw, 24px);
-  --cc-h2:clamp(18px, 1.9vw, 20px);
-  --cc-h3:clamp(16px, 1.7vw, 18px);
+  --cc-title: 20px;      /* section titles */
+  --cc-subtitle: 18px;   /* optional secondary headers if needed */
+  --cc-body: 14px;       /* paragraphs and normal text */
+  --cc-label: 14px;      /* form labels */
+  --cc-input: 16px;      /* inputs and textareas to prevent iOS zoom */
+  --cc-meta: 12px;       /* counters, help, overlines */
+  --cc-pill: 12px;       /* chip text */
+  --cc-btn: 14px;        /* button text */
+  --cc-line: 1.5;
 }
 
-/* Shared container for Incident typography */
-.incident-typography{
-  font-size:var(--cc-font-base);
-  line-height:var(--cc-line);
-}
-.incident-typography h1{font-size:var(--cc-h1);line-height:1.3;}
-.incident-typography h2{font-size:var(--cc-h2);line-height:1.35;}
-.incident-typography h3{font-size:var(--cc-h3);line-height:1.4;}
-
-/* Make modals inherit the same scale */
-.cc-modal,
-.cc-modal *{
-  font-size:inherit;
-  line-height:inherit;
+/* Base container that enforces our scale */
+.cc-typography{
+  font-size: var(--cc-body);
+  line-height: var(--cc-line);
 }
 
-/* Form controls at least 16px to avoid iOS zoom */
-.incident-typography input,
-.incident-typography select,
-.incident-typography textarea{
-  font-size:16px;
-  line-height:1.4;
-}
+/* Headings */
+.cc-title{ font-size: var(--cc-title); font-weight: 700; line-height: 1.3; }
+.cc-subtitle{ font-size: var(--cc-subtitle); font-weight: 600; line-height: 1.35; }
 
-/* Field labels consistent sizing */
-.incident-typography .cc-field-label{
-  font-size:inherit;
-  font-weight:600;
+/* Body and labels */
+.cc-body{ font-size: var(--cc-body); }
+.cc-label{ font-size: var(--cc-label); font-weight: 600; }
+
+/* Form controls */
+.cc-input, .cc-textarea, .cc-select{
+  font-size: var(--cc-input);
+  line-height: 1.4;
 }
+.cc-placeholder::placeholder{ font-size: var(--cc-input); }
+
+/* Meta and counters */
+.cc-meta{ font-size: var(--cc-meta); color: #6b7280; } /* neutral-500 */
+
+/* Pills and badges */
+.cc-pill{ font-size: var(--cc-pill); font-weight: 600; }
+
+/* Buttons */
+.cc-btn{ font-size: var(--cc-btn); font-weight: 600; }
+
+/* Make modals inherit */
+.cc-modal, .cc-modal *{ font-size: inherit; line-height: inherit; }
+
+/* Safety: do not let tiny utilities override inputs */
+input, textarea, select{ min-font-size: var(--cc-input); } /* harmless no-op for non-WebKit */
+input, textarea, select{ font-size: var(--cc-input); }     /* enforce 16px on iOS */
