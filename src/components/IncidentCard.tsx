@@ -23,7 +23,7 @@ function ChipXs({ children, icon }: { children: React.ReactNode; icon?: React.Re
         inline-flex items-center gap-1 rounded-full
         bg-muted/80 text-foreground/80
         px-2 py-[3px]
-        text-[11px] sm:text-[12px] leading-tight
+        text-[10px] sm:text-[11px] leading-tight
         max-w-full
       "
     >
