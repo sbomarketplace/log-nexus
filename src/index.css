@@ -368,4 +368,17 @@ All colors MUST be HSL.
   .incident-list > div:last-child[data-state="open"] {
     margin-bottom: calc(var(--cc-bottom-nav-h) + 2px) !important;
   }
+
+  /* Resources page bottom padding to clear bottom nav */
+  .resources-page {
+    padding-bottom: calc(var(--cc-bottom-nav-h) + env(safe-area-inset-bottom) + 16px);
+  }
+
+  /* Resources accordion content - expand in normal flow */
+  .resources-acc-content {
+    position: static;
+    overflow: visible;
+    max-height: none;
+    z-index: auto;
+  }
 }

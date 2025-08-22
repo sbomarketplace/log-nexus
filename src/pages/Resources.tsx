@@ -210,7 +210,7 @@ const Resources = () => {
 
   return (
     <Layout>
-      <div className="space-y-6 -mt-4">
+      <div className="resources-page space-y-6 -mt-4">
         {/* Header */}
         <div>
           <h1 className="text-lg font-medium text-foreground">Resources</h1>
@@ -248,8 +248,8 @@ const Resources = () => {
                     </CardHeader>
                   </CollapsibleTrigger>
                   
-                  <CollapsibleContent className="overflow-visible">
-                    <CardContent className="pt-0 overflow-visible">
+                  <CollapsibleContent className="resources-acc-content">
+                    <CardContent className="pt-0">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {category.resources.map((resource, index) => (
                           <Card 
