@@ -436,7 +436,7 @@ export const ViewIncidentModal = ({
 
   const categoryClass = getCategoryClass(formData.categoryOrIssue || incident?.categoryOrIssue || '');
 
-  // Safe helper to render text with clickable phone numbers
+  // Safe helper to render text with clickable phone numbers  
   function RenderWithPhoneLinks({ text }: { text: unknown }) {
     const html = React.useMemo(() => makePhoneNumbersClickable(text), [text]);
     return <span dangerouslySetInnerHTML={{ __html: html }} />;
