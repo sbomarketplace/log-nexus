@@ -10,6 +10,8 @@ import { CalendarIcon, ClockIcon, Hash, X, FileDown, Trash2 } from 'lucide-react
 import { PillInput } from '@/components/PillInputs';
 import { caseChipText } from '@/lib/caseFormat';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getCategoryOptions } from '@/utils/incidentCategories';
 import { deriveIncidentOccurrence, formatPrimaryChip, formatTimeChip, formatSecondaryCreated, formatRelativeUpdate, hasTimeOnly } from '@/ui/incidentDisplay';
 import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { showSuccessToast, showErrorToast } from '@/lib/showToast';
@@ -536,10 +538,39 @@ export const IncidentCard = ({
                        <div className="text-xs text-foreground/60">
                          Set either date, time, or both. We never default to the current time.
                        </div>
-                     </div>
-                     
-                     <div className="space-y-1.5">
-                       <div className="text-sm font-medium">Who</div>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Category</div>
+                        <Select
+                          value={draft.category || ""}
+                          onValueChange={(value) => setDraft(v => ({ ...v, category: value }))}
+                        >
+                          <SelectTrigger 
+                            className="w-full rounded-xl border px-3 py-2 font-normal"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {getCategoryOptions().map(({ group, items }) => (
+                              <div key={group}>
+                                <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
+                                  {group}
+                                </div>
+                                {items.map((item) => (
+                                  <SelectItem key={item} value={item} className="pl-4">
+                                    {item}
+                                  </SelectItem>
+                                ))}
+                              </div>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Who</div>
                        <Input
                          className="w-full rounded-xl border px-3 py-2 font-normal"
                          placeholder="Comma-separated (e.g., Mark, Troy)"
