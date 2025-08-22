@@ -269,7 +269,8 @@ const AddIncident = () => {
       description: "The incident has been successfully recorded.",
     });
 
-    navigate('/');
+    // Navigate to home page with the new incident opened
+    navigate(`/?incidentId=${incident.id}`);
   };
 
   const handleAIRewrite = async () => {
