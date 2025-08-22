@@ -452,7 +452,7 @@ export const IncidentCard = ({
                           value={draft.caseNumber || ""}
                           onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
                           placeholder="Case"
-                          className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-20"
+                          className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-50"
                           aria-label="Case number"
                           onClick={(e) => e.stopPropagation()}
                         />
