@@ -54,17 +54,7 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
   useEffect(() => {
     if (open) {
       loadData();
-      // Lock background scroll
-      document.body.style.overflow = 'hidden';
-    } else {
-      // Restore background scroll
-      document.body.style.overflow = '';
     }
-    
-    // Cleanup on unmount
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [open]);
 
   const loadData = () => {
@@ -269,7 +259,7 @@ export const EmergencyContactsModal: React.FC<EmergencyContactsModalProps> = ({
         </header>
 
         {/* Modal Body - Scrollable */}
-        <section className="cc-modal__body flex-1 overflow-y-auto px-4 py-3 bg-background" style={{ WebkitOverflowScrolling: 'touch' }}>
+        <section className="cc-modal__body flex-1 overflow-y-auto px-4 py-3 bg-background relative" style={{ WebkitOverflowScrolling: 'touch', scrollBehavior: 'smooth' }}>
           {/* Search */}
           <div className="relative mb-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
