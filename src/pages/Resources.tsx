@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,24 +23,41 @@ const Resources = () => {
   const [selectedResource, setSelectedResource] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
-  const [openSections, setOpenSections] = useState<Record<string, boolean>>({
-    // All sections start closed by default
-    workplace: false,
-    government: false,
-    safety: false,
-    advocacy: false
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
+    // Load from localStorage with fallback to all closed
+    try {
+      const saved = localStorage.getItem('resources_open_sections');
+      return saved ? JSON.parse(saved) : {
+        workplace: false,
+        government: false,
+        safety: false,
+        advocacy: false
+      };
+    } catch {
+      return {
+        workplace: false,
+        government: false,
+        safety: false,
+        advocacy: false
+      };
+    }
   });
 
   const toggleSection = (section: string) => {
-    setOpenSections(prev => {
-      // Close all other sections and toggle this one (accordion behavior)
-      const newState: Record<string, boolean> = {};
-      Object.keys(prev).forEach(key => {
-        newState[key] = key === section ? !prev[section] : false;
-      });
-      return newState;
-    });
+    setOpenSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
   };
+
+  // Save open sections to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('resources_open_sections', JSON.stringify(openSections));
+    } catch (error) {
+      console.warn('Failed to save resources open sections to localStorage:', error);
+    }
+  }, [openSections]);
 
   const openResourceModal = (resource: any) => {
     setSelectedResource(resource);
@@ -231,8 +248,8 @@ const Resources = () => {
                     </CardHeader>
                   </CollapsibleTrigger>
                   
-                  <CollapsibleContent>
-                    <CardContent className="pt-0">
+                  <CollapsibleContent className="overflow-visible">
+                    <CardContent className="pt-0 overflow-visible">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                         {category.resources.map((resource, index) => (
                           <Card 
