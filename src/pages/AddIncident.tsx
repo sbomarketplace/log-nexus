@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { storage } from '@/utils/storage';
-import { Incident } from '@/types/incident';
+import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategoryOptions } from '@/utils/incidentCategories';
@@ -240,29 +239,44 @@ const AddIncident = () => {
       return;
     }
 
-    const incident: Incident = {
+    // Create the incident in OrganizedIncident format
+    const organizedIncident: OrganizedIncident = {
       id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       title: formData.title,
-      date: selectedDateTime.toISOString().split('T')[0], // Keep for backward compatibility 
-      time: selectedDateTime.toTimeString().slice(0, 5), // Keep for backward compatibility
-      dateTime: toUTCISO(selectedDateTime), // New unified field
-      caseNumber: caseNumber.trim() || null, // New case number field
-      summary: formData.what, // Using 'what' as the main summary
-      location: formData.where, // Enhanced: populate location field
-      category: formData.category, // Enhanced: now captured from form
-      peopleInvolved: whoInvolved.filter(person => person.name.trim()).map(person => person.name), // Enhanced: extract names for quick display
-      who: whoInvolved.filter(person => person.name.trim()),
+      date: selectedDateTime.toISOString().split('T')[0], // YYYY-MM-DD format
+      dateTime: toUTCISO(selectedDateTime), // ISO string
+      datePart: selectedDateTime.toISOString().split('T')[0],
+      timePart: selectedDateTime.toTimeString().slice(0, 5), // HH:mm format
+      caseNumber: caseNumber.trim() || undefined,
+      categoryOrIssue: formData.category,
+      who: whoInvolved.filter(person => person.name.trim()).map(p => `${p.name}${p.role ? ` (${p.role})` : ''}`).join(', '),
       what: formData.what,
       where: formData.where,
-      why: formData.why,
-      how: formData.how,
-      witnesses: witnesses.filter(w => w.name.trim()),
-      unionInvolvement: unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()),
-      files: uploadedFiles.map(file => file.name), // In real app, store file references
-      tags: tags,
+      when: selectedDateTime.toTimeString().slice(0, 5), // Time in HH:mm format
+      witnesses: witnesses.filter(w => w.name.trim()).map(w => `${w.name}${w.role ? ` (${w.role})` : ''}`).join(', '),
+      notes: [
+        formData.how && `How: ${formData.how}`,
+        formData.why && `Why: ${formData.why}`,
+        unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()).length > 0 && 
+          `Union: ${unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()).map(ui => 
+            `${ui.name}${ui.union ? ` (${ui.union})` : ''}${ui.role ? ` - ${ui.role}` : ''}${ui.notes ? `: ${ui.notes}` : ''}`
+          ).join('; ')}`,
+        tags.length > 0 && `Tags: ${tags.join(', ')}`
+      ].filter(Boolean).join('\n\n'),
+      quotes: '',
+      requests: '',
+      timeline: '',
+      policy: '',
+      evidence: '',
+      files: uploadedFiles.map(file => file.name),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      canonicalEventDate: toUTCISO(selectedDateTime),
+      originalEventDateText: selectedDateTime.toISOString().split('T')[0],
+      incidentKey: `${formData.category}_${formData.where}_${selectedDateTime.toISOString().split('T')[0]}`.toLowerCase().replace(/[^a-z0-9_]/g, '_')
     };
 
-    storage.saveIncident(incident);
+    organizedIncidentStorage.save(organizedIncident);
     
     toast({
       title: "Incident Reported",
@@ -270,7 +284,7 @@ const AddIncident = () => {
     });
 
     // Navigate to home page with the new incident opened
-    navigate(`/?incidentId=${incident.id}`);
+    navigate(`/?incidentId=${organizedIncident.id}`);
   };
 
   const handleAIRewrite = async () => {
