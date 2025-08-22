@@ -379,7 +379,7 @@ const AddIncident = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6 -mt-4">
+      <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
@@ -726,23 +726,25 @@ const AddIncident = () => {
           </Card>
 
           {/* Submit Actions */}
-          <div className="space-y-3">
-            <Button 
-              type="submit" 
-              className="w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
-              disabled={Object.keys(errors).length > 0}
-            >
-              Save Incident
-            </Button>
-            
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={() => navigate('/')}
-              className="w-full"
-            >
-              Cancel
-            </Button>
+          <div className="add-incident-btnbar">
+            <div className="stack">
+              <Button 
+                type="submit" 
+                className="btn btn-primary w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
+                disabled={Object.keys(errors).length > 0}
+              >
+                Save Incident
+              </Button>
+              
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => navigate('/')}
+                className="btn w-full"
+              >
+                Cancel
+              </Button>
+            </div>
           </div>
         </form>
       </div>
