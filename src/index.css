@@ -342,8 +342,8 @@ All colors MUST be HSL.
 
   /* Form content can scroll past the nav; keep normal layout */
   .add-incident-content {
-    /* small extra cushion for the page bottom in general */
-    padding-bottom: 16px;
+    /* Remove extra padding since spacer handles all bottom spacing */
+    padding-bottom: 0;
   }
 
   /* Static button block (on the form layer) */
