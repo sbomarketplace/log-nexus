@@ -21,8 +21,16 @@ export const storage = {
       if (existingIndex >= 0) {
         incidents[existingIndex] = incident;
       } else {
-        incidents.push(incident);
+        // Add new incidents to the beginning of the array
+        incidents.unshift(incident);
       }
+      
+      // Sort by date/dateTime descending (newest first) to ensure proper ordering
+      incidents.sort((a, b) => {
+        const aDate = new Date(a.dateTime || a.date || 0).getTime();
+        const bDate = new Date(b.dateTime || b.date || 0).getTime();
+        return bDate - aDate; // newest first
+      });
       
       localStorage.setItem(STORAGE_KEY, JSON.stringify(incidents));
     } catch (error) {

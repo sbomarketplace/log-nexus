@@ -42,6 +42,7 @@ All colors MUST be HSL.
     --radius: 0.5rem;
 
     --cc-bottom-bar-h: 72px;
+    --cc-bottom-nav-h: 72px; /* fallback */
 
     --sidebar-background: 0 0% 98%;
 
@@ -349,4 +350,15 @@ All colors MUST be HSL.
   .incident-list > div:last-child[data-state="open"] {
     margin-bottom: calc(var(--cc-bottom-bar-h) + 2px) !important;
   }
+
+/* Add Incident page styles */
+.add-incident-content {
+  padding-bottom: calc(var(--cc-bottom-nav-h) + 96px + env(safe-area-inset-bottom));
+}
+
+.add-incident-sticky {
+  position: sticky;
+  bottom: calc(var(--cc-bottom-nav-h) + env(safe-area-inset-bottom) + 8px);
+  z-index: 30;
+}
 }
