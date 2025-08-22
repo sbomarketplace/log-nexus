@@ -726,26 +726,27 @@ const AddIncident = () => {
           </Card>
 
           {/* Submit Actions */}
-          <div className="add-incident-btnbar">
-            <div className="stack">
-              <Button 
-                type="submit" 
-                className="btn btn-primary w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
-                disabled={Object.keys(errors).length > 0}
-              >
-                Save Incident
-              </Button>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate('/')}
-                className="btn w-full"
-              >
-                Cancel
-              </Button>
-            </div>
+          <div className="add-incident-actions">
+            <Button 
+              type="submit" 
+              className="w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
+              disabled={Object.keys(errors).length > 0}
+            >
+              Save Incident
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => navigate('/')}
+              className="w-full"
+            >
+              Cancel
+            </Button>
           </div>
+
+          {/* This spacer MUST come immediately after the buttons */}
+          <div className="add-incident-bottom-spacer" aria-hidden="true" />
         </form>
       </div>
     </Layout>
