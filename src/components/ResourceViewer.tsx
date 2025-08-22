@@ -97,7 +97,7 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] mx-auto my-4 px-8 flex flex-col resource-viewer-content rounded-lg" showClose={false}>
+      <DialogContent className="max-w-4xl max-h-[90vh] mx-auto my-4 px-16 flex flex-col resource-viewer-content rounded-lg" showClose={false}>
         <DialogHeader className="py-4 border-b resource-viewer-header flex-shrink-0">
           <div className="flex flex-col items-center gap-4">
             <DialogTitle className="text-xl font-semibold text-center">{title}</DialogTitle>
