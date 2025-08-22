@@ -97,8 +97,8 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 resource-viewer-content">
-        <DialogHeader className="px-6 py-4 border-b resource-viewer-header">
+      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 resource-viewer-content" showClose={false}>
+        <DialogHeader className="px-6 py-4 border-b resource-viewer-header flex-shrink-0">
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl font-semibold">{title}</DialogTitle>
             <div className="flex items-center gap-2 resource-viewer-actions no-print">
@@ -132,7 +132,7 @@ export const ResourceViewer: React.FC<ResourceViewerProps> = ({
           </div>
         </DialogHeader>
         
-        <div className="overflow-y-auto flex-1 px-6 py-4">
+        <div className="overflow-y-auto flex-1 px-6 py-4 min-h-0">
           {loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="text-muted-foreground">Loading content...</div>
