@@ -436,11 +436,11 @@ export const ViewIncidentModal = ({
 
   const categoryClass = getCategoryClass(formData.categoryOrIssue || incident?.categoryOrIssue || '');
 
-  // Function to render text with clickable phone numbers
-  const renderTextWithPhoneLinks = (text: string) => {
-    const htmlWithPhoneLinks = makePhoneNumbersClickable(text);
-    return <span dangerouslySetInnerHTML={{ __html: htmlWithPhoneLinks }} />;
-  };
+  // Safe helper to render text with clickable phone numbers
+  function RenderWithPhoneLinks({ text }: { text: unknown }) {
+    const html = React.useMemo(() => makePhoneNumbersClickable(text), [text]);
+    return <span dangerouslySetInnerHTML={{ __html: html }} />;
+  }
 
   // Early return AFTER all hooks are declared to maintain consistent hook order
   // Use mounting guard to prevent hydration mismatches
@@ -653,13 +653,13 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {whoList.length > 0 ? (
-                        renderTextWithPhoneLinks(formatWhoList(whoList))
-                      ) : (
-                        <span className="text-muted-foreground">Not specified</span>
-                      )}
-                    </p>
+                     <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                       {whoList.length > 0 ? (
+                         <RenderWithPhoneLinks text={formatWhoList(whoList)} />
+                       ) : (
+                         <span className="text-muted-foreground">Not specified</span>
+                       )}
+                     </p>
                   )}
                 </div>
               )}
@@ -679,9 +679,9 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {renderTextWithPhoneLinks(incident.what)}
-                    </p>
+                     <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                       <RenderWithPhoneLinks text={incident.what} />
+                     </p>
                   )}
                 </div>
               )}
@@ -700,9 +700,9 @@ export const ViewIncidentModal = ({
                       className="text-base"
                     />
                   ) : (
-                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {renderTextWithPhoneLinks(incident.where)}
-                    </p>
+                     <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                       <RenderWithPhoneLinks text={incident.where} />
+                     </p>
                   )}
                 </div>
               )}
@@ -758,9 +758,9 @@ export const ViewIncidentModal = ({
                       rows={2}
                     />
                   ) : (
-                    <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                      {renderTextWithPhoneLinks(incident.witnesses)}
-                    </p>
+                     <p className="leading-snug break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                       <RenderWithPhoneLinks text={incident.witnesses} />
+                     </p>
                   )}
                 </div>
               )}
@@ -780,9 +780,9 @@ export const ViewIncidentModal = ({
                         rows={3}
                       />
                     ) : (
-                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                        {renderTextWithPhoneLinks(incident.timeline)}
-                      </p>
+                       <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                         <RenderWithPhoneLinks text={incident.timeline} />
+                       </p>
                     )}
                   </div>
                 </>
@@ -803,9 +803,9 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                        {renderTextWithPhoneLinks(incident.requests)}
-                      </p>
+                       <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                         <RenderWithPhoneLinks text={incident.requests} />
+                       </p>
                     )}
                   </div>
                 </>
@@ -826,9 +826,9 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                        {renderTextWithPhoneLinks(incident.policy)}
-                      </p>
+                       <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                         <RenderWithPhoneLinks text={incident.policy} />
+                       </p>
                     )}
                   </div>
                 </>
@@ -849,9 +849,9 @@ export const ViewIncidentModal = ({
                         rows={2}
                       />
                     ) : (
-                      <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                        {renderTextWithPhoneLinks(incident.evidence)}
-                      </p>
+                       <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                         <RenderWithPhoneLinks text={incident.evidence} />
+                       </p>
                     )}
                   </div>
                 </>
@@ -879,9 +879,9 @@ export const ViewIncidentModal = ({
                     )}
                   </>
                 ) : (
-                  <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
-                    {renderTextWithPhoneLinks(incident.notes)}
-                  </p>
+                   <p className="leading-snug whitespace-pre-wrap break-words overflow-wrap-anywhere text-slate-900 dark:text-slate-100">
+                     <RenderWithPhoneLinks text={incident.notes} />
+                   </p>
                 )}
               </div>
             </div>
