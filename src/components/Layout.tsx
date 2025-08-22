@@ -1,4 +1,4 @@
-import { ReactNode, useRef, useLayoutEffect } from 'react';
+import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { HomeIcon, PlusIcon, FileIcon, SettingsIcon } from './icons/CustomIcons';
 import { Footer } from './Footer';
@@ -10,22 +10,6 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
-  const bottomNavRef = useRef<HTMLDivElement>(null);
-
-  // Measure bottom nav height and expose as CSS variable
-  useLayoutEffect(() => {
-    const el = bottomNavRef.current;
-    if (!el) return;
-    
-    const setVar = () => {
-      document.documentElement.style.setProperty("--cc-bottom-nav-h", `${el.offsetHeight}px`);
-    };
-    
-    setVar();
-    const ro = new ResizeObserver(setVar);
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
 
   const navItems = [
     { path: '/', icon: HomeIcon, label: 'Home' },
@@ -79,7 +63,7 @@ export const Layout = ({ children }: LayoutProps) => {
       </main>
 
       {/* Mobile navigation */}
-      <div ref={bottomNavRef} className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border/50 z-40 rounded-t-lg shadow-lg">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border/50 z-40 rounded-t-lg shadow-lg">
         <div className="flex justify-around items-center px-4 py-3">
           {navItems.map(({ path, icon: Icon, label }) => (
             <Link

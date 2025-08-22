@@ -17,8 +17,6 @@ import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/dateti
 import { Wand2, Loader2 } from 'lucide-react';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
 import { cn } from '@/lib/utils';
-import { incidentService } from '@/services/incidents';
-import { showSuccessToast, showErrorToast } from '@/lib/showToast';
 
 
 interface Person {
@@ -63,7 +61,6 @@ const AddIncident = () => {
   const [newTag, setNewTag] = useState('');
   const [isRewriting, setIsRewriting] = useState(false);
   const [rewriteError, setRewriteError] = useState<string>('');
-  const [isSaving, setIsSaving] = useState(false);
 
   const validateAndSubmit = () => {
     const t = (formData.title || "").trim();
@@ -236,52 +233,43 @@ const AddIncident = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateAndSubmit()) {
       return;
     }
 
-    setIsSaving(true);
+    const incident: Incident = {
+      id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      title: formData.title,
+      date: selectedDateTime.toISOString().split('T')[0], // Keep for backward compatibility 
+      time: selectedDateTime.toTimeString().slice(0, 5), // Keep for backward compatibility
+      dateTime: toUTCISO(selectedDateTime), // New unified field
+      caseNumber: caseNumber.trim() || null, // New case number field
+      summary: formData.what, // Using 'what' as the main summary
+      location: formData.where, // Enhanced: populate location field
+      category: formData.category, // Enhanced: now captured from form
+      peopleInvolved: whoInvolved.filter(person => person.name.trim()).map(person => person.name), // Enhanced: extract names for quick display
+      who: whoInvolved.filter(person => person.name.trim()),
+      what: formData.what,
+      where: formData.where,
+      why: formData.why,
+      how: formData.how,
+      witnesses: witnesses.filter(w => w.name.trim()),
+      unionInvolvement: unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()),
+      files: uploadedFiles.map(file => file.name), // In real app, store file references
+      tags: tags,
+    };
 
-    try {
-      // Create incident for local storage and immediate UI update
-      const incidentId = `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
-      const incident: Incident = {
-        id: incidentId,
-        title: formData.title,
-        date: selectedDateTime.toISOString().split('T')[0], // Keep for backward compatibility 
-        time: selectedDateTime.toTimeString().slice(0, 5), // Keep for backward compatibility
-        dateTime: toUTCISO(selectedDateTime), // New unified field
-        caseNumber: caseNumber.trim() || null, // New case number field
-        summary: formData.what, // Using 'what' as the main summary
-        location: formData.where, // Enhanced: populate location field
-        category: formData.category, // Enhanced: now captured from form
-        peopleInvolved: whoInvolved.filter(person => person.name.trim()).map(person => person.name), // Enhanced: extract names for quick display
-        who: whoInvolved.filter(person => person.name.trim()),
-        what: formData.what,
-        where: formData.where,
-        why: formData.why,
-        how: formData.how,
-        witnesses: witnesses.filter(w => w.name.trim()),
-        unionInvolvement: unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()),
-        files: uploadedFiles.map(file => file.name), // In real app, store file references
-        tags: tags,
-      };
+    storage.saveIncident(incident);
+    
+    toast({
+      title: "Incident Reported",
+      description: "The incident has been successfully recorded.",
+    });
 
-      // Save to local storage - this ensures new incidents appear at top
-      storage.saveIncident(incident);
-      
-      showSuccessToast("Incident Reported", "The incident has been successfully recorded.");
-      navigate('/');
-    } catch (error) {
-      console.error('Error saving incident:', error);
-      showErrorToast("Save Failed", "There was an error saving the incident. Please try again.");
-    } finally {
-      setIsSaving(false);
-    }
+    navigate('/');
   };
 
   const handleAIRewrite = async () => {
@@ -391,7 +379,7 @@ const AddIncident = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6 -mt-4 add-incident-content">
+      <div className="max-w-4xl mx-auto space-y-6 -mt-4">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
@@ -737,34 +725,24 @@ const AddIncident = () => {
             </CardContent>
           </Card>
 
-          {/* Sticky Save Button */}
-          <div className="add-incident-sticky mt-4">
-            <div className="bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-4 rounded-t-xl border-t border-border space-y-3">
-              <Button 
-                type="submit" 
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white rounded-xl px-4 py-4 text-base font-medium transition-colors"
-                disabled={Object.keys(errors).length > 0 || isSaving}
-              >
-                {isSaving ? (
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    Saving...
-                  </div>
-                ) : (
-                  'Save Incident'
-                )}
-              </Button>
-              
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => navigate('/')}
-                className="w-full"
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-            </div>
+          {/* Submit Actions */}
+          <div className="space-y-3">
+            <Button 
+              type="submit" 
+              className="w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
+              disabled={Object.keys(errors).length > 0}
+            >
+              Save Incident
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => navigate('/')}
+              className="w-full"
+            >
+              Cancel
+            </Button>
           </div>
         </form>
       </div>
