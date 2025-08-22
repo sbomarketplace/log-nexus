@@ -443,37 +443,40 @@ export const IncidentCard = ({
                    )}
 
                   {/* Case Chip - short on mobile, full on desktop */}
-                  {(incident.caseNumber || editing) && (
-                    editing ? (
-                      <div className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs">
-                        <Hash className="h-3 w-3" aria-hidden />
-                        <Input
-                          type="text"
-                          value={draft.caseNumber || ""}
-                          onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
-                          placeholder="Case"
-                          className="bg-white border rounded-full px-2 py-0 text-xs h-6 w-20"
-                          aria-label="Case number"
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                      </div>
-                    ) : (
-                      <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
-                        <span className="sm:hidden chip-xs-text">{caseMobile}</span>
-                        <span className="hidden sm:inline chip-xs-text">{caseDesktop}</span>
-                      </ChipXs>
-                    )
+                  {!editing && incident.caseNumber && (
+                    <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
+                      <span className="sm:hidden chip-xs-text">{caseMobile}</span>
+                      <span className="hidden sm:inline chip-xs-text">{caseDesktop}</span>
+                    </ChipXs>
                   )}
 
                   {/* Category Pill - compact */}
-                  <span className={cn(
-                    getCategoryTagClass(incident.categoryOrIssue),
-                    "text-white text-[10px] sm:text-[11px] font-medium h-4 sm:h-5 px-1.5 rounded-full flex items-center justify-center break-words min-w-0"
-                  )}>
-                    {incident.categoryOrIssue}
-                  </span>
+                  {!editing && (
+                    <span className={cn(
+                      getCategoryTagClass(incident.categoryOrIssue),
+                      "text-white text-[10px] sm:text-[11px] font-medium h-4 sm:h-5 px-1.5 rounded-full flex items-center justify-center break-words min-w-0"
+                    )}>
+                      {incident.categoryOrIssue}
+                    </span>
+                  )}
                 </div>
               </div>
+              
+              {/* Full-width case number input in edit mode */}
+              {editing && (
+                <div className="w-full mt-2 flex items-center gap-2 rounded-full bg-muted/50 px-3 py-2">
+                  <Hash className="h-4 w-4 text-muted-foreground flex-shrink-0" aria-hidden />
+                  <Input
+                    type="text"
+                    value={draft.caseNumber || ""}
+                    onChange={(e) => setDraft(v => ({ ...v, caseNumber: sanitizeCase(e.target.value) }))}
+                    placeholder="Case number"
+                    className="bg-white border rounded-md px-3 py-1 text-sm h-8 flex-1"
+                    aria-label="Case number"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
+              )}
             </div>
           </AccordionTrigger>
           
