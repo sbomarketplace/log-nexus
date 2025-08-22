@@ -78,6 +78,12 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
       label: 'Save to Device',
       icon: Save,
       action: () => executeExport('save', () => exportPDFToDevice(incident))
+    },
+    {
+      id: 'share',
+      label: 'Share…',
+      icon: Share,
+      action: () => executeExport('share', () => shareIncident(incident))
     }
   ];
 

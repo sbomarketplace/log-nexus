@@ -2,6 +2,8 @@ import jsPDF from "jspdf";
 import { Document, Packer, Paragraph, HeadingLevel, TextRun } from "docx";
 import { deriveIncidentTime, formatHHMMForUI, normalizeTimeToHHMM } from "@/utils/datetime";
 import { briefIncidentSummary } from "@/utils/briefSummary";
+import { isNative, nativeSaveFile, nativeToast, nativeEmail, nativePrint, nativeSMS, nativeShareFile } from "@/utils/native";
+import { showSuccessToast, showErrorToast } from "@/lib/showToast";
 
 type Incident = {
   id: string;
@@ -77,6 +79,19 @@ function downloadBlob(blob: Blob, filename: string) {
 
 export async function exportTXT(incident: Incident) {
   const txt = buildPlainText(incident);
+  
+  // Native: Send via SMS
+  if (isNative) {
+    try {
+      await nativeSMS({ body: txt });
+      return;
+    } catch (error) {
+      console.warn("Native SMS failed, falling back to web download:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Download TXT file
   downloadBlob(new Blob([txt], { type: "text/plain" }), `incident_${incident.id}.txt`);
 }
 
@@ -96,6 +111,20 @@ export async function exportPDF(incident: Incident) {
     }
   }
   const blob = doc.output("blob");
+  
+  // Native: Save to Files
+  if (isNative) {
+    try {
+      await nativeSaveFile(blob, `incident_${incident.id}.pdf`);
+      await nativeToast("Successfully saved to Files as PDF.");
+      return blob;
+    } catch (error) {
+      console.warn("Native PDF save failed, falling back to web download:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Download PDF
   downloadBlob(blob, `incident_${incident.id}.pdf`);
   return blob;
 }
@@ -141,6 +170,43 @@ export async function exportDOCX(incident: Incident) {
 export async function exportPrint(incident: Incident) {
   const category = incident.categoryOrIssue ?? incident.category ?? "";
   
+  // Native: Use native print dialog
+  if (isNative) {
+    try {
+      const html = `
+<!doctype html><html><head>
+<meta charset="utf-8"/>
+<title>Incident ${incident.id}</title>
+<style>
+  body{font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding:24px;}
+  h1,h2{margin:0 0 8px;}
+  .group{margin:14px 0;}
+  .label{font-weight:600;margin-bottom:4px;}
+  pre{white-space:pre-wrap;}
+</style>
+</head><body>
+  <h1>Incident Report</h1>
+  <div class="group"><div class="label">ID</div>${incident.id}</div>
+  <div class="group"><div class="label">Date</div>${fmtDate(incident.date)}</div>
+  <div class="group"><div class="label">Time</div>${fmtTime(incident)}</div>
+  <div class="group"><div class="label">Category</div>${category}</div>
+  <div class="group"><div class="label">Summary</div><pre>${briefIncidentSummary(incident)}</pre></div>
+  <div class="group"><div class="label">Who</div><pre>${incident.who ?? ""}</pre></div>
+  <div class="group"><div class="label">What</div><pre>${incident.what ?? ""}</pre></div>
+  <div class="group"><div class="label">Where</div><pre>${incident.where ?? ""}</pre></div>
+  <div class="group"><div class="label">Witnesses</div><pre>${incident.witnesses ?? ""}</pre></div>
+  <div class="group"><div class="label">Notes</div><pre>${incident.notes ?? ""}</pre></div>
+  <div class="group"><div class="label">Incident Summary</div><pre>${incident.summary ?? ""}</pre></div>
+</body></html>`;
+      await nativePrint({ html });
+      return;
+    } catch (error) {
+      console.warn("Native print failed, falling back to web print:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Open print window
   const html = `
 <!doctype html><html><head>
 <meta charset="utf-8"/>
@@ -175,8 +241,22 @@ export async function exportPrint(incident: Incident) {
 }
 
 export async function exportPDFToDevice(incident: Incident) {
+  // Native: Save TXT to device (overriding PDF for "Save to Device" button to be TXT/SMS functionality)
+  if (isNative) {
+    try {
+      const txt = buildPlainText(incident);
+      const blob = new Blob([txt], { type: "text/plain" });
+      await nativeSaveFile(blob, `incident_${incident.id}.txt`);
+      await nativeToast("Successfully saved to device.");
+      return;
+    } catch (error) {
+      console.warn("Native TXT save failed, falling back to PDF:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Try Web Share with PDF or download
   const blob = await exportPDF(incident);
-  // Try Web Share with file for a better mobile save flow
   const file = new File([blob], `incident_${incident.id}.pdf`, { type: "application/pdf" });
   if ((navigator as any).canShare?.({ files: [file] })) {
     try { await (navigator as any).share({ files: [file], title: "Incident Report" }); return; } catch {}
@@ -185,6 +265,20 @@ export async function exportPDFToDevice(incident: Incident) {
 }
 
 export async function shareIncident(incident: Incident) {
+  // Native: Share PDF via native share sheet
+  if (isNative) {
+    try {
+      const blob = await exportPDF(incident);
+      const file = new File([blob], `incident_${incident.id}.pdf`, { type: "application/pdf" });      
+      await nativeShareFile(file, buildPlainText(incident), "Incident Report");
+      return;
+    } catch (error) {
+      console.warn("Native share failed, falling back to web share:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Web Share API
   const txt = buildPlainText(incident);
   if (navigator.share) {
     try { await navigator.share({ title: "Incident Report", text: txt }); return; } catch {}
@@ -193,7 +287,22 @@ export async function shareIncident(incident: Incident) {
 }
 
 export async function emailIncident(incident: Incident) {
-  // Try to attach PDF via Web Share files on mobile
+  // Native: Use native email composer with PDF attachment
+  if (isNative) {
+    try {
+      const blob = await exportPDF(incident);
+      const file = new File([blob], `incident_${incident.id}.pdf`, { type: "application/pdf" });
+      const subject = `Incident Report ${incident.id}`;
+      const body = `Summary: ${briefIncidentSummary(incident)}\n\n${buildPlainText(incident)}`;
+      await nativeEmail({ subject, body, files: [file] });
+      return;
+    } catch (error) {
+      console.warn("Native email failed, falling back to web share/mailto:", error);
+      showErrorToast("Something went wrong. Please try again.");
+    }
+  }
+  
+  // Web fallback: Try Web Share with files or mailto
   const blob = await exportPDF(incident);
   const file = new File([blob], `incident_${incident.id}.pdf`, { type: "application/pdf" });
   if ((navigator as any).canShare?.({ files: [file] })) {
