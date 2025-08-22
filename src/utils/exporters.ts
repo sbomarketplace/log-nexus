@@ -474,3 +474,82 @@ export async function exportBulkPrint(incidents: any[], opts: BulkExportOptions 
   w.document.write(html);
   w.document.close();
 }
+
+// Export HTML content to PDF for resource documents
+export async function exportHtmlToPdf(title: string, htmlElement: HTMLElement) {
+  const doc = new jsPDF();
+  const margins = { left: 14, top: 18, right: 14, bottom: 18 };
+  const pageWidth = doc.internal.pageSize.getWidth() - margins.left - margins.right;
+  
+  // Create a clean filename from title
+  const filename = title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '_')
+    .substring(0, 50) + '.pdf';
+
+  // Extract text content and convert to PDF
+  const textContent = htmlElement.innerText || htmlElement.textContent || '';
+  const lines = textContent.split('\n').filter(line => line.trim());
+  
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  
+  let y = margins.top;
+  const lineHeight = 7;
+  const maxY = doc.internal.pageSize.getHeight() - margins.bottom;
+  
+  // Add title
+  doc.setFontSize(16);
+  doc.setFont("helvetica", "bold");
+  const titleLines = doc.splitTextToSize(title, pageWidth);
+  for (const titleLine of titleLines) {
+    if (y > maxY - 10) {
+      doc.addPage();
+      y = margins.top;
+    }
+    doc.text(titleLine, margins.left, y);
+    y += lineHeight + 2;
+  }
+  
+  y += 5; // Extra space after title
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  
+  // Add content
+  for (const line of lines) {
+    if (!line.trim()) {
+      y += lineHeight / 2; // Smaller space for empty lines
+      continue;
+    }
+    
+    // Check if it's a heading (starts with #)
+    if (line.startsWith('#')) {
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      y += 3; // Extra space before headings
+    } else {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(12);
+    }
+    
+    const wrappedLines = doc.splitTextToSize(line.replace(/^#+\s*/, ''), pageWidth);
+    for (const wrappedLine of wrappedLines) {
+      if (y > maxY - 10) {
+        doc.addPage();
+        y = margins.top;
+      }
+      doc.text(wrappedLine, margins.left, y);
+      y += lineHeight;
+    }
+    
+    // Reset font after headings
+    if (line.startsWith('#')) {
+      y += 2; // Extra space after headings
+    }
+  }
+  
+  const blob = doc.output("blob");
+  downloadBlob(blob, filename);
+  return blob;
+}

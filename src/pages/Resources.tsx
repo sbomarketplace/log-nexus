@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ResourceModal } from '@/components/ResourceModal';
 import { EmergencyContactsModal } from '@/components/EmergencyContactsModal';
+import { ResourceViewer } from '@/components/ResourceViewer';
 import { 
   FileIcon, 
   ChevronDown, 
@@ -23,6 +24,8 @@ const Resources = () => {
   const [selectedResource, setSelectedResource] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
+  const [resourceViewerOpen, setResourceViewerOpen] = useState(false);
+  const [viewerConfig, setViewerConfig] = useState<{ title: string; mdPath: string }>({ title: '', mdPath: '' });
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(() => {
     // Load from localStorage with fallback to all closed
     try {
@@ -64,6 +67,11 @@ const Resources = () => {
     setModalOpen(true);
   };
 
+  const openResourceViewer = (title: string, mdPath: string) => {
+    setViewerConfig({ title, mdPath });
+    setResourceViewerOpen(true);
+  };
+
   const resourceCategories = {
     workplace: {
       title: 'Workplace Incident Documentation',
@@ -74,7 +82,9 @@ const Resources = () => {
           description: 'Comprehensive guide on proper workplace incident documentation',
           fullDescription: 'This comprehensive guide provides step-by-step instructions for documenting workplace incidents, including required information, proper forms, timelines, and best practices for accurate reporting.',
           purpose: 'Ensures consistent and thorough documentation of workplace incidents for legal compliance, safety analysis, and prevention of future occurrences.',
-          type: 'PDF Guide'
+          type: 'PDF Guide',
+          isViewable: true,
+          mdPath: 'incident-reporting-guidelines.md'
         },
         {
           title: 'Emergency Contact List',
@@ -90,7 +100,9 @@ const Resources = () => {
           description: 'Step-by-step checklist for conducting incident investigations',
           fullDescription: 'A detailed checklist covering all aspects of workplace incident investigation including evidence collection, witness interviews, root cause analysis, and corrective action planning.',
           purpose: 'Ensures thorough and systematic investigation of workplace incidents to identify causes and prevent recurrence.',
-          type: 'Checklist'
+          type: 'Checklist',
+          isViewable: true,
+          mdPath: 'investigation-checklist.md'
         }
       ]
     },
@@ -258,6 +270,8 @@ const Resources = () => {
                             onClick={() => {
                               if (resource.isInteractive && resource.action) {
                                 resource.action();
+                              } else if (resource.isViewable && resource.mdPath) {
+                                openResourceViewer(resource.title, resource.mdPath);
                               } else {
                                 openResourceModal(resource);
                               }
@@ -304,6 +318,14 @@ const Resources = () => {
         <EmergencyContactsModal
           open={contactsModalOpen}
           onOpenChange={setContactsModalOpen}
+        />
+
+        {/* Resource Viewer */}
+        <ResourceViewer
+          open={resourceViewerOpen}
+          onOpenChange={setResourceViewerOpen}
+          title={viewerConfig.title}
+          mdPath={viewerConfig.mdPath}
         />
       </div>
     </Layout>
