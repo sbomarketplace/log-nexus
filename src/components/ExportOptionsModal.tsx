@@ -78,13 +78,6 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
       label: 'Save to Device',
       icon: Save,
       action: () => executeExport('save', () => exportPDFToDevice(incident))
-    },
-    {
-      id: 'share',
-      label: 'Share…',
-      icon: Share,
-      action: () => executeExport('share', () => shareIncident(incident)),
-      disabled: !navigator.share
     }
   ];
 
@@ -109,7 +102,7 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           {exportOptions.map((option) => {
             const Icon = option.icon;
             const isLoading = loadingOption === option.id;
-            const isDisabled = option.disabled || isLoading;
+            const isDisabled = (option as any).disabled || isLoading;
 
             return (
               <Button
