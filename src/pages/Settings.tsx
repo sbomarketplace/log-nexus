@@ -43,6 +43,7 @@ import {
 } from '@/utils/native';
 import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
+import IntegrationsCard from '@/components/settings/IntegrationsCard';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -541,9 +542,7 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              <div className="text-sm text-muted-foreground">
-                Integrations coming soon...
-              </div>
+              <IntegrationsCard />
             </AccordionContent>
           </AccordionItem>
 
