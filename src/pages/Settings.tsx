@@ -42,7 +42,9 @@ import {
   nativeEmail
 } from '@/utils/native';
 import { Layout } from '@/components/Layout';
+import SupportLegalModal from '@/components/SupportLegalModal';
 import '../styles/settings.css';
+import '../styles/modal.css';
 
 type PricingButtonProps = {
   price: string;
@@ -116,6 +118,7 @@ const Settings = () => {
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [cacheInfo, setCacheInfo] = useState({ size: 0, itemCount: 0 });
+  const [supportLegalOpen, setSupportLegalOpen] = useState(false);
 
   // Helper function for AI report unit labels
   const unitLabel = (n: number) => n === 1 ? "AI report" : "AI reports";
@@ -553,8 +556,18 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              <div className="text-sm text-muted-foreground">
-                Support options coming soon...
+              {/* Support & Legal */}
+              <div 
+                className="settings-row cursor-pointer hover:bg-muted/20"
+                onClick={() => setSupportLegalOpen(true)}
+              >
+                <div className="settings-row-label">
+                  <span className="settings-row-title">Support & Legal</span>
+                  <span className="settings-row-description">
+                    Terms, Privacy, Contact Support, Rate App
+                  </span>
+                </div>
+                <ChevronRight className="h-4 w-4 text-muted-foreground" />
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -581,6 +594,11 @@ const Settings = () => {
             </Button>
           </div>
         </FloatingModal>
+
+        {/* Support & Legal Modal */}
+        {supportLegalOpen && (
+          <SupportLegalModal onClose={() => setSupportLegalOpen(false)} />
+        )}
       </div>
     </Layout>
   );
