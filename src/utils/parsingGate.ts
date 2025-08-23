@@ -65,8 +65,9 @@ export const getPlanDisplayInfo = (): {
   
   // Free plan
   const freeRemaining = Math.max(0, 3 - parsing.lifetimeUsed);
+  const unitText = freeRemaining === 1 ? 'AI report' : 'AI reports';
   return {
-    displayText: `${freeRemaining} free parsings remaining`,
+    displayText: `${freeRemaining} free ${unitText} remaining`,
     isUnlimited: false,
     remaining: freeRemaining
   };

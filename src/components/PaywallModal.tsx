@@ -47,7 +47,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
     >
       <div className="cc-float-modal">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">Parsing limit reached</h2>
+          <h2 className="text-xl font-semibold text-foreground">AI report limit reached</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -60,15 +60,15 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
 
         <div className="mb-6">
           <p className="text-sm text-muted-foreground mb-2">
-            You've used your 3 free parsings. Manual logging is always free.
+            You've used your 3 free AI reports. Manual logging is always free.
           </p>
           <p className="text-xs text-muted-foreground">
-            Choose a plan to continue using AI-powered incident parsing:
+            Choose a plan to continue using AI-powered incident reports:
           </p>
         </div>
 
         <div className="space-y-3 mb-6">
-          {/* Get 5 parsings */}
+          {/* Get 5 AI reports */}
           <Button
             onClick={() => handlePurchase('pack5', buyPack5)}
             disabled={loading !== null}
@@ -76,7 +76,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
             variant="outline"
           >
             <div>
-              <div className="font-medium">Get 5 parsings</div>
+              <div className="font-medium">Get 5 AI reports</div>
               <div className="text-xs text-muted-foreground">Perfect for occasional use</div>
             </div>
             <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
             </div>
           </Button>
 
-          {/* Get 60 parsings */}
+          {/* Get 60 AI reports */}
           <Button
             onClick={() => handlePurchase('pack60', buyPack60)}
             disabled={loading !== null}
@@ -93,7 +93,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
             variant="outline"
           >
             <div>
-              <div className="font-medium">Get 60 parsings</div>
+              <div className="font-medium">Get 60 AI reports</div>
               <div className="text-xs text-muted-foreground">Best value for regular users</div>
             </div>
             <div className="flex items-center gap-2">
@@ -110,7 +110,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           >
             <div>
               <div className="font-medium text-primary-foreground">Go Unlimited</div>
-              <div className="text-xs text-primary-foreground/80">Unlimited parsing for power users</div>
+              <div className="text-xs text-primary-foreground/80">Unlimited AI reports for power users</div>
             </div>
             <div className="flex items-center gap-2">
               {loading === 'unlimited' && <Loader2 className="h-4 w-4 animate-spin text-primary-foreground" />}

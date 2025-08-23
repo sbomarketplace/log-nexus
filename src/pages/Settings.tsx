@@ -119,6 +119,9 @@ const Settings = () => {
 
   const planInfo = getPlanDisplayInfo();
 
+  // Helper function for AI report unit labels
+  const unitLabel = (n: number) => n === 1 ? "AI report" : "AI reports";
+
   // Load cache info on mount
   useEffect(() => {
     const loadCacheInfo = async () => {
@@ -284,18 +287,28 @@ const Settings = () => {
                     </span>
                   )}
                 </div>
-                {!planInfo.isUnlimited && (
-                  <div className="credits-meter-bar">
-                    <div 
-                      className="credits-meter-fill"
-                      style={{ 
-                        width: parsing.plan === 'free' 
-                          ? `${Math.max(0, (3 - parsing.lifetimeUsed) / 3) * 100}%`
-                          : `${Math.min(100, (parsing.remaining / 60) * 100)}%`
-                      }}
-                    />
-                  </div>
-                )}
+                {!planInfo.isUnlimited && (() => {
+                  const FREE_TOTAL = 3;
+                  const used = parsing.plan === 'free' 
+                    ? parsing.lifetimeUsed 
+                    : Math.max(0, 60 - parsing.remaining);
+                  const total = parsing.plan === 'free' ? FREE_TOTAL : 60;
+                  const pct = Math.min(100, (used / total) * 100);
+                  
+                  return (
+                    <div className="credits-meter-bar">
+                      <div 
+                        className="credits-meter-fill"
+                        style={{ width: `${pct}%` }}
+                        aria-label={`${unitLabel(used)} used: ${used} of ${total}`}
+                        role="progressbar"
+                        aria-valuemin={0}
+                        aria-valuemax={total}
+                        aria-valuenow={used}
+                      />
+                    </div>
+                  );
+                })()}
                 <p className="text-xs text-muted-foreground mt-2">
                   Manual logging is always free.
                 </p>
@@ -306,7 +319,7 @@ const Settings = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <PricingButton
                     price="$1.99"
-                    caption="5 parsings"
+                    caption={`5 ${unitLabel(5)}`}
                     selected={parsing.plan === 'pack'}
                     disabled={purchasing !== null}
                     loading={purchasing === 'pack5'}
@@ -314,7 +327,7 @@ const Settings = () => {
                   />
                   <PricingButton
                     price="$19.99"
-                    caption="60 parsings"
+                    caption={`60 ${unitLabel(60)}`}
                     selected={parsing.plan === 'pack'}
                     disabled={purchasing !== null}
                     loading={purchasing === 'pack60'}
