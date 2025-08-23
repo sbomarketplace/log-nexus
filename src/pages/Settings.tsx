@@ -44,6 +44,56 @@ import {
 import { Layout } from '@/components/Layout';
 import '../styles/settings.css';
 
+type PricingButtonProps = {
+  price: string;
+  caption: string;
+  selected?: boolean;
+  disabled?: boolean;
+  loading?: boolean;
+  className?: string;
+  onClick?: () => void;
+};
+
+const PricingButton = ({
+  price,
+  caption,
+  selected = false,
+  disabled = false,
+  loading = false,
+  className = '',
+  onClick,
+}: PricingButtonProps) => {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-pressed={selected}
+      className={`
+        w-full min-h-[64px] px-4 py-3 rounded-lg border
+        flex flex-col items-center justify-center gap-1
+        text-center whitespace-normal leading-tight
+        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
+        transition-all duration-200
+        ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        ${selected
+          ? 'bg-primary text-primary-foreground border-transparent shadow-sm'
+          : 'bg-background text-foreground border-border hover:bg-accent hover:text-accent-foreground'
+        }
+        ${className}
+      `.trim()}
+    >
+      {loading && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
+      <span className={`font-semibold text-[17px] md:text-[18px] ${selected ? 'text-primary-foreground' : 'text-foreground'}`}>
+        {price}
+      </span>
+      <span className={`text-[14px] ${selected ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}>
+        {caption}
+      </span>
+    </button>
+  );
+};
+
 const Settings = () => {
   const {
     hidePreviews,
@@ -252,36 +302,34 @@ const Settings = () => {
               </div>
 
               {/* Purchase Options */}
-              <div className="purchase-buttons">
-                <Button
-                  variant="outline"
-                  className="purchase-button cursor-pointer opacity-100 hover:bg-accent/50"
-                  onClick={() => handlePurchase('pack5', buyPack5)}
-                  disabled={purchasing !== null}
-                >
-                  {purchasing === 'pack5' && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
-                  <span className="purchase-button-price">$1.99</span>
-                  <span className="purchase-button-description">5 parsings</span>
-                </Button>
-                <Button
-                  variant="outline"
-                  className="purchase-button cursor-pointer opacity-100 hover:bg-accent/50"
-                  onClick={() => handlePurchase('pack60', buyPack60)}
-                  disabled={purchasing !== null}
-                >
-                  {purchasing === 'pack60' && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
-                  <span className="purchase-button-price">$19.99</span>
-                  <span className="purchase-button-description">60 parsings</span>
-                </Button>
-                <Button
-                  className="purchase-button cursor-pointer opacity-100"
-                  onClick={() => handlePurchase('unlimited', buyUnlimited)}
-                  disabled={purchasing !== null}
-                >
-                  {purchasing === 'unlimited' && <Loader2 className="h-4 w-4 animate-spin mb-1 text-primary-foreground" />}
-                  <span className="purchase-button-price text-primary-foreground">$99/mo</span>
-                  <span className="purchase-button-description text-primary-foreground/80">Unlimited</span>
-                </Button>
+              <div className="mt-3 mb-1">
+                <div className="grid grid-cols-2 gap-3">
+                  <PricingButton
+                    price="$1.99"
+                    caption="5 parsings"
+                    selected={parsing.plan === 'pack'}
+                    disabled={purchasing !== null}
+                    loading={purchasing === 'pack5'}
+                    onClick={() => handlePurchase('pack5', buyPack5)}
+                  />
+                  <PricingButton
+                    price="$19.99"
+                    caption="60 parsings"
+                    selected={parsing.plan === 'pack'}
+                    disabled={purchasing !== null}
+                    loading={purchasing === 'pack60'}
+                    onClick={() => handlePurchase('pack60', buyPack60)}
+                  />
+                  <PricingButton
+                    price="$99/mo"
+                    caption="Unlimited"
+                    selected={parsing.plan === 'unlimited'}
+                    disabled={purchasing !== null}
+                    loading={purchasing === 'unlimited'}
+                    onClick={() => handlePurchase('unlimited', buyUnlimited)}
+                    className="col-span-2"
+                  />
+                </div>
               </div>
             </AccordionContent>
           </AccordionItem>
