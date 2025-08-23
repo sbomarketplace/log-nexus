@@ -199,7 +199,7 @@ const Settings = () => {
                 <span className="font-medium">Account & Subscription</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               {/* Current Plan */}
               <div className="settings-row">
                 <div className="settings-row-label">
@@ -294,7 +294,7 @@ const Settings = () => {
                 <span className="font-medium">Security & Privacy</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               {/* Hide Sensitive Previews */}
               <div className="settings-row">
                 <div className="settings-row-label">
@@ -377,7 +377,7 @@ const Settings = () => {
                 <span className="font-medium">Data & Storage</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               {/* Clear cached files */}
               <div className="settings-row">
                 <div className="settings-row-label">
@@ -407,7 +407,7 @@ const Settings = () => {
                 <span className="font-medium">Incident Defaults & Templates</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               <div className="text-sm text-muted-foreground">
                 Incident templates coming soon...
               </div>
@@ -422,7 +422,7 @@ const Settings = () => {
                 <span className="font-medium">Notifications</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               <div className="text-sm text-muted-foreground">
                 Notification settings coming soon...
               </div>
@@ -437,7 +437,7 @@ const Settings = () => {
                 <span className="font-medium">Integrations</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               <div className="text-sm text-muted-foreground">
                 Integrations coming soon...
               </div>
@@ -452,7 +452,7 @@ const Settings = () => {
                 <span className="font-medium">Support & About</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content">
+            <AccordionContent className="settings-section-content cc-acc-content">
               <div className="text-sm text-muted-foreground">
                 Support options coming soon...
               </div>
