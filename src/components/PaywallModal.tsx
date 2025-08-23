@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Loader2 } from 'lucide-react';
-import { buyPack5, buyPack60, buyUnlimited, restorePurchases } from '@/utils/purchase';
+import { purchase, restore, toast } from '@/utils/iap';
+import { useAIQuota } from '@/state/aiQuotaStore';
 import '../styles/settings.css';
 
 interface PaywallModalProps {
@@ -14,13 +15,43 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
 
   if (!isOpen) return null;
 
-  const handlePurchase = async (purchaseType: string, purchaseFunction: () => Promise<boolean>) => {
+  const buy5 = async () => {
+    try { 
+      await purchase("cc.ai.5"); 
+      useAIQuota.getState().addCredits(5); 
+      toast("Purchase successful. 5 AI reports added."); 
+      onClose();
+    } catch { 
+      toast("Purchase canceled."); 
+    }
+  };
+
+  const buy60 = async () => {
+    try { 
+      await purchase("cc.ai.60"); 
+      useAIQuota.getState().addCredits(60); 
+      toast("Purchase successful. 60 AI reports added."); 
+      onClose();
+    } catch { 
+      toast("Purchase canceled."); 
+    }
+  };
+
+  const buyUnlimited = async () => {
+    try { 
+      await purchase("cc.ai.unlimited.month"); 
+      useAIQuota.getState().setUnlimited(true); 
+      toast("Unlimited AI reports activated."); 
+      onClose();
+    } catch { 
+      toast("Purchase canceled."); 
+    }
+  };
+
+  const handlePurchase = async (purchaseType: string, purchaseFunction: () => Promise<void>) => {
     setLoading(purchaseType);
     try {
-      const success = await purchaseFunction();
-      if (success) {
-        onClose();
-      }
+      await purchaseFunction();
     } catch (error) {
       console.error('Purchase error:', error);
     } finally {
@@ -31,10 +62,13 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
   const handleRestore = async () => {
     setLoading('restore');
     try {
-      await restorePurchases();
+      const result = await restore();
+      if (result?.unlimitedActive) useAIQuota.getState().setUnlimited(true);
+      if (result?.credits) useAIQuota.getState().addCredits(result.credits);
+      toast("Purchases restored.");
       onClose();
-    } catch (error) {
-      console.error('Restore error:', error);
+    } catch {
+      toast("Restore failed.");
     } finally {
       setLoading(null);
     }
@@ -70,7 +104,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
         <div className="space-y-3 mb-6">
           {/* Get 5 AI reports */}
           <Button
-            onClick={() => handlePurchase('pack5', buyPack5)}
+            onClick={() => handlePurchase('pack5', buy5)}
             disabled={loading !== null}
             className="w-full h-12 flex items-center justify-between text-left px-4"
             variant="outline"
@@ -87,7 +121,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
 
           {/* Get 60 AI reports */}
           <Button
-            onClick={() => handlePurchase('pack60', buyPack60)}
+            onClick={() => handlePurchase('pack60', buy60)}
             disabled={loading !== null}
             className="w-full h-12 flex items-center justify-between text-left px-4"
             variant="outline"

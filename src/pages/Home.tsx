@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
-import { canParse, consumeParse } from '@/utils/parsingGate';
+import { withAIGate } from '@/utils/aiGate';
 import { PaywallModal } from '@/components/PaywallModal';
 import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
@@ -50,6 +50,8 @@ const Home = () => {
   const [quickNotesError, setQuickNotesError] = useState('');
   const [titleError, setTitleError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
+  
+  const openPaywall = () => setShowPaywall(true);
   const MAX_CHARS = 10000;
   const WARN_THRESHOLD = 8000;
   const [limitReached, setLimitReached] = useState(false);
@@ -201,7 +203,7 @@ const Home = () => {
     }, 100);
   };
 
-  const handleQuickNotesOrganize = async () => {
+  const runOrganize = async () => {
     setQuickNotesError('');
     setTitleError('');
     
@@ -232,18 +234,9 @@ const Home = () => {
       return;
     }
 
-    // Check parsing gate before proceeding
-    if (!canParse()) {
-      setShowPaywall(true);
-      return;
-    }
-
     setIsOrganizing(true);
     try {
       const results = await organizeIncidents(quickNotes);
-      
-      // Consume parsing credit after successful parsing
-      await consumeParse();
       
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
@@ -305,6 +298,8 @@ const Home = () => {
       setIsOrganizing(false);
     }
   };
+
+  const handleQuickNotesOrganize = withAIGate(runOrganize, openPaywall);
 
   const handleDeleteIncident = async (id: string) => {
     try {

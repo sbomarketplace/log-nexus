@@ -15,6 +15,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { Wand2, Loader2 } from 'lucide-react';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
+import { withAIGate } from '@/utils/aiGate';
+import { PaywallModal } from '@/components/PaywallModal';
 import { cn } from '@/lib/utils';
 
 
@@ -60,6 +62,9 @@ const AddIncident = () => {
   const [newTag, setNewTag] = useState('');
   const [isRewriting, setIsRewriting] = useState(false);
   const [rewriteError, setRewriteError] = useState<string>('');
+  const [showPaywall, setShowPaywall] = useState(false);
+  
+  const openPaywall = () => setShowPaywall(true);
 
   const validateAndSubmit = () => {
     const t = (formData.title || "").trim();
@@ -287,7 +292,7 @@ const AddIncident = () => {
     navigate(`/?incidentId=${organizedIncident.id}`);
   };
 
-  const handleAIRewrite = async () => {
+  const runRewrite = async () => {
     if (!formData.what.trim()) {
       toast({
         title: "Nothing to Rewrite",
@@ -331,8 +336,10 @@ const AddIncident = () => {
       });
     } finally {
       setIsRewriting(false);
+    }
   };
-  };
+
+  const handleAIRewrite = withAIGate(runRewrite, openPaywall);
 
   const renderPersonSection = (
     title: string,
@@ -763,6 +770,12 @@ const AddIncident = () => {
           {/* This spacer MUST come immediately after the buttons */}
           <div className="add-incident-bottom-spacer" aria-hidden="true" />
         </form>
+
+        {/* Paywall Modal */}
+        <PaywallModal
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+        />
       </div>
     </Layout>
   );
