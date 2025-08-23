@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -71,8 +71,35 @@ const Settings = () => {
 
   // Load cache info on mount
   useEffect(() => {
-    setCacheInfo(getCacheSize());
+    const loadCacheInfo = async () => {
+      try {
+        const info = getCacheSize();
+        setCacheInfo(info);
+      } catch (error) {
+        console.warn('Failed to load cache info:', error);
+        setCacheInfo({ size: 0, itemCount: 0 });
+      }
+    };
+    loadCacheInfo();
   }, []);
+
+  const handleClearCache = async () => {
+    try {
+      await clearCache();
+      const info = getCacheSize();
+      setCacheInfo(info);
+      if (isNative) {
+        nativeToast('Cache cleared.');
+      } else {
+        console.log('Cache cleared.');
+      }
+    } catch (error) {
+      console.error('Failed to clear cache:', error);
+      if (isNative) {
+        nativeToast('Failed to clear cache.');
+      }
+    }
+  };
 
   const closeModal = () => {
     setActiveModal(null);
@@ -351,8 +378,23 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content">
-              <div className="text-sm text-muted-foreground">
-                Data & Storage settings coming soon...
+              {/* Clear cached files */}
+              <div className="settings-row">
+                <div className="settings-row-label">
+                  <span className="settings-row-title">Cached files</span>
+                  <span className="settings-row-description">
+                    {cacheInfo.itemCount} items • {formatCacheSize(cacheInfo.size)}
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleClearCache}
+                  className="text-xs"
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Clear cache
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
