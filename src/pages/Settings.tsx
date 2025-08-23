@@ -1,13 +1,47 @@
-import { useState } from 'react';
-import { Layout } from '@/components/Layout';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { X, ChevronRight, Shield, Database, FileText, Bell, Link, HelpCircle, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { 
+  X, 
+  ChevronRight, 
+  Shield, 
+  Database, 
+  FileText, 
+  Bell, 
+  Link, 
+  HelpCircle, 
+  Loader2,
+  Upload,
+  Download,
+  Trash2,
+  Settings as SettingsIcon,
+  Mail,
+  Star,
+  Share,
+  ExternalLink,
+  Clock,
+  Globe
+} from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
 import { buyPack5, buyPack60, buyUnlimited, restorePurchases } from '@/utils/purchase';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
+import { exportBackup, importBackup } from '@/utils/backup';
+import { getCacheSize, clearCache, formatCacheSize, scheduleDataRetentionCheck } from '@/utils/storage';
+import { 
+  openSystemSettings, 
+  rateApp, 
+  shareDiagnostics, 
+  requestPermission, 
+  checkPermission,
+  isNative,
+  nativeToast,
+  nativeEmail
+} from '@/utils/native';
+import { Layout } from '@/components/Layout';
 import '../styles/settings.css';
 
 const Settings = () => {
@@ -15,16 +49,35 @@ const Settings = () => {
     hidePreviews,
     appLock,
     parsing,
+    dataStorage,
+    incidentDefaults,
+    notifications,
+    integrations,
     setHidePreviews,
     setAppLock,
+    setParsing,
+    setDataStorage,
+    setIncidentDefaults,
+    setNotifications,
+    setIntegrations,
   } = useSettingsStore();
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [cacheInfo, setCacheInfo] = useState({ size: 0, itemCount: 0 });
 
   const planInfo = getPlanDisplayInfo();
 
-  const closeModal = () => setActiveModal(null);
+  // Load cache info on mount
+  useEffect(() => {
+    setCacheInfo(getCacheSize());
+  }, []);
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setImportFile(null);
+  };
 
   const getPlanDisplayName = (plan: string) => {
     switch (plan) {

@@ -38,3 +38,34 @@ export async function nativeSMS({ body }:{ body: string }) {
   if (!isNative) throw new Error("not-native");
   return (window as any).__NATIVE__.sms({ body });
 }
+
+// Additional native utilities for Settings
+export async function openSystemSettings(type?: 'notifications' | 'privacy' | 'general') {
+  if (!isNative) throw new Error("not-native");
+  return (window as any).__NATIVE__.system.openSettings({ type });
+}
+
+export async function rateApp() {
+  if (!isNative) throw new Error("not-native");
+  return (window as any).__NATIVE__.system.rateApp();
+}
+
+export async function shareDiagnostics(data: any) {
+  if (!isNative) throw new Error("not-native");
+  return (window as any).__NATIVE__.system.shareDiagnostics(data);
+}
+
+export async function requestPermission(type: 'contacts' | 'calendar' | 'notifications') {
+  if (!isNative) throw new Error("not-native");
+  return (window as any).__NATIVE__.permissions.request({ type });
+}
+
+export async function checkPermission(type: 'contacts' | 'calendar' | 'notifications') {
+  if (!isNative) return false;
+  try {
+    const result = await (window as any).__NATIVE__.permissions.check({ type });
+    return result.granted || false;
+  } catch {
+    return false;
+  }
+}
