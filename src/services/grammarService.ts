@@ -1,8 +1,10 @@
 import { supabase } from '@/integrations/supabase/client';
+import { canParse, consumeParse } from '@/utils/parsingGate';
 
 export interface GrammarImprovementResult {
   improvedText: string;
   hasChanges: boolean;
+  originalText?: string;
   originalLength?: number;
   improvedLength?: number;
   error?: string;
@@ -27,6 +29,11 @@ export async function improveGrammar(text: string): Promise<GrammarImprovementRe
     };
   }
 
+  // Check parsing gate before making AI call
+  if (!canParse()) {
+    return { improvedText: text, hasChanges: false };
+  }
+
   // Check cache first
   const cacheKey = getCacheKey(text);
   if (grammarCache.has(cacheKey)) {
@@ -37,6 +44,9 @@ export async function improveGrammar(text: string): Promise<GrammarImprovementRe
     const { data, error } = await supabase.functions.invoke('improve-grammar', {
       body: { text }
     });
+
+    // Consume parsing credit after successful call
+    await consumeParse();
 
     if (error) {
       console.warn('Grammar improvement failed:', error);
@@ -96,34 +106,46 @@ export async function improveGrammarForFields<T extends Record<string, any>>(
   
   // Process batch if there are uncached texts
   if (textsToImprove.length > 0) {
-    try {
-      const { data, error } = await supabase.functions.invoke('improve-grammar', {
-        body: { texts: textsToImprove }
-      });
-
-      if (error) {
-        console.warn('Batch grammar improvement failed:', error);
-        return result;
+    // Check parsing gate before making AI call
+    if (!canParse()) {
+      // Return results with original text for uncached items
+      for (const text of textsToImprove) {
+        const cacheKey = `grammar_${text.slice(0, 50)}_${text.length}`;
+        grammarCache.set(cacheKey, { improvedText: text, hasChanges: false });
       }
+    } else {
+      try {
+        const { data, error } = await supabase.functions.invoke('improve-grammar', {
+          body: { texts: textsToImprove }
+        });
 
-      const batchResults = data.results as GrammarImprovementResult[];
-      
-      // Apply results and cache them
-      for (const { field, index } of fieldMapping) {
-        const batchResult = batchResults[index];
-        const originalText = textsToImprove[index];
-        
-        // Cache the result
-        const cacheKey = getCacheKey(originalText);
-        grammarCache.set(cacheKey, batchResult);
-        
-        // Apply if there are changes
-        if (batchResult.hasChanges) {
-          (result as any)[field] = batchResult.improvedText;
+        // Consume parsing credit after successful call
+        await consumeParse();
+
+        if (error) {
+          console.warn('Batch grammar improvement failed:', error);
+          return result;
         }
+
+        const batchResults = data.results as GrammarImprovementResult[];
+        
+        // Apply results and cache them
+        for (const { field, index } of fieldMapping) {
+          const batchResult = batchResults[index];
+          const originalText = textsToImprove[index];
+          
+          // Cache the result
+          const cacheKey = getCacheKey(originalText);
+          grammarCache.set(cacheKey, batchResult);
+          
+          // Apply if there are changes
+          if (batchResult.hasChanges) {
+            (result as any)[field] = batchResult.improvedText;
+          }
+        }
+      } catch (error) {
+        console.warn('Grammar service batch error:', error);
       }
-    } catch (error) {
-      console.warn('Grammar service batch error:', error);
     }
   }
   

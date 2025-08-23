@@ -12,6 +12,8 @@ import { adaptApiToStructuredIncident } from '@/utils/incidentAdapter';
 import { organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getDateSafely, sanitizeIncidentArray } from '@/utils/safeDate';
 import { processIncident } from '@/services/incidentProcessor';
+import { canParse, consumeParse } from '@/utils/parsingGate';
+import { PaywallModal } from '@/components/PaywallModal';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
@@ -25,6 +27,7 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
   const [isProcessing, setIsProcessing] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPaywall, setShowPaywall] = useState(false);
   const { toast } = useToast();
 
   // Prevent body scroll when modal is open
@@ -67,10 +70,19 @@ export const OrganizeNotesModal = ({ onOrganizeComplete }: OrganizeNotesModalPro
       return;
     }
 
+    // Check parsing gate before proceeding
+    if (!canParse()) {
+      setShowPaywall(true);
+      return;
+    }
+
     setIsProcessing(true);
     setError(null);
     try {
       const apiIncidents = await organizeNotes(rawNotes.trim());
+      
+      // Consume parsing credit after successful parsing
+      await consumeParse();
       
       if (apiIncidents.length === 0) {
         setError('No incidents could be organized. Please review your notes and try again.');
@@ -570,6 +582,11 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
           )}
         </div>
       </div>
+      
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
     </>
   );
 };

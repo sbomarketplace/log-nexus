@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { X, ChevronRight, Shield, Database, FileText, Bell, Link, HelpCircle } from 'lucide-react';
+import { X, ChevronRight, Shield, Database, FileText, Bell, Link, HelpCircle, Loader2 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
+import { buyPack5, buyPack60, buyUnlimited, restorePurchases } from '@/utils/purchase';
+import { getPlanDisplayInfo } from '@/utils/parsingGate';
 import '../styles/settings.css';
 
 const Settings = () => {
@@ -18,16 +20,50 @@ const Settings = () => {
   } = useSettingsStore();
 
   const [activeModal, setActiveModal] = useState<string | null>(null);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
+
+  const planInfo = getPlanDisplayInfo();
 
   const closeModal = () => setActiveModal(null);
 
   const getPlanDisplayName = (plan: string) => {
     switch (plan) {
       case 'free': return 'Free';
-      case 'pack5': return '5-Pack';
-      case 'pack60': return '60-Pack';
+      case 'pack': return 'Pack';
       case 'unlimited': return 'Unlimited';
       default: return 'Free';
+    }
+  };
+
+  const handlePurchase = async (purchaseType: string, purchaseFunction: () => Promise<boolean>) => {
+    setPurchasing(purchaseType);
+    try {
+      await purchaseFunction();
+    } catch (error) {
+      console.error('Purchase error:', error);
+    } finally {
+      setPurchasing(null);
+    }
+  };
+
+  const handleRestore = async () => {
+    setPurchasing('restore');
+    try {
+      await restorePurchases();
+    } catch (error) {
+      console.error('Restore error:', error);
+    } finally {
+      setPurchasing(null);
+    }
+  };
+
+  const openSubscriptionManagement = () => {
+    if (window.__NATIVE__) {
+      // Native app - open App Store subscription management
+      window.open('itms-apps://apps.apple.com/account/subscriptions', '_system');
+    } else {
+      // Web fallback
+      setActiveModal('subscription');
     }
   };
 
@@ -95,7 +131,10 @@ const Settings = () => {
               </div>
 
               {/* Manage Subscription */}
-              <div className="settings-row">
+              <div 
+                className="settings-row cursor-pointer hover:bg-muted/20"
+                onClick={openSubscriptionManagement}
+              >
                 <div className="settings-row-label">
                   <span className="settings-row-title">Manage Subscription</span>
                   <span className="settings-row-description">Restore purchases (App Store)</span>
@@ -107,18 +146,26 @@ const Settings = () => {
               <div className="credits-meter">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium text-foreground">
-                    Parsing Credits: {parsing.remaining}
+                    {planInfo.displayText}
                   </span>
-                  <span className="text-xs text-muted-foreground">
-                    Free: 3 per account
-                  </span>
+                  {!planInfo.isUnlimited && (
+                    <span className="text-xs text-muted-foreground">
+                      {parsing.plan === 'free' ? 'Free: 3 per account' : 'Credits available'}
+                    </span>
+                  )}
                 </div>
-                <div className="credits-meter-bar">
-                  <div 
-                    className="credits-meter-fill"
-                    style={{ width: `${(parsing.remaining / 3) * 100}%` }}
-                  />
-                </div>
+                {!planInfo.isUnlimited && (
+                  <div className="credits-meter-bar">
+                    <div 
+                      className="credits-meter-fill"
+                      style={{ 
+                        width: parsing.plan === 'free' 
+                          ? `${Math.max(0, (3 - parsing.lifetimeUsed) / 3) * 100}%`
+                          : `${Math.min(100, (parsing.remaining / 60) * 100)}%`
+                      }}
+                    />
+                  </div>
+                )}
                 <p className="text-xs text-muted-foreground mt-2">
                   Manual logging is always free.
                 </p>
@@ -126,18 +173,35 @@ const Settings = () => {
 
               {/* Purchase Options */}
               <div className="purchase-buttons">
-                <div className="purchase-button">
+                <Button
+                  variant="outline"
+                  className="purchase-button cursor-pointer opacity-100 hover:bg-accent/50"
+                  onClick={() => handlePurchase('pack5', buyPack5)}
+                  disabled={purchasing !== null}
+                >
+                  {purchasing === 'pack5' && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
                   <span className="purchase-button-price">$1.99</span>
                   <span className="purchase-button-description">5 parsings</span>
-                </div>
-                <div className="purchase-button">
+                </Button>
+                <Button
+                  variant="outline"
+                  className="purchase-button cursor-pointer opacity-100 hover:bg-accent/50"
+                  onClick={() => handlePurchase('pack60', buyPack60)}
+                  disabled={purchasing !== null}
+                >
+                  {purchasing === 'pack60' && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
                   <span className="purchase-button-price">$19.99</span>
                   <span className="purchase-button-description">60 parsings</span>
-                </div>
-                <div className="purchase-button">
-                  <span className="purchase-button-price">$99/mo</span>
-                  <span className="purchase-button-description">Unlimited</span>
-                </div>
+                </Button>
+                <Button
+                  className="purchase-button cursor-pointer opacity-100"
+                  onClick={() => handlePurchase('unlimited', buyUnlimited)}
+                  disabled={purchasing !== null}
+                >
+                  {purchasing === 'unlimited' && <Loader2 className="h-4 w-4 animate-spin mb-1 text-primary-foreground" />}
+                  <span className="purchase-button-price text-primary-foreground">$99/mo</span>
+                  <span className="purchase-button-description text-primary-foreground/80">Unlimited</span>
+                </Button>
               </div>
             </AccordionContent>
           </AccordionItem>
@@ -303,12 +367,23 @@ const Settings = () => {
 
         {/* Floating Modals */}
         <FloatingModal
-          isOpen={activeModal === 'example'}
+          isOpen={activeModal === 'subscription'}
           onClose={closeModal}
-          title="Example Modal"
+          title="Manage Subscription"
         >
-          <div className="text-sm text-muted-foreground">
-            This is an example of the floating modal design.
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Manage your subscription and restore purchases.
+            </p>
+            <Button
+              variant="outline"
+              onClick={handleRestore}
+              disabled={purchasing !== null}
+              className="w-full"
+            >
+              {purchasing === 'restore' && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+              Restore Purchases
+            </Button>
           </div>
         </FloatingModal>
       </div>

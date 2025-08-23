@@ -8,9 +8,11 @@ interface AppLockSettings {
 }
 
 interface ParsingSettings {
-  plan: 'free' | 'pack5' | 'pack60' | 'unlimited';
+  plan: 'free' | 'pack' | 'unlimited';
   remaining: number;
   lifetimeUsed: number;
+  subscriptionActive: boolean;
+  lastReceiptCheck: number;
 }
 
 interface SettingsState {
@@ -41,6 +43,8 @@ export const useSettingsStore = create<SettingsState>()(
         plan: 'free',
         remaining: 3,
         lifetimeUsed: 0,
+        subscriptionActive: false,
+        lastReceiptCheck: 0,
       },
       
       // Actions

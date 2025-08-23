@@ -15,6 +15,8 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
+import { canParse, consumeParse } from '@/utils/parsingGate';
+import { PaywallModal } from '@/components/PaywallModal';
 import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
@@ -47,6 +49,7 @@ const Home = () => {
   const [quickNotesTitle, setQuickNotesTitle] = useState('');
   const [quickNotesError, setQuickNotesError] = useState('');
   const [titleError, setTitleError] = useState('');
+  const [showPaywall, setShowPaywall] = useState(false);
   const MAX_CHARS = 10000;
   const WARN_THRESHOLD = 8000;
   const [limitReached, setLimitReached] = useState(false);
@@ -229,9 +232,19 @@ const Home = () => {
       return;
     }
 
+    // Check parsing gate before proceeding
+    if (!canParse()) {
+      setShowPaywall(true);
+      return;
+    }
+
     setIsOrganizing(true);
     try {
       const results = await organizeIncidents(quickNotes);
+      
+      // Consume parsing credit after successful parsing
+      await consumeParse();
+      
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
       } else {
@@ -789,6 +802,11 @@ const Home = () => {
           </>
         )}
       </div>
+      
+      <PaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
+      />
     </Layout>
   );
 };
