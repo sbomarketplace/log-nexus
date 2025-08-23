@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Mail, FileText, Printer, Share, Save, File, FileImage } from 'lucide-react';
+import { Loader2, Mail, FileText, Printer, Save, File, FileImage } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { IncidentCardHeader } from '@/components/IncidentCardHeader';
 import { briefIncidentSummary } from '@/utils/briefSummary';
@@ -12,7 +12,6 @@ import {
   exportTXT,
   exportDOCX,
   exportPDFToDevice,
-  shareIncident,
   emailIncident
 } from '@/utils/exporters';
 
@@ -78,12 +77,6 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
       label: 'Save to Device',
       icon: Save,
       action: () => executeExport('save', () => exportPDFToDevice(incident))
-    },
-    {
-      id: 'share',
-      label: 'Share…',
-      icon: Share,
-      action: () => executeExport('share', () => shareIncident(incident))
     }
   ];
 
@@ -108,7 +101,7 @@ export const ExportOptionsModal = ({ open, onOpenChange, incident }: ExportOptio
           {exportOptions.map((option) => {
             const Icon = option.icon;
             const isLoading = loadingOption === option.id;
-            const isDisabled = (option as any).disabled || isLoading;
+            const isDisabled = isLoading;
 
             return (
               <Button

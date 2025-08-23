@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, Mail, FileText, Printer, Share, Save, File, FileImage, Archive, Table } from 'lucide-react';
+import { Loader2, Mail, FileText, Printer, Save, File, FileImage, Archive, Table } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import {
   exportBulkSinglePDF,
@@ -9,7 +9,6 @@ import {
   exportBulkCSV,
   exportBulkDocxZip,
   exportBulkTxtZip,
-  exportBulkShare,
   exportBulkPrint
 } from '@/utils/exporters';
 
@@ -100,13 +99,6 @@ export const BulkExportModal = ({ isOpen, onClose, incidents }: BulkExportModalP
       action: () => executeExport('txtZip', () => exportBulkTxtZip(incidents, {}))
     },
     {
-      id: 'share',
-      label: 'Share…',
-      icon: Share,
-      action: () => executeExport('share', () => exportBulkShare(incidents, {})),
-      disabled: !navigator.share
-    },
-    {
       id: 'print',
       label: 'Print',
       icon: Printer,
@@ -138,7 +130,7 @@ export const BulkExportModal = ({ isOpen, onClose, incidents }: BulkExportModalP
             {exportOptions.map((option) => {
               const Icon = option.icon;
               const isLoading = loadingOption === option.id;
-              const isDisabled = option.disabled || isLoading;
+              const isDisabled = isLoading;
 
               return (
                 <Button
