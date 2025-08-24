@@ -13,6 +13,8 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
 import { useToastStore } from "@/lib/showToast";
+import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
+import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
 
@@ -53,6 +55,7 @@ const App = () => {
         <Toaster />
         <Sonner />
         {node}
+        <ScreenPrivacyOverlay />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />

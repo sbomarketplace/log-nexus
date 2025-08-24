@@ -43,6 +43,7 @@ import {
 } from '@/utils/native';
 import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
+import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
 import IntegrationsCard from '@/components/settings/IntegrationsCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
 import NotificationsCard from '@/components/settings/NotificationsCard';
@@ -401,77 +402,7 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              {/* Hide Sensitive Previews */}
-              <div className="settings-row">
-                <div className="settings-row-label">
-                  <span className="settings-row-title">Hide Sensitive Previews</span>
-                  <span className="settings-row-description">
-                    Blur app switcher/screenshot overlay
-                  </span>
-                </div>
-                <Switch
-                  checked={hidePreviews}
-                  onCheckedChange={setHidePreviews}
-                />
-              </div>
-
-              {/* App Lock */}
-              <div className="settings-row">
-                <div className="settings-row-label">
-                  <span className="settings-row-title">App Lock</span>
-                  <span className="settings-row-description">
-                    Face ID / Touch ID / Passcode
-                  </span>
-                </div>
-                <Switch
-                  checked={appLock.enabled}
-                  onCheckedChange={(enabled) => setAppLock({ enabled })}
-                />
-              </div>
-
-              {/* Auto-lock (only when App Lock is ON) */}
-              {appLock.enabled && (
-                <div className="settings-row">
-                  <div className="settings-row-label">
-                    <span className="settings-row-title">Auto-lock</span>
-                    <span className="settings-row-description">
-                      Automatically lock the app after inactivity
-                    </span>
-                  </div>
-                  <Select
-                    value={appLock.autoLockMins.toString()}
-                    onValueChange={(value) => setAppLock({ autoLockMins: parseInt(value) })}
-                  >
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="0">Immediately</SelectItem>
-                      <SelectItem value="1">1 minute</SelectItem>
-                      <SelectItem value="5">5 minutes</SelectItem>
-                      <SelectItem value="15">15 minutes</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Require unlock for export (only when App Lock is ON) */}
-              {appLock.enabled && (
-                <div className="settings-row">
-                  <div className="settings-row-label">
-                    <span className="settings-row-title">Require unlock to export/share</span>
-                    <span className="settings-row-description">
-                      Additional security for sensitive data
-                    </span>
-                  </div>
-                  <Switch
-                    checked={appLock.requireUnlockForExport}
-                    onCheckedChange={(requireUnlockForExport) => 
-                      setAppLock({ requireUnlockForExport })
-                    }
-                  />
-                </div>
-              )}
+              <SecurityPrivacyCard />
             </AccordionContent>
           </AccordionItem>
 
@@ -485,21 +416,6 @@ const Settings = () => {
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
               <DataStorageCard />
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Incident Defaults & Templates */}
-          <AccordionItem value="templates" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
-              <div className="flex items-center gap-3">
-                <FileText className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Incident Defaults & Templates</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
-              <div className="text-sm text-muted-foreground">
-                Incident templates coming soon...
-              </div>
             </AccordionContent>
           </AccordionItem>
 

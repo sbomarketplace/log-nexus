@@ -1,0 +1,8 @@
+.cc-sensitive-previews body {
+  filter: blur(0px);
+}
+
+.cc-sensitive-previews .sensitive,
+.cc-sensitive-previews #root {
+  filter: blur(6px) saturate(0.7);
+}
