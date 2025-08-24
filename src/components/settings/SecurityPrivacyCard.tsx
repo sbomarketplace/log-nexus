@@ -1,7 +1,6 @@
 import * as React from "react";
 import { Shield } from "lucide-react";
 import Lock from "@/lib/lock";
-import UnlockModal from "@/components/common/UnlockModal";
 
 const AUTO_OPTIONS = [
   { label: "1 minute", value: 1 },
@@ -12,40 +11,35 @@ const AUTO_OPTIONS = [
 
 export default function SecurityPrivacyCard() {
   const [, force] = React.useReducer((x) => x + 1, 0);
-  const [showUnlock, setShowUnlock] = React.useState<false | "unlock" | "setup">(false);
 
   React.useEffect(() => {
     Lock.initLock();
     const unsubscribe = Lock.subscribe(() => force());
-    return () => unsubscribe();
+    return unsubscribe;
   }, []);
 
-  const settings = ((): any => JSON.parse(localStorage.getItem("cc_security_settings_v1") || "{}"))();
+  const settings = JSON.parse(localStorage.getItem("cc_security_settings_v1") || "{}");
 
-  async function toggleAppLock(next: boolean) {
+  async function onToggleAppLock(next: boolean) {
     if (next) {
-      const used = await Lock.enableAppLock(); // tries WebAuthn; falls back to passcode
-      if (used === "passcode") setShowUnlock("setup");
+      const ok = await Lock.enableAppLock();
+      if (!ok) return; // leave off if enrollment failed
     } else {
-      // Require unlock before disabling
-      const ok = await Lock.requireAuth("disable");
-      if (ok === "ok") Lock.disableAppLock();
-      // if passcode needed, show modal
-      if (ok === "passcode") setShowUnlock("unlock");
+      const ok = await Lock.disableAppLock();
+      if (!ok) return; // keep on if auth failed
     }
     force();
   }
 
-  async function setAutoLock(minutes: number | null) {
+  function onSetAuto(mins: number | null) {
     if (!settings?.appLockEnabled) return;
-    Lock.setAutoLockMinutes(minutes);
-    force();
+    Lock.setAutoLockMinutes(mins);
   }
 
-  async function toggleExportRequirement(next: boolean) {
+  async function onToggleExport(next: boolean) {
     if (next && !settings?.appLockEnabled) {
-      // enabling this implicitly requires app lock
-      await toggleAppLock(true);
+      const ok = await Lock.enableAppLock();
+      if (!ok) return; // don't enable gating without app lock
     }
     Lock.setRequireUnlockForExport(next);
     force();
@@ -63,27 +57,15 @@ export default function SecurityPrivacyCard() {
         <Row
           title="Hide Sensitive Previews"
           subtitle="Blur app switcher/screenshot overlay"
-          right={
-            <Switch
-              checked={!!settings?.hideSensitivePreviews}
-              onChange={(v) => { Lock.setHideSensitivePreviews(v); force(); }}
-            />
-          }
+          right={<Switch checked={!!settings?.hideSensitivePreviews} onChange={(v)=>{ Lock.setHideSensitivePreviews(v); }} />}
         />
 
-        {/* App Lock */}
         <Row
           title="App Lock"
-          subtitle="Face ID / Touch ID / Passcode"
-          right={
-            <Switch
-              checked={!!settings?.appLockEnabled}
-              onChange={toggleAppLock}
-            />
-          }
+          subtitle="Face ID / Touch ID / Passcode (device)"
+          right={<Switch checked={!!settings?.appLockEnabled} onChange={onToggleAppLock} />}
         />
 
-        {/* Auto-lock */}
         <Row
           title="Auto-lock"
           subtitle="Automatically lock the app after inactivity"
@@ -91,48 +73,23 @@ export default function SecurityPrivacyCard() {
             <select
               className="rounded-xl border px-3 py-2 disabled:opacity-60"
               disabled={!settings?.appLockEnabled}
-              value={
-                settings?.autoLockMinutes === null || settings?.autoLockMinutes === undefined
-                  ? ""
-                  : String(settings.autoLockMinutes)
-              }
-              onChange={(e) =>
-                setAutoLock(e.target.value === "" ? null : Number(e.target.value))
-              }
+              value={settings?.autoLockMinutes ?? ""}
+              onChange={(e)=>onSetAuto(e.target.value === "" ? null : Number(e.target.value))}
             >
-              {AUTO_OPTIONS.map((opt) => (
-                <option key={String(opt.value ?? "")} value={opt.value ?? ""}>
-                  {opt.label}
-                </option>
+              {AUTO_OPTIONS.map((o)=>(
+                <option key={String(o.value ?? "")} value={o.value ?? ""}>{o.label}</option>
               ))}
             </select>
           }
         />
 
-        {/* Require unlock to export/share */}
         <Row
           title="Require unlock to export/share"
           subtitle="Additional security for sensitive data"
-          right={
-            <Switch
-              checked={!!settings?.requireUnlockForExport}
-              onChange={toggleExportRequirement}
-            />
-          }
+          right={<Switch checked={!!settings?.requireUnlockForExport} onChange={onToggleExport} />}
         />
       </div>
 
-      {/* Unlock / setup modals */}
-      <UnlockModal
-        open={showUnlock === "unlock" && Lock.isLocked()}
-        mode="unlock"
-        onClose={() => setShowUnlock(false)}
-      />
-      <UnlockModal
-        open={showUnlock === "setup" && Lock.isLocked()}
-        mode="setup-passcode"
-        onClose={() => setShowUnlock(false)}
-      />
     </div>
   );
 }
