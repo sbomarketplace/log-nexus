@@ -44,6 +44,8 @@ import {
 import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
 import IntegrationsCard from '@/components/settings/IntegrationsCard';
+import DataStorageCard from '@/components/settings/DataStorageCard';
+import NotificationsCard from '@/components/settings/NotificationsCard';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -482,24 +484,7 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              {/* Clear cached files */}
-              <div className="settings-row">
-                <div className="settings-row-label">
-                  <span className="settings-row-title">Cached files</span>
-                  <span className="settings-row-description">
-                    {cacheInfo.itemCount} items • {formatCacheSize(cacheInfo.size)}
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleClearCache}
-                  className="text-xs"
-                >
-                  <Trash2 className="h-3 w-3 mr-1" />
-                  Clear cache
-                </Button>
-              </div>
+              <DataStorageCard />
             </AccordionContent>
           </AccordionItem>
 
@@ -527,9 +512,7 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              <div className="text-sm text-muted-foreground">
-                Notification settings coming soon...
-              </div>
+              <NotificationsCard />
             </AccordionContent>
           </AccordionItem>
 
