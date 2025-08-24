@@ -59,12 +59,7 @@ export default function IntegrationModal({
           alert("Enter a valid Slack Incoming Webhook URL first.");
           return;
         }
-        await sendSlackWebhook(value, {
-          type: "test",
-          source: "IntegrationsModal",
-          message: "ClearCase test message",
-          timestamp: new Date().toISOString(),
-        });
+        await sendSlackWebhook(value, { type: "test", ts: new Date().toISOString() });
         alert("Test sent to Slack.");
         return;
       }
@@ -73,12 +68,7 @@ export default function IntegrationModal({
           alert("Enter a valid Zapier Catch Hook URL first.");
           return;
         }
-        await sendZapierWebhook(value, {
-          type: "test",
-          source: "IntegrationsModal",
-          message: "ClearCase test message",
-          timestamp: new Date().toISOString(),
-        });
+        await sendZapierWebhook(value, { type: "test", ts: new Date().toISOString() });
         alert("Test sent to Zapier.");
         return;
       }
