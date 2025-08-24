@@ -116,7 +116,7 @@ export default function IntegrationModal({
           </button>
         </div>
 
-        {/* Body - compact layout */}
+        {/* Body - simplified layout: title → description → buttons */}
         <div className="px-4 py-3">
           {/* Description directly under title */}
           <p className="text-xs text-gray-600 mb-3 leading-snug">
