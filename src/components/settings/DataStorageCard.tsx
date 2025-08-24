@@ -103,7 +103,6 @@ export default function DataStorageCard() {
         description={
           <div className="space-y-2">
             <p>This permanently deletes every incident you've saved on this device.</p>
-            <p className="text-xs text-gray-500">Type <span className="font-mono bg-gray-100 px-1 rounded">DELETE</span> to proceed.</p>
           </div>
         }
         confirmLabel={busy === "delete" ? "Deleting…" : "Delete permanently"}
