@@ -1,11 +1,8 @@
+// src/lib/rateApp.ts
 import { isNative } from './platform';
 
-/** -------- persistent state for prompting cadence -------- */
-type PromptState = {
-  lastPromptAt?: number;
-  timesShown?: number;
-  neverAsk?: boolean;
-};
+/** ---------- Local state for prompt cadence ---------- */
+type PromptState = { lastPromptAt?: number; timesShown?: number; neverAsk?: boolean };
 const LS_KEY = 'cc_rate_prompt_v1';
 
 function load(): PromptState {
@@ -14,14 +11,14 @@ function load(): PromptState {
 }
 function save(s: PromptState) { localStorage.setItem(LS_KEY, JSON.stringify(s)); }
 
-/** Count sessions (or call after "happy moments" like export complete) */
+/** Count sessions (call on app launch) */
 export function bumpSessionCounter() {
   const key = 'cc_sessions';
   const n = Number(localStorage.getItem(key) || '0') + 1;
   localStorage.setItem(key, String(n));
 }
 
-/** Should we auto-show the prompt? */
+/** Decide if we should auto-show the prompt */
 export function shouldShowRatePrompt(opts?: { minSessions?: number; minDaysSinceLast?: number }) {
   const { minSessions = 3, minDaysSinceLast = 7 } = opts || {};
   const st = load();
@@ -37,13 +34,13 @@ export function shouldShowRatePrompt(opts?: { minSessions?: number; minDaysSince
   return true;
 }
 
-/** Allow App.tsx to register a controller to open the modal */
+/** Allow App.tsx to register the modal controller */
 let externalController: { open: () => void } | null = null;
 export function registerRateModalController(ctrl: { open: () => void }) {
   externalController = ctrl;
 }
 
-/** Open the modal now and record that we showed it */
+/** Open the modal now and record the show time */
 export function triggerRatePromptNow() {
   if (externalController) {
     externalController.open();
@@ -54,26 +51,25 @@ export function triggerRatePromptNow() {
   }
 }
 
-/** Optional: let users disable future prompts */
+/** Let users stop seeing prompts */
 export function neverAskAgain() {
   const st = load();
   st.neverAsk = true;
   save(st);
 }
 
-/** -------- store review (native or web fallback) -------- */
+/** ---------- Request a store review (native or web) ---------- */
 export async function openStoreReview() {
   if (isNative) {
     try {
       const { AppReview } = await import('@capawesome/capacitor-app-review');
-      await AppReview.requestReview(); // native in-app review sheet
+      await AppReview.requestReview(); // native review sheet
       return;
     } catch {
       // fall through to web links
     }
   }
 
-  // Web fallback: open store pages
   const IOS_APP_ID = import.meta.env.VITE_IOS_APP_ID as string | undefined;
   const ANDROID_PKG = import.meta.env.VITE_ANDROID_PACKAGE as string | undefined;
   const ua = navigator.userAgent || '';
@@ -88,23 +84,22 @@ export async function openStoreReview() {
     window.location.href = `market://details?id=${ANDROID_PKG}`;
     return;
   }
-
-  // Final fallback: open store pages in new tabs if IDs exist
   if (IOS_APP_ID) window.open(`https://apps.apple.com/app/id${IOS_APP_ID}`, '_blank');
   if (ANDROID_PKG) window.open(`https://play.google.com/store/apps/details?id=${ANDROID_PKG}`, '_blank');
 }
 
-/** Used by RateAppModal when the user picks 1–3 stars */
+/** Used by RateAppModal for low-star feedback */
 export function sendFeedbackEmail() {
-  const to = "SBOMarketplaceapp@gmail.com";
-  const subject = "ClearCase feedback";
+  const to = 'SBOMarketplaceapp@gmail.com';
+  const subject = 'ClearCase feedback';
   const body = [
-    "Tell us what could be better:",
-    "",
-    "- What were you trying to do?",
-    "- What didn't work?",
-    "- Device/OS:"
-  ].join("\n");
+    'Tell us what could be better:',
+    '',
+    '- What were you trying to do?',
+    '- What didn’t work?',
+    '- Device/OS:'
+  ].join('\n');
+
   window.location.href =
     `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 }
