@@ -118,17 +118,14 @@ export default function IntegrationModal({
 
         {/* Body scroll area */}
         <div className="px-5 py-4 overflow-y-auto grow">
-          {/* Status and badge pills with safe padding */}
-          <div className="mb-3 flex items-center gap-2">
-            <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-              {isConnected ? "Connected" : "Not connected"}
-            </span>
-            {integration.badge && (
+          {/* Badge if present */}
+          {integration.badge && (
+            <div className="mb-3">
               <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 whitespace-nowrap">
                 {integration.badge}
               </span>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Description directly under the title as requested */}
           <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug mb-4">
@@ -176,39 +173,48 @@ export default function IntegrationModal({
             </div>
           )}
 
-          {/* Buttons under description and inputs for all modals */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            {/* Test button appears when an action is testable */}
-            {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) && !integration.disabled && (
+          {/* Status and buttons under description and inputs */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-500">Status:</span>
+              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                {isConnected ? "Connected" : "Not connected"}
+              </span>
+            </div>
+            
+            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+              {/* Test button appears when an action is testable */}
+              {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) && !integration.disabled && (
+                <button
+                  onClick={handleTest}
+                  className="rounded-xl bg-gray-900 px-4 py-2 text-white text-sm hover:opacity-90"
+                >
+                  Send test
+                </button>
+              )}
+              {isConnected ? (
+                <button
+                  onClick={onDisconnect}
+                  className="rounded-xl bg-red-600 px-4 py-2 text-white text-sm hover:opacity-90"
+                >
+                  Disconnect
+                </button>
+              ) : (
+                <button
+                  onClick={onConnect}
+                  disabled={isDisabled}
+                  className={`rounded-xl px-4 py-2 text-white text-sm ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
+                >
+                  {integration.disabled ? "Unavailable" : "Connect"}
+                </button>
+              )}
               <button
-                onClick={handleTest}
-                className="rounded-xl bg-gray-900 px-4 py-2 text-white text-sm hover:opacity-90"
+                onClick={onClose}
+                className="rounded-xl px-4 py-2 text-sm text-gray-800 bg-gray-100 hover:bg-gray-200"
               >
-                Send test
+                Close
               </button>
-            )}
-            {isConnected ? (
-              <button
-                onClick={onDisconnect}
-                className="rounded-xl bg-red-600 px-4 py-2 text-white text-sm hover:opacity-90"
-              >
-                Disconnect
-              </button>
-            ) : (
-              <button
-                onClick={onConnect}
-                disabled={isDisabled}
-                className={`rounded-xl px-4 py-2 text-white text-sm ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
-              >
-                {integration.disabled ? "Unavailable" : "Connect"}
-              </button>
-            )}
-            <button
-              onClick={onClose}
-              className="rounded-xl px-4 py-2 text-sm text-gray-800 bg-gray-100 hover:bg-gray-200"
-            >
-              Close
-            </button>
+            </div>
           </div>
         </div>
       </div>
