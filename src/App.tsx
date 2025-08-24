@@ -14,6 +14,8 @@ import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
 import { useToastStore } from "@/lib/showToast";
 import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
+import RateAppModal from "@/components/feedback/RateAppModal";
+import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -21,6 +23,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [hasConsent, setHasConsent] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [rateModalOpen, setRateModalOpen] = useState(false);
   const { node } = useToastStore();
 
   useEffect(() => {
@@ -29,6 +32,20 @@ const App = () => {
     setHasConsent(hasValidConsent);
     setIsLoading(false);
   }, []);
+
+  // Register rate modal controller and bump session counter
+  useEffect(() => {
+    registerRateModalController({ open: () => setRateModalOpen(true) });
+    bumpSessionCounter();
+  }, []);
+
+  // Show rate prompt after a delay if conditions are met
+  useEffect(() => {
+    if (hasConsent && shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
+      const id = setTimeout(() => triggerRatePromptNow(), 2000);
+      return () => clearTimeout(id);
+    }
+  }, [hasConsent]);
 
   const handleConsentGiven = () => {
     setHasConsent(true);
@@ -56,6 +73,7 @@ const App = () => {
         <Sonner />
         {node}
         <ScreenPrivacyOverlay />
+        <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Home />} />

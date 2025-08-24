@@ -1,5 +1,6 @@
 import * as React from "react";
 import { X } from "lucide-react";
+import { triggerRatePromptNow } from "@/lib/rateApp";
 
 interface SupportLegalModalProps {
   onClose: () => void;
@@ -16,11 +17,7 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
   };
 
   const handleRateApp = () => {
-    if ((window as any).__NATIVE__?.rateApp) {
-      (window as any).__NATIVE__.rateApp();
-    } else {
-      window.open("https://apps.apple.com/account/subscriptions", "_blank");
-    }
+    triggerRatePromptNow();
   };
 
   // Handle backdrop click
