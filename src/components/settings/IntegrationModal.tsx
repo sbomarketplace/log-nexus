@@ -120,101 +120,98 @@ export default function IntegrationModal({
         <div className="px-5 py-4 overflow-y-auto grow">
           {/* Badge if present */}
           {integration.badge && (
-            <div className="mb-3">
-              <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 whitespace-nowrap">
+            <div className="mb-2">
+              <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-1 text-xs font-medium text-gray-700 whitespace-nowrap">
                 {integration.badge}
               </span>
             </div>
           )}
 
-          {/* Description directly under the title as requested */}
-          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug mb-4">
+          {/* Description */}
+          <p className="text-sm text-gray-600 whitespace-normal break-words leading-relaxed mb-4">
             {integration.description}
           </p>
 
-          {/* Any required input sits above the buttons */}
+          {/* Input fields if needed */}
           {integration.requiresUrl && (
-            <div className="space-y-2 mb-4">
-              <label className="text-sm font-medium">Webhook URL</label>
+            <div className="space-y-1 mb-4">
+              <label className="text-sm font-medium text-gray-700">Webhook URL</label>
               <input
                 type="url"
                 inputMode="url"
                 placeholder="https://hooks.slack.com/services/..."
-                className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={isDisabled}
               />
-              <p className="text-xs text-gray-500">
-                Stored locally on your device. Not uploaded to our servers.
-              </p>
+              <p className="text-xs text-gray-500">Stored locally on your device.</p>
             </div>
           )}
 
           {integration.requiresEmail && (
-            <div className="space-y-2 mb-4">
-              <label className="text-sm font-medium">Default export email</label>
+            <div className="space-y-1 mb-4">
+              <label className="text-sm font-medium text-gray-700">Default export email</label>
               <input
                 type="email"
                 inputMode="email"
                 placeholder="you@example.com"
-                className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={isDisabled}
               />
-              <p className="text-xs text-gray-500">Used to prefill exports. Stored locally only.</p>
+              <p className="text-xs text-gray-500">Used to prefill exports.</p>
             </div>
           )}
 
           {integration.disabled && (
-            <div className="rounded-xl border bg-gray-50 px-3 py-2 text-sm text-gray-600 mb-4">
-              This integration is planned. OAuth connection will be added in a future update.
+            <div className="rounded-lg border bg-gray-50 px-3 py-2 text-sm text-gray-600 mb-4">
+              This integration is planned for a future update.
             </div>
           )}
 
-          {/* Status and buttons under description and inputs */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-gray-500">Status:</span>
-              <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-                {isConnected ? "Connected" : "Not connected"}
-              </span>
-            </div>
+          {/* Status */}
+          <div className="mb-4">
+            <span className="text-xs text-gray-500 mr-2">Status:</span>
+            <span className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-medium whitespace-nowrap ${isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+              {isConnected ? "Connected" : "Not connected"}
+            </span>
+          </div>
             
-            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-              {/* Test button appears when an action is testable */}
-              {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) && !integration.disabled && (
-                <button
-                  onClick={handleTest}
-                  className="rounded-xl bg-gray-900 px-4 py-2 text-white text-sm hover:opacity-90"
-                >
-                  Send test
-                </button>
-              )}
-              {isConnected ? (
-                <button
-                  onClick={onDisconnect}
-                  className="rounded-xl bg-red-600 px-4 py-2 text-white text-sm hover:opacity-90"
-                >
-                  Disconnect
-                </button>
-              ) : (
-                <button
-                  onClick={onConnect}
-                  disabled={isDisabled}
-                  className={`rounded-xl px-4 py-2 text-white text-sm ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
-                >
-                  {integration.disabled ? "Unavailable" : "Connect"}
-                </button>
-              )}
+          {/* Buttons - horizontal layout */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Test button appears when an action is testable */}
+            {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) && !integration.disabled && (
               <button
-                onClick={onClose}
-                className="rounded-xl px-4 py-2 text-sm text-gray-800 bg-gray-100 hover:bg-gray-200"
+                onClick={handleTest}
+                className="rounded-lg bg-gray-900 px-3 py-2 text-white text-sm hover:opacity-90"
               >
-                Close
+                Send test
               </button>
-            </div>
+            )}
+            {isConnected ? (
+              <button
+                onClick={onDisconnect}
+                className="rounded-lg bg-red-600 px-3 py-2 text-white text-sm hover:opacity-90"
+              >
+                Disconnect
+              </button>
+            ) : (
+              <button
+                onClick={onConnect}
+                disabled={isDisabled}
+                className={`rounded-lg px-3 py-2 text-white text-sm ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
+              >
+                {integration.disabled ? "Unavailable" : "Connect"}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200"
+            >
+              Close
+            </button>
           </div>
         </div>
       </div>
