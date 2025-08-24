@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 type Props = {
@@ -38,7 +39,7 @@ export default function ConfirmModal({
 
   if (!open) return null;
 
-  return (
+  const modalContent = (
     <div role="dialog" aria-modal="true" className="fixed inset-0 z-[9999] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative mx-4 w-full max-w-md rounded-2xl bg-white shadow-xl flex flex-col">
@@ -89,4 +90,6 @@ export default function ConfirmModal({
       </div>
     </div>
   );
+
+  return createPortal(modalContent, document.body);
 }
