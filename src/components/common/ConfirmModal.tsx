@@ -39,7 +39,7 @@ export default function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[100] flex items-center justify-center">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-[9999] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="relative mx-4 w-full max-w-md rounded-2xl bg-white shadow-xl flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b">
