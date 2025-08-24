@@ -45,8 +45,6 @@ export default function IntegrationModal({
 }: ModalProps) {
   if (!open || !integration) return null;
 
-  const title = `${integration.name} Integration`;
-
   async function handleTest() {
     try {
       if (integration.id === "email") {
@@ -93,20 +91,14 @@ export default function IntegrationModal({
   }
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-label={title}
-      className="fixed inset-0 z-50 flex items-center justify-center"
-    >
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Floating modal */}
+      {/* Container. Header and footer fixed. Body scrolls. */}
       <div className="relative mx-4 w-full max-w-xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[85vh]">
-        {/* Header with title on a single line */}
-        <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
-          <h3 className="text-lg font-semibold">{title}</h3>
+        {/* Header with close only, to keep the content title as the first line in body */}
+        <div className="flex items-center justify-end px-5 py-4 border-b shrink-0">
           <button
             onClick={onClose}
             aria-label="Close"
@@ -116,65 +108,77 @@ export default function IntegrationModal({
           </button>
         </div>
 
-        {/* Body - simplified layout: title → description → buttons */}
-        <div className="px-4 py-3">
-          {/* Description directly under title */}
-          <p className="text-xs text-gray-600 mb-3 leading-snug">
+        {/* Body. Title line, then description line, then inputs, then buttons row. */}
+        <div className="px-5 py-4 overflow-y-auto grow">
+          {/* Title on top line */}
+          <h3 className="text-lg font-semibold mb-1">{integration.name}</h3>
+
+          {/* Description on the next line */}
+          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug mb-4">
             {integration.description}
           </p>
 
-          {/* Input fields just above buttons if needed */}
+          {/* Required input section shown above buttons if needed */}
           {integration.requiresUrl && (
-            <div className="mb-3">
-              <label className="text-xs font-medium text-gray-700 mb-1 block">Webhook URL</label>
+            <div className="space-y-2 mb-4">
+              <label className="text-sm font-medium">Webhook URL</label>
               <input
                 type="url"
                 inputMode="url"
                 placeholder="https://hooks.slack.com/services/..."
-                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={isDisabled}
               />
+              <p className="text-xs text-gray-500">
+                Stored locally on your device. Not uploaded to our servers.
+              </p>
             </div>
           )}
 
           {integration.requiresEmail && (
-            <div className="mb-3">
-              <label className="text-xs font-medium text-gray-700 mb-1 block">Default export email</label>
+            <div className="space-y-2 mb-4">
+              <label className="text-sm font-medium">Default export email</label>
               <input
                 type="email"
                 inputMode="email"
                 placeholder="you@example.com"
-                className="w-full rounded-lg border border-gray-300 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="w-full rounded-xl border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
                 disabled={isDisabled}
               />
+              <p className="text-xs text-gray-500">Used to prefill exports. Stored locally only.</p>
             </div>
           )}
 
-          {integration.disabled && (
-            <div className="rounded-lg border bg-gray-50 px-2 py-1.5 text-xs text-gray-600 mb-3">
-              This integration is planned for a future update.
-            </div>
-          )}
-            
-          {/* Buttons - horizontal layout under description */}
-          <div className="flex items-center gap-2">
-            {/* Test button appears when an action is testable */}
-            {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) && !integration.disabled && (
-              <button
-                onClick={handleTest}
-                className="rounded-lg bg-gray-900 px-2 py-1.5 text-white text-xs hover:opacity-90"
-              >
-                Test
-              </button>
-            )}
+          {/* Buttons row directly under description and any inputs */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Status pill with safe padding and no overflow */}
+            <span
+              className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
+                isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+              }`}
+            >
+              {isConnected ? "Connected" : "Not connected"}
+            </span>
+
+            {/* Test button only for supported integrations */}
+            {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) &&
+              !integration.disabled && (
+                <button
+                  onClick={handleTest}
+                  className="rounded-xl bg-gray-900 px-4 py-2 text-white text-sm hover:opacity-90"
+                >
+                  Send test
+                </button>
+              )}
+
             {isConnected ? (
               <button
                 onClick={onDisconnect}
-                className="rounded-lg bg-red-600 px-2 py-1.5 text-white text-xs hover:opacity-90"
+                className="rounded-xl bg-red-600 px-4 py-2 text-white text-sm hover:opacity-90"
               >
                 Disconnect
               </button>
@@ -182,21 +186,20 @@ export default function IntegrationModal({
               <button
                 onClick={onConnect}
                 disabled={isDisabled}
-                className={`rounded-lg px-2 py-1.5 text-white text-xs ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
+                className={`rounded-xl px-4 py-2 text-white text-sm ${
+                  isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"
+                }`}
               >
                 {integration.disabled ? "Unavailable" : "Connect"}
               </button>
             )}
+
             <button
               onClick={onClose}
-              className="rounded-lg px-2 py-1.5 text-xs text-gray-700 bg-gray-100 hover:bg-gray-200"
+              className="rounded-xl px-4 py-2 text-sm text-gray-800 bg-gray-100 hover:bg-gray-200"
             >
               Close
             </button>
-            {/* Status indicator */}
-            <span className={`ml-auto inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
-              {isConnected ? "Connected" : "Not connected"}
-            </span>
           </div>
         </div>
       </div>

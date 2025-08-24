@@ -123,9 +123,9 @@ export default function IntegrationsCard() {
             return (
               <div
                 key={it.id}
-                className="flex items-center justify-between rounded-xl border px-4 py-3 hover:bg-gray-50"
+                className="flex w-full items-start gap-4 rounded-xl border p-4 hover:bg-gray-50"
               >
-                <div className="flex items-center gap-3">
+                <div className="flex-1 min-w-0 flex items-start gap-3">
                   <Icon className="h-5 w-5 text-gray-700" />
                   <div>
                     <div className="flex items-center gap-2">
@@ -142,7 +142,7 @@ export default function IntegrationsCard() {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="shrink-0 flex items-center gap-3 self-start">
                   <span
                     className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
                       stored.connected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
