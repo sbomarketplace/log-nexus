@@ -108,19 +108,19 @@ export default function IntegrationModal({
           </button>
         </div>
 
-        {/* Body. Title line, then description line, then inputs, then buttons row. */}
-        <div className="px-5 py-4 overflow-y-auto grow">
-          {/* Title on top line */}
-          <h3 className="text-lg font-semibold mb-1">{integration.name}</h3>
+        {/* Body: Title → Description → Inputs (if needed) → Buttons */}
+        <div className="px-5 py-4 overflow-y-auto grow space-y-4">
+          {/* Title on first line */}
+          <h3 className="text-lg font-semibold">{integration.name}</h3>
 
-          {/* Description on the next line */}
-          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug mb-4">
+          {/* Description on second line */}
+          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug">
             {integration.description}
           </p>
 
-          {/* Required input section shown above buttons if needed */}
+          {/* Inputs above buttons when required */}
           {integration.requiresUrl && (
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Webhook URL</label>
               <input
                 type="url"
@@ -138,7 +138,7 @@ export default function IntegrationModal({
           )}
 
           {integration.requiresEmail && (
-            <div className="space-y-2 mb-4">
+            <div className="space-y-2">
               <label className="text-sm font-medium">Default export email</label>
               <input
                 type="email"
@@ -153,9 +153,8 @@ export default function IntegrationModal({
             </div>
           )}
 
-          {/* Buttons row directly under description and any inputs */}
+          {/* Buttons row at bottom */}
           <div className="flex flex-wrap items-center gap-2">
-            {/* Status pill with safe padding and no overflow */}
             <span
               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
                 isConnected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
@@ -164,7 +163,6 @@ export default function IntegrationModal({
               {isConnected ? "Connected" : "Not connected"}
             </span>
 
-            {/* Test button only for supported integrations */}
             {((integration.id === "email") || (integration.id === "slack") || (integration.id === "zapier")) &&
               !integration.disabled && (
                 <button
