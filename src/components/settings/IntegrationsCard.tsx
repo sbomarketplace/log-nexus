@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Mail, Webhook, Cloud, Link as LinkIcon, Archive } from "lucide-react";
 import IntegrationModal, { IntegrationConfig } from "./IntegrationModal";
+import { isValidEmail, isValidUrl } from "@/integrations";
 
 type Stored = {
   connected: boolean;
@@ -130,7 +131,7 @@ export default function IntegrationsCard() {
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{it.name}</p>
                       {it.badge && (
-                        <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
+                        <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700 whitespace-nowrap">
                           {it.badge}
                         </span>
                       )}
@@ -143,7 +144,7 @@ export default function IntegrationsCard() {
 
                 <div className="flex items-center gap-3">
                   <span
-                    className={`rounded-full px-2 py-1 text-xs ${
+                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
                       stored.connected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
                     }`}
                   >
@@ -172,22 +173,16 @@ export default function IntegrationsCard() {
         isDisabled={active?.disabled}
         onConnect={() => {
           if (!active) return;
-          // Light validation for URL or email where required
-          if (active.requiresUrl) {
-            const ok = /^https?:\/\/.+/i.test(value.trim());
-            if (!ok) {
-              alert("Please enter a valid webhook URL that starts with http or https.");
-              return;
-            }
+          const trimmed = value.trim();
+          if (active.requiresUrl && !isValidUrl(trimmed)) {
+            alert("Enter a valid URL that starts with http or https.");
+            return;
           }
-          if (active.requiresEmail) {
-            const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-            if (!ok) {
-              alert("Please enter a valid email address.");
-              return;
-            }
+          if (active.requiresEmail && !isValidEmail(trimmed)) {
+            alert("Enter a valid email address.");
+            return;
           }
-          updateStored(active.id, { connected: !active.disabled, value: value.trim() });
+          updateStored(active.id, { connected: !active.disabled, value: trimmed });
           setOpen(false);
         }}
         onDisconnect={() => {
