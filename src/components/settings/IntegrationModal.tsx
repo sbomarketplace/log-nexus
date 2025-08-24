@@ -1,8 +1,14 @@
 import * as React from "react";
 import { X } from "lucide-react";
+import {
+  isValidEmail,
+  isValidUrl,
+  sendSlackWebhook,
+  sendZapierWebhook,
+  openTestEmail,
+} from "@/integrations";
 
 type IntegrationId = "slack" | "zapier" | "email" | "google_drive" | "dropbox";
-
 export type IntegrationConfig = {
   id: IntegrationId;
   name: string;
@@ -39,7 +45,57 @@ export default function IntegrationModal({
   if (!open || !integration) return null;
 
   const title = `${integration.name} Integration`;
+  const canTest =
+    isConnected && !integration.disabled && (integration.requiresUrl || integration.requiresEmail);
 
+  async function handleTest() {
+    try {
+      if (integration.id === "email") {
+        if (!isValidEmail(value)) {
+          alert("Enter a valid email address first.");
+          return;
+        }
+        openTestEmail(value);
+        return;
+      }
+      if (integration.id === "slack") {
+        if (!isValidUrl(value)) {
+          alert("Enter a valid Slack Incoming Webhook URL first.");
+          return;
+        }
+        await sendSlackWebhook(value, {
+          type: "test",
+          source: "IntegrationsModal",
+          message: "ClearCase test message from Integrations",
+          timestamp: new Date().toISOString(),
+        });
+        alert("Test sent to Slack.");
+        return;
+      }
+      if (integration.id === "zapier") {
+        if (!isValidUrl(value)) {
+          alert("Enter a valid Zapier Catch Hook URL first.");
+          return;
+        }
+        await sendZapierWebhook(value, {
+          type: "test",
+          source: "IntegrationsModal",
+          message: "ClearCase test message from Integrations",
+          timestamp: new Date().toISOString(),
+        });
+        alert("Test sent to Zapier.");
+        return;
+      }
+      alert("This integration does not support testing yet.");
+    } catch (err) {
+      console.error(err);
+      alert("Test failed. See console for details.");
+    }
+  }
+
+  // Height-safe layout:
+  // - Use a centered container with min-h-0 so the scroll area can actually scroll.
+  // - Make body the only scrolling region to keep header and footer fixed.
   return (
     <div
       role="dialog"
@@ -47,9 +103,13 @@ export default function IntegrationModal({
       aria-label={title}
       className="fixed inset-0 z-50 flex items-center justify-center"
     >
+      {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative mx-4 w-full max-w-xl rounded-2xl bg-white shadow-xl">
-        <div className="flex items-center justify-between px-5 py-4 border-b">
+
+      {/* Container */}
+      <div className="relative mx-4 w-full max-w-xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[85vh]">
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b shrink-0">
           <h3 className="text-lg font-semibold">{title}</h3>
           <button
             onClick={onClose}
@@ -60,7 +120,8 @@ export default function IntegrationModal({
           </button>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-4 space-y-4">
+        {/* Scrollable content */}
+        <div className="px-5 py-4 space-y-4 overflow-y-auto grow break-words">
           {integration.badge && (
             <span className="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-700">
               {integration.badge}
@@ -81,7 +142,7 @@ export default function IntegrationModal({
                 disabled={isDisabled}
               />
               <p className="text-xs text-gray-500">
-                We store this URL locally on your device. It is not uploaded to our servers.
+                Stored locally on your device. Not uploaded to our servers.
               </p>
             </div>
           )}
@@ -98,24 +159,31 @@ export default function IntegrationModal({
                 onChange={(e) => onChange(e.target.value)}
                 disabled={isDisabled}
               />
-              <p className="text-xs text-gray-500">
-                Used to prefill export flows. Stored locally only.
-              </p>
+              <p className="text-xs text-gray-500">Used to prefill exports. Stored locally only.</p>
             </div>
           )}
 
           {integration.disabled && (
             <div className="rounded-xl border bg-gray-50 px-3 py-2 text-sm text-gray-600">
-              This integration is planned. OAuth screens and export targets will be added in a future update.
+              This integration is planned. OAuth connection will be added in a future update.
             </div>
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t px-5 py-3">
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-3 border-t px-5 py-3 shrink-0">
           <div className="text-xs text-gray-500">
             Status: {isConnected ? "Connected" : "Not connected"}
           </div>
           <div className="flex items-center gap-2">
+            {canTest && (
+              <button
+                onClick={handleTest}
+                className="rounded-xl px-4 py-2 text-sm bg-gray-800 text-white hover:opacity-90"
+              >
+                Send test
+              </button>
+            )}
             {isConnected ? (
               <button
                 onClick={onDisconnect}
@@ -127,7 +195,9 @@ export default function IntegrationModal({
               <button
                 onClick={onConnect}
                 disabled={isDisabled}
-                className={`rounded-xl px-4 py-2 text-white ${isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
+                className={`rounded-xl px-4 py-2 text-white text-sm ${
+                  isDisabled ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"
+                }`}
               >
                 {integration.disabled ? "Unavailable" : "Connect"}
               </button>
