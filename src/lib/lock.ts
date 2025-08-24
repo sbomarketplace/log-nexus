@@ -47,6 +47,15 @@ export function subscribe(fn: () => void) {
 }
 
 export function initLock() {
+  // Initialize privacy screen for native apps
+  (async () => {
+    const { isNative } = await import('./platform');
+    if (isNative) {
+      const { initPrivacyScreen } = await import('./privacyScreen');
+      await initPrivacyScreen();
+    }
+  })();
+  
   // user activity listeners
   const bump = () => onUserActivity();
   window.addEventListener("pointerdown", bump);
@@ -88,8 +97,17 @@ export function setAutoLockMinutes(mins: number | null) {
 }
 export function setRequireUnlockForExport(v: boolean) { settings.requireUnlockForExport = !!v; saveSettings(); }
 
-export function setHideSensitivePreviews(v: boolean) {
-  settings.hideSensitivePreviews = !!v; saveSettings(); applyHideSensitivePreviews();
+export async function setHideSensitivePreviews(v: boolean) {
+  settings.hideSensitivePreviews = !!v; 
+  saveSettings(); 
+  applyHideSensitivePreviews();
+  
+  // Update native privacy screen if available
+  const { isNative } = await import('./platform');
+  if (isNative) {
+    const { setPrivacyScreenEnabled } = await import('./privacyScreen');
+    await setPrivacyScreenEnabled(v);
+  }
 }
 function applyHideSensitivePreviews() {
   const cls = "cc-sensitive-previews";
@@ -99,6 +117,26 @@ function applyHideSensitivePreviews() {
 
 /** Enable App Lock by enrolling a platform authenticator. No passcode fallback. */
 export async function enableAppLock(): Promise<boolean> {
+  // Check if native auth is available
+  const { isNative } = await import('./platform');
+  if (isNative) {
+    const { nativeIsAvailable, nativeRequireAuth } = await import('./nativeAuth');
+    const available = await nativeIsAvailable();
+    if (!available) {
+      alert("This device doesn't support biometric authentication. Please ensure Face ID/Touch ID (or device PIN) is set up.");
+      return false;
+    }
+    // Test authentication works before enabling
+    const success = await nativeRequireAuth("Enable App Lock");
+    if (!success) return false;
+    
+    settings.appLockEnabled = true;
+    saveSettings();
+    lock("enabled");
+    return true;
+  }
+  
+  // Web fallback - existing WebAuthn code
   if (!canUseWebAuthn()) {
     alert("This device/browser doesn't support secure device authentication (WebAuthn).");
     return false;
@@ -152,6 +190,20 @@ export async function disableAppLock(): Promise<boolean> {
 /** Prompt the OS for Face ID/Touch ID/PIN. */
 export async function requireAuth(_reason = "unlock"): Promise<"ok" | "denied"> {
   if (!settings.appLockEnabled) return "ok";
+  
+  // Use native auth if available
+  const { isNative } = await import('./platform');
+  if (isNative) {
+    const { nativeRequireAuth } = await import('./nativeAuth');
+    const success = await nativeRequireAuth(_reason);
+    if (success) {
+      unlock();
+      return "ok";
+    }
+    return "denied";
+  }
+  
+  // Web fallback - existing WebAuthn code
   if (!canUseWebAuthn() || !settings.webauthnCredentialId) return "denied";
   try {
     const assertion = await navigator.credentials.get({

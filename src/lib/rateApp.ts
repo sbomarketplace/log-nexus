@@ -59,7 +59,21 @@ export function neverAskAgain() {
 }
 
 /** Open the native store review page directly */
-export function openStoreReview() {
+export async function openStoreReview() {
+  // Check if we're in native and can use in-app review
+  const { isNative } = await import('./platform');
+  if (isNative) {
+    try {
+      const { RateApp } = await import('capacitor-rate-app');
+      await RateApp.requestReview();
+      return;
+    } catch (error) {
+      console.warn('Native review failed, falling back to store link:', error);
+      // Continue to web fallback below
+    }
+  }
+  
+  // Web fallback - existing store links
   const ua = navigator.userAgent || "";
   const isiOS = /iPad|iPhone|iPod/.test(ua);
   const isAndroid = /Android/i.test(ua);

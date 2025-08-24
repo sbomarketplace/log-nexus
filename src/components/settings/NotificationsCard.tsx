@@ -28,21 +28,16 @@ export default function NotificationsCard() {
   React.useEffect(() => save(settings), [settings]);
 
   async function enableNotifications() {
-    if (!("Notification" in window)) {
-      alert("Notifications are not supported in this browser.");
-      return;
-    }
-    const res = await Notification.requestPermission();
-    setPermission(res);
-    setSettings((s) => ({ ...s, enabled: res === "granted" }));
+    const { requestPermissions } = await import('@/lib/notify');
+    const granted = await requestPermissions();
+    setPermission(granted ? 'granted' : 'denied');
+    setSettings((s) => ({ ...s, enabled: granted }));
   }
 
-  function testNotification() {
+  async function testNotification() {
     if (permission !== "granted") return alert("Please enable notifications first.");
-    new Notification("ClearCase — test", {
-      body: "This is a test notification from Settings.",
-      icon: "/favicon.ico",
-    });
+    const { testNotification: sendTest } = await import('@/lib/notify');
+    await sendTest();
   }
 
   return (

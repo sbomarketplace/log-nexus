@@ -163,6 +163,19 @@ export async function exportDOCX(incident: Incident) {
 
   const doc = new Document({ sections: [{ properties: {}, children: sections }] });
   const blob = await Packer.toBlob(doc);
+  
+  // Native: Share DOCX file
+  if (isNative) {
+    try {
+      const file = new File([blob], `incident_${incident.id}.docx`, { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+      await nativeShareFile(file, `incident_${incident.id}.docx`);
+      return blob;
+    } catch (error) {
+      console.warn("Native DOCX share failed, falling back to download:", error);
+    }
+  }
+  
+  // Web fallback: Download DOCX
   downloadBlob(blob, `incident_${incident.id}.docx`);
   return blob;
 }
