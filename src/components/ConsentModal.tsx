@@ -312,7 +312,7 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
               className="text-xs text-gray-500 underline underline-offset-2 hover:text-gray-400"
               aria-label="View full Terms, Privacy, and Cookie Policy"
             >
-              Learn More (View Full Policies)
+              Learn More
             </a>
           </div>
 
