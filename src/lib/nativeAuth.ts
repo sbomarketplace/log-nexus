@@ -12,7 +12,7 @@ export async function nativeIsAvailable(): Promise<boolean> {
   }
 }
 
-export async function nativeRequireAuth(reason = 'Unlock'): Promise<boolean> {
+export async function nativeRequireAuth(reason = 'Unlock ClearCase'): Promise<boolean> {
   if (!isNative) return false;
   
   try {
@@ -23,7 +23,7 @@ export async function nativeRequireAuth(reason = 'Unlock'): Promise<boolean> {
       reason,
       cancelTitle: 'Cancel',
       allowDeviceCredential: true,
-      iosFallbackTitle: 'Use Device Passcode',
+      iosFallbackTitle: 'Use Passcode',
       androidTitle: 'Authenticate',
       androidSubtitle: reason,
       androidConfirmationRequired: false

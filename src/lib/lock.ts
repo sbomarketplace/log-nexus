@@ -176,7 +176,7 @@ export async function enableAppLock(): Promise<boolean> {
 
 /** Disabling requires successful device auth; if auth fails, remain enabled. */
 export async function disableAppLock(): Promise<boolean> {
-  const ok = await requireAuth("disable");
+  const ok = await requireAuth("Disable App Lock");
   if (ok !== "ok") return false;
   settings.appLockEnabled = false;
   settings.webauthnCredentialId = null;
