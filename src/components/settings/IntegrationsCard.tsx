@@ -108,9 +108,10 @@ export default function IntegrationsCard() {
             return (
               <div
                 key={it.id}
-                className="flex items-start justify-between gap-3 rounded-xl border p-4 hover:bg-gray-50"
+                className="flex w-full items-start gap-4 rounded-xl border p-4 hover:bg-gray-50"
               >
-                <div className="flex items-start gap-3 min-w-0">
+                {/* Left info - owns available width */}
+                <div className="flex-1 min-w-0 flex items-start gap-3">
                   <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gray-700" />
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
@@ -121,11 +122,14 @@ export default function IntegrationsCard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600 break-words">{it.description}</p>
+                    <p className="text-sm text-gray-600 whitespace-normal break-words leading-snug">
+                      {it.description}
+                    </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
+                {/* Right actions - never steals width */}
+                <div className="shrink-0 flex items-center gap-3 self-start">
                   <span
                     className={`rounded-full px-2 py-1 text-xs ${
                       stored.connected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
@@ -165,12 +169,19 @@ export default function IntegrationsCard() {
             alert("Enter a valid email address.");
             return;
           }
-          updateStored(active.id!, { connected: !active.disabled, value: trimmed });
+          // mark connected unless disabled
+          const ok = active.disabled ? false : true;
+          const next = { connected: ok, value: trimmed };
+          const newState = { ...loadState(), [active.id!]: next };
+          setState(newState);
+          saveState(newState);
           setOpen(false);
         }}
         onDisconnect={() => {
           if (!active) return;
-          updateStored(active.id!, { connected: false, value: "" });
+          const newState = { ...loadState(), [active.id!]: { connected: false, value: "" } };
+          setState(newState);
+          saveState(newState);
           setValue("");
           setOpen(false);
         }}
