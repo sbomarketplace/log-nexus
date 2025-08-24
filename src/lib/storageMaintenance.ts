@@ -12,9 +12,10 @@ const KNOWN_LOCALSTORAGE_CACHE_KEYS = [
 ];
 
 const INCIDENT_LOCALSTORAGE_KEYS = [
-  // Add the real keys your app uses to persist incidents
-  "cc_incidents_v1",
-  "cc_incidents_index_v1",
+  "organized-incidents", // Main incidents storage
+  "incidents", // Legacy incidents storage
+  "quickNotesDraft", // Quick notes draft
+  "quickNotesTitleDraft", // Quick notes title draft
 ];
 
 export async function getCacheStats(): Promise<CacheStats> {
@@ -75,24 +76,28 @@ export async function clearAllAppCaches(): Promise<void> {
 }
 
 export async function deleteAllIncidents(): Promise<void> {
-  // 1) If you have a storage adapter, call it:
   try {
-    // Check for custom app deletion hook
-    const windowWithCC = window as any;
-    if (windowWithCC.cc?.deleteAllIncidents) {
-      await windowWithCC.cc.deleteAllIncidents();
-      return;
+    // Import supabase client
+    const { supabase } = await import('@/integrations/supabase/client');
+    
+    // Delete all incidents from Supabase database
+    const { error } = await supabase
+      .from('incidents')
+      .delete()
+      .neq('id', ''); // Delete all rows (neq with empty string matches all)
+    
+    if (error) {
+      console.error('Failed to delete from Supabase:', error);
     }
-  } catch {
-    // ignore and fallback
+  } catch (error) {
+    console.error('Error deleting from Supabase:', error);
   }
 
-  // 2) Fallback: remove known incident keys from localStorage
+  // Remove incident-related keys from localStorage
   for (const key of INCIDENT_LOCALSTORAGE_KEYS) {
     localStorage.removeItem(key);
   }
-
-  // 3) If incidents live in IndexedDB (Dexie, etc.), add DB names here and delete like above
-  // KNOWN_IDB_DATABASES.push("ClearCaseIncidentsDB")
-  // await indexedDB.deleteDatabase("ClearCaseIncidentsDB")
+  
+  // Trigger event to notify components
+  window.dispatchEvent(new CustomEvent('incidentsUpdated'));
 }
