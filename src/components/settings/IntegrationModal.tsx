@@ -9,7 +9,6 @@ import {
 } from "@/integrations";
 
 type IntegrationId = "slack" | "zapier" | "email" | "google_drive" | "dropbox";
-
 export type IntegrationConfig = {
   id: IntegrationId;
   name: string;
@@ -95,9 +94,9 @@ export default function IntegrationModal({
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
-      {/* Container. Header and footer fixed. Body scrolls. */}
+      {/* Floating modal */}
       <div className="relative mx-4 w-full max-w-xl rounded-2xl bg-white shadow-xl flex flex-col max-h-[85vh]">
-        {/* Header with close only, to keep the content title as the first line in body */}
+        {/* Header with close only */}
         <div className="flex items-center justify-end px-5 py-4 border-b shrink-0">
           <button
             onClick={onClose}
@@ -108,19 +107,19 @@ export default function IntegrationModal({
           </button>
         </div>
 
-        {/* Body: Title → Description → Inputs (if needed) → Buttons */}
-        <div className="px-5 py-4 overflow-y-auto grow space-y-4">
-          {/* Title on first line */}
-          <h3 className="text-lg font-semibold">{integration.name}</h3>
+        {/* Body: Title line, Description line, Inputs, Buttons row */}
+        <div className="px-5 py-4 overflow-y-auto grow">
+          {/* Title */}
+          <h3 className="text-lg font-semibold mb-1">{integration.name}</h3>
 
-          {/* Description on second line */}
-          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug">
+          {/* Description */}
+          <p className="text-sm text-gray-700 whitespace-normal break-words leading-snug mb-4">
             {integration.description}
           </p>
 
-          {/* Inputs above buttons when required */}
+          {/* Inputs placed above buttons when required */}
           {integration.requiresUrl && (
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <label className="text-sm font-medium">Webhook URL</label>
               <input
                 type="url"
@@ -138,7 +137,7 @@ export default function IntegrationModal({
           )}
 
           {integration.requiresEmail && (
-            <div className="space-y-2">
+            <div className="space-y-2 mb-4">
               <label className="text-sm font-medium">Default export email</label>
               <input
                 type="email"
@@ -153,7 +152,7 @@ export default function IntegrationModal({
             </div>
           )}
 
-          {/* Buttons row at bottom */}
+          {/* Buttons row under description and inputs */}
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${

@@ -3,29 +3,21 @@ import { Mail, Webhook, Cloud, Link as LinkIcon, Archive } from "lucide-react";
 import IntegrationModal, { IntegrationConfig } from "./IntegrationModal";
 import { isValidEmail, isValidUrl } from "@/integrations";
 
-type Stored = {
-  connected: boolean;
-  value: string;
-};
-
+type Stored = { connected: boolean; value: string };
 const LS_KEY = "cc_integrations_state_v1";
 
 function loadState(): Record<string, Stored> {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return {};
-    return JSON.parse(raw) || {};
+    return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
   }
 }
-
 function saveState(state: Record<string, Stored>) {
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(state));
-  } catch {
-    // ignore
-  }
+  } catch {}
 }
 
 const INTEGRATIONS: IntegrationConfig[] = [
@@ -55,16 +47,14 @@ const INTEGRATIONS: IntegrationConfig[] = [
   {
     id: "google_drive",
     name: "Google Drive",
-    description:
-      "Export PDFs and archives directly to your Drive. OAuth based connection. Planned in a future update.",
+    description: "Export PDFs directly to Drive. Planned.",
     badge: "Coming soon",
     disabled: true,
   },
   {
     id: "dropbox",
     name: "Dropbox",
-    description:
-      "Save exports to a selected Dropbox folder. OAuth based connection. Planned in a future update.",
+    description: "Save exports to Dropbox. Planned.",
     badge: "Coming soon",
     disabled: true,
   },
@@ -76,15 +66,12 @@ export default function IntegrationsCard() {
   const [active, setActive] = React.useState<IntegrationConfig | null>(null);
   const [value, setValue] = React.useState("");
 
-  React.useEffect(() => {
-    setState(loadState());
-  }, []);
+  React.useEffect(() => setState(loadState()), []);
 
   function openModal(integration: IntegrationConfig) {
-    setActive(integration);
     const st = loadState();
-    const entry = st[integration.id] || { connected: false, value: "" };
-    setValue(entry.value || "");
+    setActive(integration);
+    setValue(st[integration.id]?.value || "");
     setOpen(true);
   }
 
@@ -94,20 +81,16 @@ export default function IntegrationsCard() {
     saveState(newState);
   }
 
-  const rows = INTEGRATIONS;
-
   return (
     <>
       <div className="rounded-xl border bg-white p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <LinkIcon className="h-5 w-5 text-gray-600" />
-            <p className="font-semibold">Integrations</p>
-          </div>
+        <div className="mb-3 flex items-center gap-2">
+          <LinkIcon className="h-5 w-5 text-gray-600" />
+          <p className="font-semibold">Integrations</p>
         </div>
 
         <div className="space-y-3">
-          {rows.map((it) => {
+          {INTEGRATIONS.map((it) => {
             const stored = state[it.id] || { connected: false, value: "" };
             const Icon =
               it.id === "email"
@@ -121,13 +104,11 @@ export default function IntegrationsCard() {
                 : Archive;
 
             return (
-              <div
-                key={it.id}
-                className="flex w-full items-start gap-4 rounded-xl border p-4 hover:bg-gray-50"
-              >
-                <div className="flex-1 min-w-0 flex items-start gap-3">
-                  <Icon className="h-5 w-5 text-gray-700" />
-                  <div>
+              <div key={it.id} className="rounded-xl border p-4 hover:bg-gray-50">
+                <div className="flex items-start gap-3">
+                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-gray-700" />
+                  <div className="flex-1 min-w-0">
+                    {/* Title line */}
                     <div className="flex items-center gap-2">
                       <p className="font-medium">{it.name}</p>
                       {it.badge && (
@@ -136,26 +117,30 @@ export default function IntegrationsCard() {
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-gray-600">
+
+                    {/* Description line */}
+                    <p className="mt-1 text-sm text-gray-700 whitespace-normal break-words leading-snug">
                       {it.description}
                     </p>
-                  </div>
-                </div>
 
-                <div className="shrink-0 flex items-center gap-3 self-start">
-                  <span
-                    className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
-                      stored.connected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
-                    }`}
-                  >
-                    {stored.connected ? "Connected" : "Not connected"}
-                  </span>
-                  <button
-                    onClick={() => openModal(it)}
-                    className="rounded-xl bg-blue-600 px-3 py-2 text-sm text-white hover:opacity-90 disabled:bg-gray-400"
-                  >
-                    {stored.connected ? "Manage" : it.disabled ? "Details" : "Connect"}
-                  </button>
+                    {/* Action row under description */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <span
+                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium whitespace-nowrap ${
+                          stored.connected ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"
+                        }`}
+                      >
+                        {stored.connected ? "Connected" : "Not connected"}
+                      </span>
+
+                      <button
+                        onClick={() => openModal(it)}
+                        className="rounded-xl bg-blue-600 px-3 py-2 text-sm text-white hover:opacity-90 disabled:bg-gray-400"
+                      >
+                        {stored.connected ? "Manage" : it.disabled ? "Details" : "Connect"}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             );
@@ -169,7 +154,7 @@ export default function IntegrationsCard() {
         integration={active}
         value={value}
         onChange={(v) => setValue(v)}
-        isConnected={active ? Boolean(state[active.id]?.connected) : false}
+        isConnected={active ? Boolean(state[active.id!]?.connected) : false}
         isDisabled={active?.disabled}
         onConnect={() => {
           if (!active) return;
@@ -182,12 +167,18 @@ export default function IntegrationsCard() {
             alert("Enter a valid email address.");
             return;
           }
-          updateStored(active.id, { connected: !active.disabled, value: trimmed });
+          const ok = active.disabled ? false : true;
+          const next = { connected: ok, value: trimmed };
+          const newState = { ...loadState(), [active.id!]: next };
+          setState(newState);
+          saveState(newState);
           setOpen(false);
         }}
         onDisconnect={() => {
           if (!active) return;
-          updateStored(active.id, { connected: false, value: "" });
+          const newState = { ...loadState(), [active.id!]: { connected: false, value: "" } };
+          setState(newState);
+          saveState(newState);
           setValue("");
           setOpen(false);
         }}
