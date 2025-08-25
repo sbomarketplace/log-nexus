@@ -92,11 +92,11 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           </Button>
         </div>
 
-        <div className="mb-6 text-center">
-          <p className="text-sm text-white mb-2">
-            You've used your 3 free AI reports. Manual logging is always free.
+        <div className="mb-8 text-center px-4">
+          <p className="text-white mb-3 text-base leading-relaxed">
+            You&apos;ve used your 3 free AI reports. Manual logging is always free.
           </p>
-          <p className="text-xs text-white">
+          <p className="text-white/90 text-sm">
             Choose a plan to continue using AI-powered incident reports:
           </p>
         </div>
