@@ -1,6 +1,7 @@
 import * as React from "react";
 import { X, Star } from "lucide-react";
 import { openStoreReview, sendFeedbackEmail } from "@/lib/rateApp";
+import FeedbackModal from "./FeedbackModal";
 
 type Props = {
   open: boolean;
@@ -10,9 +11,16 @@ type Props = {
 export default function RateAppModal({ open, onClose }: Props) {
   const [rating, setRating] = React.useState<number>(0);
   const [hover, setHover] = React.useState<number | null>(null);
+  const [feedbackOpen, setFeedbackOpen] = React.useState<boolean>(false);
   const stars = [1, 2, 3, 4, 5];
 
-  React.useEffect(() => { if (!open) { setRating(0); setHover(null); } }, [open]);
+  React.useEffect(() => { 
+    if (!open) { 
+      setRating(0); 
+      setHover(null); 
+      setFeedbackOpen(false);
+    } 
+  }, [open]);
   if (!open) return null;
 
   async function onSubmit() {
@@ -65,24 +73,36 @@ export default function RateAppModal({ open, onClose }: Props) {
             })}
           </div>
 
-          <div className="mt-5 flex flex-col sm:flex-row gap-2">
+          <div className="mt-5 flex flex-col gap-2">
             <button
               onClick={onSubmit}
               disabled={rating === 0}
-              className={`rounded-xl px-4 py-2 text-sm text-white ${rating === 0 ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
+              className={`rounded-xl px-4 py-2 text-sm text-white w-full ${rating === 0 ? "bg-gray-400" : "bg-blue-600 hover:opacity-90"}`}
             >
               {rating >= 4 ? "Rate on the App Store / Play" : "Send Feedback"}
             </button>
-            <button
-              onClick={onClose}
-              className="rounded-xl px-4 py-2 text-sm bg-gray-100 text-gray-800 hover:bg-gray-200"
-            >
-              Not now
-            </button>
+            <div className="flex gap-8 items-center justify-between">
+              <button
+                className="text-[15px] font-semibold text-blue-600"
+                onClick={() => setFeedbackOpen(true)}
+              >
+                Give Feedback
+              </button>
+              <button className="text-[15px] text-gray-600" onClick={onClose}>
+                Not now
+              </button>
+            </div>
           </div>
 
         </div>
       </div>
+
+      {feedbackOpen && (
+        <FeedbackModal
+          rating={rating}
+          onClose={() => setFeedbackOpen(false)}
+        />
+      )}
     </div>
   );
 }
