@@ -92,12 +92,21 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           </Button>
         </div>
 
-        <div className="space-y-3 mb-6">
+        <div className="mb-6 text-center">
+          <p className="text-white mb-3 text-base leading-relaxed">
+            You&apos;ve used your 3 free AI reports. Manual logging is always free.
+          </p>
+          <p className="text-white/90 text-sm">
+            Choose a plan to continue using AI-powered incident reports:
+          </p>
+        </div>
+
+        <div className="space-y-3 mb-6 flex flex-col items-center">
           {/* Get 5 AI reports */}
           <Button
             onClick={() => handlePurchase('pack5', buy5)}
             disabled={loading !== null}
-            className="w-full h-12 flex items-center justify-between text-left px-4"
+            className="w-full max-w-md h-12 flex items-center justify-between text-left px-4"
             variant="outline"
           >
             <div>
@@ -114,7 +123,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           <Button
             onClick={() => handlePurchase('pack60', buy60)}
             disabled={loading !== null}
-            className="w-full h-12 flex items-center justify-between text-left px-4"
+            className="w-full max-w-md h-12 flex items-center justify-between text-left px-4"
             variant="outline"
           >
             <div>
@@ -131,7 +140,7 @@ export const PaywallModal = ({ isOpen, onClose }: PaywallModalProps) => {
           <Button
             onClick={() => handlePurchase('unlimited', buyUnlimited)}
             disabled={loading !== null}
-            className="w-full h-12 flex items-center justify-between text-left px-4"
+            className="w-full max-w-md h-12 flex items-center justify-between text-left px-4"
           >
             <div>
               <div className="font-medium text-primary-foreground">Go Unlimited</div>
