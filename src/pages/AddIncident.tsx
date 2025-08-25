@@ -763,7 +763,7 @@ const AddIncident = () => {
               type="button" 
               variant="outline" 
               onClick={() => navigate('/')}
-              className="w-full mb-2"
+              className="w-full"
             >
               Cancel
             </Button>
