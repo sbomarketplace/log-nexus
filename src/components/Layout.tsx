@@ -32,7 +32,7 @@ export const Layout = ({ children }: LayoutProps) => {
   ];
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-[100dvh] flex flex-col bg-background">
       <header className="cc-sticky-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-14">
@@ -71,11 +71,11 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </header>
 
-      <div className="pt-[56px] pb-[calc(64px+env(safe-area-inset-bottom))] min-h-[100dvh]">
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-4 md:pb-8">
+      <main id="app-scroll" className="cc-page flex-1 pt-[56px]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-4 md:pb-8">
           {children}
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Mobile navigation */}
       <nav ref={barRef} className="cc-sticky-bottom md:hidden">

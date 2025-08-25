@@ -3,7 +3,15 @@
 @tailwind utilities;
 
 /* Prevent iOS font zoom and respect dynamic viewport */
-html, body { -webkit-text-size-adjust: 100%; }
+html, body { 
+  -webkit-text-size-adjust: 100%; 
+  height: 100%;
+}
+
+#root { 
+  height: 100%;
+  min-height: 100dvh;
+}
 
 /* iOS-only: keep inputs >=16px so focusing doesn't zoom */
 @supports (-webkit-touch-callout: none) {
@@ -11,7 +19,17 @@ html, body { -webkit-text-size-adjust: 100%; }
 }
 
 /* Smooth keyboard behavior and prevent rubber-banding jumps */
-:root { overscroll-behavior-y: none; }
+:root { 
+  overscroll-behavior-y: none;
+  /* Layout variables for consistent spacing */
+  --cc-bottom-nav-h: 72px;
+  --cc-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cc-bottom-gap: 8px;
+}
+
+body { 
+  overscroll-behavior-y: none; 
+}
 
 /* Helpers for sticky bars that respect iPhone safe areas */
 .cc-sticky-top {
@@ -77,7 +95,6 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    --cc-bottom-nav-h: 72px;
 
     --sidebar-background: 0 0% 98%;
 
@@ -173,8 +190,31 @@ All colors MUST be HSL.
   input, textarea, select { @apply text-base; }
 }
 
-/* Enhanced UI utilities for incident list */
+/* Layout utilities for consistent spacing */
 @layer utilities {
+  /* Page wrapper: applies bottom padding equal to nav height + safe-area + 8px */
+  .cc-page {
+    min-height: 100%;
+    padding-bottom: calc(var(--cc-bottom-nav-h) + var(--cc-safe-bottom) + var(--cc-bottom-gap));
+  }
+
+  /* If a page has its own fixed CTA bar, keep it above the nav by 8px */
+  .cc-sticky-cta {
+    position: sticky; 
+    bottom: calc(var(--cc-bottom-nav-h) + var(--cc-safe-bottom) + var(--cc-bottom-gap));
+    z-index: 30;
+  }
+
+  /* If you must absolutely position a footer, use this helper instead */
+  .cc-fixed-cta {
+    position: fixed; 
+    left: 0; 
+    right: 0;
+    bottom: calc(var(--cc-bottom-nav-h) + var(--cc-safe-bottom) + var(--cc-bottom-gap));
+    z-index: 30;
+  }
+
+/* Enhanced UI utilities for incident list */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;
