@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { purchase, restore, toast } from '@/utils/iap';
-import { useAIQuota } from '@/state/aiQuotaStore';
+import { addPack, setSubscription } from '@/lib/credits';
 import PaywallModal from './PaywallModal';
 
 type Plan = "PACK_5" | "PACK_60" | "UNLIMITED";
@@ -16,7 +16,7 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
   const buy5 = async () => {
     try { 
       await purchase("cc.ai.5"); 
-      useAIQuota.getState().addCredits(5); 
+      await addPack(5);
       toast("Purchase successful. 5 AI reports added."); 
       onClose();
     } catch { 
@@ -27,7 +27,7 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
   const buy60 = async () => {
     try { 
       await purchase("cc.ai.60"); 
-      useAIQuota.getState().addCredits(60); 
+      await addPack(60);
       toast("Purchase successful. 60 AI reports added."); 
       onClose();
     } catch { 
@@ -38,7 +38,7 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
   const buyUnlimited = async () => {
     try { 
       await purchase("cc.ai.unlimited.month"); 
-      useAIQuota.getState().setUnlimited(true); 
+      await setSubscription(true);
       toast("Unlimited AI reports activated."); 
       onClose();
     } catch { 
@@ -61,8 +61,8 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
     setLoading('restore');
     try {
       const result = await restore();
-      if (result?.unlimitedActive) useAIQuota.getState().setUnlimited(true);
-      if (result?.credits) useAIQuota.getState().addCredits(result.credits);
+      if (result?.unlimitedActive) await setSubscription(true);
+      if (result?.credits) await addPack(result.credits);
       toast("Purchases restored.");
       onClose();
     } catch {

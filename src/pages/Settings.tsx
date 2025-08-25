@@ -28,7 +28,8 @@ import {
 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
 import { purchase, restore, toast, isNative } from '@/utils/iap';
-import { useAIQuota, FREE_TOTAL } from '@/state/aiQuotaStore';
+import { AiCreditsPanel } from '@/components/AiCreditsPanel';
+import { addPack, setSubscription } from '@/lib/credits';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
 import { exportBackup, importBackup } from '@/utils/backup';
 import { getCacheSize, clearCache, formatCacheSize, scheduleDataRetentionCheck } from '@/utils/storage';
@@ -116,8 +117,6 @@ const Settings = () => {
     setIntegrations,
   } = useSettingsStore();
   
-  const { freeUsed, credits, subscriptionActive, plan, lastPackAdded } = useAIQuota();
-
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
@@ -126,36 +125,6 @@ const Settings = () => {
 
   // Helper function for AI report unit labels
   const unitLabel = (n: number) => n === 1 ? "AI report" : "AI reports";
-
-  const buy5 = async () => {
-    try { 
-      await purchase("cc.ai.5"); 
-      useAIQuota.getState().addCredits(5); 
-      toast("Purchase successful. 5 AI reports added."); 
-    } catch { 
-      toast("Purchase canceled."); 
-    }
-  };
-
-  const buy60 = async () => {
-    try { 
-      await purchase("cc.ai.60"); 
-      useAIQuota.getState().addCredits(60); 
-      toast("Purchase successful. 60 AI reports added."); 
-    } catch { 
-      toast("Purchase canceled."); 
-    }
-  };
-
-  const buyUnlimited = async () => {
-    try { 
-      await purchase("cc.ai.unlimited.month"); 
-      useAIQuota.getState().setUnlimited(true); 
-      toast("Unlimited AI reports activated."); 
-    } catch { 
-      toast("Purchase canceled."); 
-    }
-  };
 
   // Load cache info on mount
   useEffect(() => {
@@ -218,8 +187,8 @@ const Settings = () => {
     setPurchasing('restore');
     try {
       const result = await restore();
-      if (result?.unlimitedActive) useAIQuota.getState().setUnlimited(true);
-      if (result?.credits) useAIQuota.getState().addCredits(result.credits);
+      if (result?.unlimitedActive) await setSubscription(true);
+      if (result?.credits) await addPack(result.credits);
       toast("Purchases restored.");
     } catch {
       toast("Restore failed.");
@@ -291,19 +260,12 @@ const Settings = () => {
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              {/* Current Plan */}
-              <div className="settings-row">
-                <div className="settings-row-label">
-                  <span className="settings-row-title">Current Plan</span>
-                </div>
-                <div className={`plan-chip ${plan}`}>
-                  {plan === 'free' ? 'Free' : plan === 'pack' ? 'Pack' : 'Unlimited'}
-                </div>
-              </div>
+              {/* AI Credits Panel */}
+              <AiCreditsPanel />
 
               {/* Manage Subscription */}
               <div 
-                className="settings-row cursor-pointer hover:bg-muted/20"
+                className="settings-row cursor-pointer hover:bg-muted/20 mt-4"
                 onClick={openSubscriptionManagement}
               >
                 <div className="settings-row-label">
@@ -311,84 +273,6 @@ const Settings = () => {
                   <span className="settings-row-description">Restore purchases (App Store)</span>
                 </div>
                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </div>
-
-              {/* Credits Meter */}
-              <div className="credits-meter">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-foreground">
-                    {FREE_TOTAL - freeUsed} free {unitLabel(FREE_TOTAL - freeUsed)} remaining
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    Free: {FREE_TOTAL} per account
-                  </span>
-                </div>
-                {!subscriptionActive && (
-                  <div className="credits-meter-bar">
-                    <div 
-                      className="credits-meter-fill"
-                      style={{ width: `${Math.round((freeUsed / FREE_TOTAL) * 100)}%` }}
-                      aria-label={`Free AI reports used: ${freeUsed} of ${FREE_TOTAL}`}
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={FREE_TOTAL}
-                      aria-valuenow={freeUsed}
-                    />
-                  </div>
-                )}
-                <div className="mt-1 text-xs text-gray-500">Used {freeUsed}/{FREE_TOTAL}</div>
-                <p className="text-xs text-muted-foreground mt-2">
-                  Manual logging is always free.
-                </p>
-              </div>
-
-              {/* Purchase Options */}
-              <div className="mt-3 mb-1">
-                <div className="grid grid-cols-2 gap-3">
-                  <PricingButton
-                    price="$1.99"
-                    caption={`5 ${unitLabel(5)}`}
-                    selected={plan === 'pack' && lastPackAdded === 5}
-                    disabled={purchasing !== null}
-                    loading={purchasing === 'pack5'}
-                    onClick={() => handlePurchase('pack5', buy5)}
-                  />
-                  <PricingButton
-                    price="$19.99"
-                    caption={`60 ${unitLabel(60)}`}
-                    selected={plan === 'pack' && lastPackAdded === 60}
-                    disabled={purchasing !== null}
-                    loading={purchasing === 'pack60'}
-                    onClick={() => handlePurchase('pack60', buy60)}
-                  />
-                  <PricingButton
-                    price="$99/mo"
-                    caption="Unlimited"
-                    selected={plan === 'unlimited'}
-                    disabled={purchasing !== null}
-                    loading={purchasing === 'unlimited'}
-                    onClick={() => handlePurchase('unlimited', buyUnlimited)}
-                    className="col-span-2"
-                  />
-                </div>
-                
-                {/* Restore purchases button */}
-                {isNative && (
-                  <button
-                    onClick={handleRestore}
-                    disabled={purchasing !== null}
-                    className="w-full text-sm text-gray-600 hover:text-gray-800 py-2 disabled:opacity-50 mt-3"
-                  >
-                    {purchasing === 'restore' ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Restoring...
-                      </span>
-                    ) : (
-                      'Restore Purchases'
-                    )}
-                  </button>
-                )}
               </div>
             </AccordionContent>
           </AccordionItem>

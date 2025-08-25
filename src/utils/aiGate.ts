@@ -1,13 +1,12 @@
-import { useAIQuota } from "@/state/aiQuotaStore";
+import { consumeOne } from "@/lib/credits";
 
 export function withAIGate(fn: () => Promise<void>, openPaywall: () => void) {
-  const { canUseAI, consume } = useAIQuota.getState();
   return async () => {
-    if (!canUseAI()) { 
+    const result = await consumeOne();
+    if (result === 'paywall') { 
       openPaywall(); 
       return; 
     }
     await fn();
-    consume();
   };
 }
