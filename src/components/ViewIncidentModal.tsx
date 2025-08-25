@@ -909,24 +909,34 @@ export const ViewIncidentModal = ({
           </div>
         </div>
         
-        {/* Sticky Bottom Bar for Save Button - Only in Edit Mode */}
+        {/* Sticky Bottom Bar for Save and Cancel Buttons - Only in Edit Mode */}
         {isEditMode && (
           <div className="absolute bottom-0 left-0 right-0 bg-background border-t border-border px-6 py-4">
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="w-full h-12 text-base font-medium bg-orange-500 hover:bg-orange-600 text-white"
-              aria-label="Save changes"
-            >
-              {isSaving ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                  Saving Changes...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                onClick={handleCancel}
+                variant="outline"
+                className="flex-1 h-12 text-base font-medium"
+                aria-label="Cancel changes"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 h-12 text-base font-medium bg-orange-500 hover:bg-orange-600 text-white"
+                aria-label="Save changes"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                    Saving Changes...
+                  </>
+                ) : (
+                  'Save Changes'
+                )}
+              </Button>
+            </div>
           </div>
         )}
       </DialogContent>
