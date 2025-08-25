@@ -81,9 +81,6 @@ export default function RateAppModal({ open, onClose }: Props) {
             </button>
           </div>
 
-          <p className="mt-3 text-[11px] text-gray-500">
-            We only ask occasionally. Choosing "Not now" will snooze this prompt.
-          </p>
         </div>
       </div>
     </div>
