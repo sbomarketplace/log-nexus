@@ -10,7 +10,7 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
-  const barRef = useRef<HTMLDivElement | null>(null);
+  const barRef = useRef<HTMLElement | null>(null);
 
   useLayoutEffect(() => {
     const el = barRef.current;
@@ -33,9 +33,9 @@ export const Layout = ({ children }: LayoutProps) => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-50 bg-card border-b border-border">
+      <header className="cc-sticky-top">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+          <div className="flex justify-between items-center h-14">
             {/* Logo and Brand Text */}
             <Link to="/" aria-label="Go to Home" className="flex items-center gap-2 flex-shrink-0">
               <img 
@@ -71,12 +71,14 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-4 md:pb-8">
-        {children}
-      </main>
+      <div className="pt-[56px] pb-[calc(64px+env(safe-area-inset-bottom))] min-h-[100dvh]">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-4 md:pb-8">
+          {children}
+        </main>
+      </div>
 
       {/* Mobile navigation */}
-      <div ref={barRef} className="cc-bottom-nav md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-border/50 z-40 rounded-t-lg shadow-lg">
+      <nav ref={barRef} className="cc-sticky-bottom md:hidden">
         <div className="flex justify-around items-center px-4 py-3">
           {navItems.map(({ path, icon: Icon, label }) => (
             <Link
@@ -99,7 +101,7 @@ export const Layout = ({ children }: LayoutProps) => {
             </Link>
           ))}
         </div>
-      </div>
+      </nav>
 
       <Footer />
     </div>

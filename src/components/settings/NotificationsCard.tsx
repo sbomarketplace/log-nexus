@@ -28,16 +28,16 @@ export default function NotificationsCard() {
   React.useEffect(() => save(settings), [settings]);
 
   async function enableNotifications() {
-    const { requestPermissions } = await import('@/lib/notify');
-    const granted = await requestPermissions();
+    const { requestNotifPermission } = await import('@/lib/notify');
+    const granted = await requestNotifPermission();
     setPermission(granted ? 'granted' : 'denied');
     setSettings((s) => ({ ...s, enabled: granted }));
   }
 
   async function testNotification() {
     if (permission !== "granted") return alert("Please enable notifications first.");
-    const { testNotification: sendTest } = await import('@/lib/notify');
-    await sendTest();
+    const { sendTestNotification } = await import('@/lib/notify');
+    await sendTestNotification();
   }
 
   return (

@@ -447,8 +447,8 @@ const AddIncident = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3 w-full items-end">
+                <div className="min-w-0">
                   <Label htmlFor="date">Date *</Label>
                   <Input
                     id="date"
@@ -462,9 +462,10 @@ const AddIncident = () => {
                     }}
                     required
                     aria-label="Choose date"
+                    className="w-full"
                   />
                 </div>
-                <div className="space-y-2">
+                <div className="min-w-0">
                   <Label htmlFor="time">Time *</Label>
                   <Input
                     id="time"
@@ -479,6 +480,7 @@ const AddIncident = () => {
                     }}
                     required
                     aria-label="Choose time"
+                    className="w-full"
                   />
                 </div>
               </div>

@@ -1,20 +1,15 @@
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { isNative } from './platform';
 
-export async function requestPermissions(): Promise<boolean> {
+export async function requestNotifPermission(): Promise<boolean> {
   if (isNative) {
-    try {
-      const result = await LocalNotifications.requestPermissions();
-      return result.display === 'granted';
-    } catch {
-      return false;
-    }
-  } else {
-    // Web fallback
-    if (!('Notification' in window)) return false;
-    const permission = await Notification.requestPermission();
-    return permission === 'granted';
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    const { display } = await LocalNotifications.requestPermissions();
+    return display === 'granted';
   }
+  if (!('Notification' in window)) return false;
+  const res = await Notification.requestPermission();
+  return res === 'granted';
 }
 
 export async function scheduleDailyReminder(time: string): Promise<void> {
@@ -59,28 +54,11 @@ export async function scheduleDailyReminder(time: string): Promise<void> {
   }
 }
 
-export async function testNotification(): Promise<void> {
+export async function sendTestNotification(){
   if (isNative) {
-    try {
-      await LocalNotifications.schedule({
-        notifications: [{
-          id: 999,
-          title: 'Test Notification',
-          body: 'This is a test notification from ClearCase',
-          schedule: {
-            at: new Date(Date.now() + 2000) // 2 seconds from now
-          }
-        }]
-      });
-    } catch (error) {
-      console.warn('Failed to send test notification:', error);
-    }
-  } else {
-    if (Notification.permission === 'granted') {
-      new Notification('Test Notification', {
-        body: 'This is a test notification from ClearCase',
-        icon: '/icon-192.png'
-      });
-    }
+    const { LocalNotifications } = await import('@capacitor/local-notifications');
+    await LocalNotifications.schedule({ notifications: [{ id: Date.now(), title: 'ClearCase', body: 'Test notification', schedule: { at: new Date(Date.now()+500) } }] });
+    return;
   }
+  if (Notification.permission === 'granted') new Notification('ClearCase — test', { body: 'This is a test.' });
 }

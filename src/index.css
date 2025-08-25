@@ -2,6 +2,42 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Prevent iOS font zoom and respect dynamic viewport */
+html, body { -webkit-text-size-adjust: 100%; }
+
+/* iOS-only: keep inputs >=16px so focusing doesn't zoom */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select { font-size: 16px !important; }
+}
+
+/* Smooth keyboard behavior and prevent rubber-banding jumps */
+:root { overscroll-behavior-y: none; }
+
+/* Helpers for sticky bars that respect iPhone safe areas */
+.cc-sticky-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  height: 56px;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  transform: translateZ(0); /* avoid flicker */
+}
+.cc-sticky-bottom {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  height: 64px;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateZ(0);
+}
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
