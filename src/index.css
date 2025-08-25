@@ -29,7 +29,7 @@ html, body { -webkit-text-size-adjust: 100%; }
   position: fixed;
   bottom: 0; left: 0; right: 0;
   z-index: 50;
-  height: 56px;
+  height: 64px;
   background: rgba(255,255,255,0.9);
   -webkit-backdrop-filter: saturate(180%) blur(8px);
   backdrop-filter: saturate(180%) blur(8px);
@@ -77,7 +77,7 @@ All colors MUST be HSL.
 
     --radius: 0.5rem;
 
-    --cc-bottom-nav-h: 56px;
+    --cc-bottom-nav-h: 72px;
 
     --sidebar-background: 0 0% 98%;
 
