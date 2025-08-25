@@ -710,6 +710,7 @@ const Home = () => {
                     onDelete={() => setDeleteId(incident.id)}
                     onUpdate={loadIncidents}
                     getCategoryTagClass={getCategoryTagClass}
+                    initialEditMode={mode === 'edit' && incident.id === incidentId}
                   />
                 ))
               )}

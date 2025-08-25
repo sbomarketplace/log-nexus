@@ -61,6 +61,7 @@ interface IncidentCardProps {
   getCategoryTagClass: (category: string) => string;
   index?: number;
   pageIds?: string[];
+  initialEditMode?: boolean;
 }
 
 export const IncidentCard = ({ 
@@ -71,9 +72,10 @@ export const IncidentCard = ({
   onUpdate, 
   getCategoryTagClass,
   index,
-  pageIds = []
+  pageIds = [],
+  initialEditMode = false
 }: IncidentCardProps) => {
-  const [editing, setEditing] = useState(false);
+  const [editing, setEditing] = useState(initialEditMode);
   const [draft, setDraft] = useState<Draft>(buildDraft(incident));
   const [saving, setSaving] = useState(false);
   const [isAccordionOpen, setIsAccordionOpen] = useState(false);
