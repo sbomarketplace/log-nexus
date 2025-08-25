@@ -15,6 +15,13 @@ export type ProductInfo = { id: string; title: string; priceString: string; type
 
 export async function initIAP(): Promise<void> {
   if (initialized) return;
+  
+  // Guard web builds - cordova plugin only works on native
+  if (!(window as any).cordova) {
+    initialized = true;
+    return;
+  }
+  
   await waitCordovaReady();
 
   store = CdvPurchase.store;
@@ -50,11 +57,15 @@ export async function initIAP(): Promise<void> {
 
 // Simple Product list for UI labels (localized price)
 export function getProducts(): ProductInfo[] {
-  if (!store) return [
-    { id: P5,  title: 'Get 5 AI reports',  priceString: '$1.99', type: 'consumable' },
-    { id: P60, title: 'Get 60 AI reports', priceString: '$19.99',type: 'consumable' },
-    { id: PSUB,title: 'Go Unlimited',      priceString: '$99/mo',type: 'subscription' },
+  // Fallback prices for web builds or when store isn't available
+  const fallbackProducts = [
+    { id: P5,  title: 'Get 5 AI reports',  priceString: '$1.99', type: 'consumable' as const },
+    { id: P60, title: 'Get 60 AI reports', priceString: '$19.99',type: 'consumable' as const },
+    { id: PSUB,title: 'Go Unlimited',      priceString: '$99/mo',type: 'subscription' as const },
   ];
+  
+  if (!store || !(window as any).cordova) return fallbackProducts;
+  
   const p5  = store.get(P5);
   const p60 = store.get(P60);
   const sub = store.get(PSUB);
@@ -67,6 +78,11 @@ export function getProducts(): ProductInfo[] {
 
 export async function purchase(productId: string): Promise<{ok:boolean; error?:string}> {
   try {
+    // Guard web builds
+    if (!(window as any).cordova) {
+      return { ok:false, error:'In-app purchases not available on web' };
+    }
+    
     await initIAP();
     const product = store.get(productId);
     if (!product) return { ok:false, error:'Product not found' };
@@ -84,6 +100,11 @@ export async function purchase(productId: string): Promise<{ok:boolean; error?:s
 
 // Restore: asks App Store for past non-consumable/subscriptions
 export async function restore(): Promise<void> {
+  // Guard web builds
+  if (!(window as any).cordova) {
+    throw new Error('Restore purchases not available on web');
+  }
+  
   await initIAP();
   await store?.refresh(); // triggers productUpdated/verified as needed
 }
@@ -105,7 +126,11 @@ async function onVerified(receipt: any) {
 function waitCordovaReady() {
   return new Promise<void>(resolve => {
     if ((window as any).cordova) {
-      document.addEventListener('deviceready', () => resolve(), { once: true });
+      if ((window as any).CdvPurchase) {
+        resolve();
+      } else {
+        document.addEventListener('deviceready', () => resolve(), { once: true });
+      }
     } else {
       resolve(); // web fallback
     }

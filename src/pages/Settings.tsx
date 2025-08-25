@@ -27,7 +27,8 @@ import {
   Globe
 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
-import { purchase, restore, toast, isNative } from '@/utils/iap';
+import { restore } from '@/lib/iap';
+import { purchase, toast, isNative } from '@/utils/iap';
 import { AiCreditsPanel } from '@/components/AiCreditsPanel';
 import { addPack, setSubscription } from '@/lib/credits';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
@@ -186,12 +187,10 @@ const Settings = () => {
   const handleRestore = async () => {
     setPurchasing('restore');
     try {
-      const result = await restore();
-      if (result?.unlimitedActive) await setSubscription(true);
-      if (result?.credits) await addPack(result.credits);
-      toast("Purchases restored.");
-    } catch {
-      toast("Restore failed.");
+      await restore();
+      console.log("Purchases restored.");
+    } catch (error) {
+      console.error("Restore failed:", error);
     } finally {
       setPurchasing(null);
     }
