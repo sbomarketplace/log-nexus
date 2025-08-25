@@ -751,43 +751,7 @@ export const ViewIncidentModal = ({
                 </div>
               )}
 
-              {((isEditMode || incident.where) && (isEditMode || incident.when)) && <div className="border-t border-border/50 my-2"></div>}
-
-                 <div>
-                   <h4 className="cc-field-label text-slate-600 mb-1">Time</h4>
-                   {isEditMode ? (
-                     <div className="pill-field time">
-                       <Input
-                         id="incident-time-edit"
-                         type="time"
-                         step="60"
-                         value={timeInput}
-                         onChange={(e) => handleTimeInputChange(e.target.value)}
-                           className="min-w-[80px] text-xs h-6 cc-field-label border-0 bg-white rounded-full px-2"
-                           aria-label="Incident time"
-                           style={{ fontSize: '13px' }}
-                       />
-                     </div>
-                   ) : (
-                      <div className="flex items-center gap-2">
-                        <div className="break-words">
-                          {(() => {
-                            // Use derived time with timeline fallback for display
-                            const derivedTime = deriveIncidentTime(incident);
-                            if (derivedTime) {
-                              return formatHHMMForUI(derivedTime);
-                            }
-                            if (effectiveDateTime) {
-                              return formatTimeOnly(effectiveDateTime);
-                            }
-                            return <span className="text-muted-foreground italic">No time specified</span>;
-                          })()}
-                        </div>
-                      </div>
-                   )}
-                 </div>
-
-              {((isEditMode || incident.when) && (isEditMode || incident.witnesses)) && <div className="border-t border-border/50 my-2"></div>}
+               {((isEditMode || incident.where) && (isEditMode || incident.witnesses)) && <div className="border-t border-border/50 my-2"></div>}
 
               {/* Witnesses Section */}
               {(isEditMode || incident.witnesses) && (
