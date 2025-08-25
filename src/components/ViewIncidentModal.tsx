@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { X, Edit3, Save, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { formatDisplayDate, parseIncidentDate } from '@/utils/dateParser';
 import { getPreferredDateTime } from '@/utils/timelineParser';
@@ -48,6 +49,7 @@ export const ViewIncidentModal = ({
   onIncidentUpdate,
   currentUserId 
 }: ViewIncidentModalProps) => {
+  const navigate = useNavigate();
   // HOOKS MUST BE DECLARED AT TOP LEVEL - React Rules of Hooks requirement
   // All hooks must be called in the same order every render, regardless of props or state
   const [isEditMode, setIsEditMode] = useState(false);
@@ -232,15 +234,14 @@ export const ViewIncidentModal = ({
     }));
   }, []);
 
-  // Enter edit mode
+  // Navigate to incident card edit form
   const handleEditClick = useCallback(() => {
-    setIsEditMode(true);
-    setValidationErrors({});
-    // Focus first field after state update
-    setTimeout(() => {
-      firstEditFieldRef.current?.focus();
-    }, 50);
-  }, []);
+    if (!incident) return;
+    
+    // Close the modal and navigate to edit mode
+    onOpenChange(false);
+    navigate(`/?incidentId=${incident.id}&mode=edit`);
+  }, [incident, onOpenChange, navigate]);
 
   // Save changes
   const handleSave = useCallback(async () => {
@@ -467,7 +468,15 @@ export const ViewIncidentModal = ({
               Incident Details
             </h2>
             <div className="flex items-center gap-2">
-              {/* Edit button removed */}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleEditClick}
+                className="h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+                aria-label="Edit incident"
+              >
+                <Edit3 className="h-4 w-4" />
+              </Button>
               <Button
                 variant="ghost"
                 size="sm"
