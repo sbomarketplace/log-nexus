@@ -16,7 +16,7 @@ import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/dateti
 import { Wand2, Loader2 } from 'lucide-react';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
 import { withAIGate } from '@/utils/aiGate';
-import { PaywallModal } from '@/components/PaywallModal';
+import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import { cn } from '@/lib/utils';
 
 
@@ -774,7 +774,7 @@ const AddIncident = () => {
         </form>
 
         {/* Paywall Modal */}
-        <PaywallModal
+        <PaywallWrapper
           isOpen={showPaywall}
           onClose={() => setShowPaywall(false)}
         />

@@ -13,7 +13,7 @@ import { organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getDateSafely, sanitizeIncidentArray } from '@/utils/safeDate';
 import { processIncident } from '@/services/incidentProcessor';
 import { canParse, consumeParse } from '@/utils/parsingGate';
-import { PaywallModal } from '@/components/PaywallModal';
+import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import { X, Loader2, FolderOpen, Edit, Save, Download, Trash2 } from 'lucide-react';
 
 interface OrganizeNotesModalProps {
@@ -583,7 +583,7 @@ ${incident.notes?.map(n => `• ${n}`).join('\n') || 'None'}`;
         </div>
       </div>
       
-      <PaywallModal
+      <PaywallWrapper
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
       />

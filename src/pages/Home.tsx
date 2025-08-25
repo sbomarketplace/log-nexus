@@ -16,7 +16,7 @@ import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
 import { withAIGate } from '@/utils/aiGate';
-import { PaywallModal } from '@/components/PaywallModal';
+import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
@@ -799,7 +799,7 @@ const Home = () => {
         )}
       </div>
       
-      <PaywallModal
+      <PaywallWrapper
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
       />
