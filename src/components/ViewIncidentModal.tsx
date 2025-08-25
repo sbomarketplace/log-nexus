@@ -234,14 +234,15 @@ export const ViewIncidentModal = ({
     }));
   }, []);
 
-  // Navigate to incident card edit form
+  // Enter edit mode within the modal
   const handleEditClick = useCallback(() => {
-    if (!incident) return;
-    
-    // Close the modal and navigate to edit mode
-    onOpenChange(false);
-    navigate(`/?incidentId=${incident.id}&mode=edit`);
-  }, [incident, onOpenChange, navigate]);
+    setIsEditMode(true);
+    setValidationErrors({});
+    // Focus first field after state update
+    setTimeout(() => {
+      firstEditFieldRef.current?.focus();
+    }, 50);
+  }, []);
 
   // Save changes
   const handleSave = useCallback(async () => {
@@ -383,7 +384,7 @@ export const ViewIncidentModal = ({
     }
   }, [isDirty, incident]);
 
-  // Handle modal close with dirty check
+  // Handle modal close with dirty check - X acts as cancel in edit mode
   const handleModalClose = useCallback((shouldClose: boolean) => {
     if (!shouldClose) return;
     
@@ -394,6 +395,10 @@ export const ViewIncidentModal = ({
         setValidationErrors({});
         onOpenChange(false);
       }
+    } else if (isEditMode) {
+      // Cancel edit mode without closing modal if no changes
+      setIsEditMode(false);
+      setValidationErrors({});
     } else {
       onOpenChange(false);
     }
@@ -468,24 +473,54 @@ export const ViewIncidentModal = ({
               Incident Details
             </h2>
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleEditClick}
-                className="h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
-                aria-label="Edit incident"
-              >
-                <Edit3 className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleModalClose(true)}
-                className={`h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-${categoryClass.split('-')[1]}-tint`}
-                aria-label="Close incident details"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {isEditMode ? (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className="h-8 px-3 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Save changes"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleModalClose(true)}
+                    className="h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Cancel editing"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleEditClick}
+                    className="h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2"
+                    aria-label="Edit incident"
+                  >
+                    <Edit3 className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleModalClose(true)}
+                    className={`h-8 w-8 p-0 rounded-full hover:bg-secondary focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-${categoryClass.split('-')[1]}-tint`}
+                    aria-label="Close incident details"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
             </div>
           </div>
 
