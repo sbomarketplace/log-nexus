@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { purchase, restore, toast } from '@/utils/iap';
+import { initIAP, purchase, restore, getProducts } from '@/lib/iap';
 import { addPack, setSubscription } from '@/lib/credits';
 import PaywallModal from './PaywallModal';
 
@@ -12,37 +12,46 @@ interface PaywallWrapperProps {
 
 export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
   const [loading, setLoading] = useState<string | null>(null);
+  const [products, setProducts] = useState(getProducts());
+
+  useEffect(() => {
+    if (isOpen) {
+      initIAP().then(() => {
+        setProducts(getProducts());
+      });
+    }
+  }, [isOpen]);
 
   const buy5 = async () => {
-    try { 
-      await purchase("cc.ai.5"); 
+    const result = await purchase(import.meta.env.VITE_IAP_CREDIT_PACK_5);
+    if (result.ok) {
       await addPack(5);
-      toast("Purchase successful. 5 AI reports added."); 
+      console.log("Purchase successful. 5 AI reports added.");
       onClose();
-    } catch { 
-      toast("Purchase canceled."); 
+    } else if (result.error !== 'cancelled') {
+      console.error("Purchase failed:", result.error);
     }
   };
 
   const buy60 = async () => {
-    try { 
-      await purchase("cc.ai.60"); 
+    const result = await purchase(import.meta.env.VITE_IAP_CREDIT_PACK_60);
+    if (result.ok) {
       await addPack(60);
-      toast("Purchase successful. 60 AI reports added."); 
+      console.log("Purchase successful. 60 AI reports added.");
       onClose();
-    } catch { 
-      toast("Purchase canceled."); 
+    } else if (result.error !== 'cancelled') {
+      console.error("Purchase failed:", result.error);
     }
   };
 
   const buyUnlimited = async () => {
-    try { 
-      await purchase("cc.ai.unlimited.month"); 
+    const result = await purchase(import.meta.env.VITE_IAP_SUB_MONTHLY);
+    if (result.ok) {
       await setSubscription(true);
-      toast("Unlimited AI reports activated."); 
+      console.log("Unlimited AI reports activated.");
       onClose();
-    } catch { 
-      toast("Purchase canceled."); 
+    } else if (result.error !== 'cancelled') {
+      console.error("Purchase failed:", result.error);
     }
   };
 
@@ -60,13 +69,11 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
   const handleRestore = async () => {
     setLoading('restore');
     try {
-      const result = await restore();
-      if (result?.unlimitedActive) await setSubscription(true);
-      if (result?.credits) await addPack(result.credits);
-      toast("Purchases restored.");
+      await restore();
+      console.log("Purchases restored.");
       onClose();
     } catch {
-      toast("Restore failed.");
+      console.error("Restore failed.");
     } finally {
       setLoading(null);
     }
@@ -100,6 +107,7 @@ export const PaywallWrapper = ({ isOpen, onClose }: PaywallWrapperProps) => {
       open={isOpen}
       onClose={onClose}
       onSelect={handleSelect}
+      products={products}
     />
   );
 };

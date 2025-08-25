@@ -2,14 +2,23 @@ import React, { useEffect, useRef } from "react";
 
 type Plan = "PACK_5" | "PACK_60" | "UNLIMITED";
 
+interface Product {
+  id: string;
+  title: string;
+  priceString: string;
+  type: 'consumable' | 'subscription';
+}
+
 export default function PaywallModal({
   open,
   onClose,
   onSelect,
+  products = [],
 }: {
   open: boolean;
   onClose?: () => void;                 // optional (we might disallow dismiss)
   onSelect: (plan: Plan) => void;       // wiring to IAP handler elsewhere
+  products?: Product[];
 }) {
   const firstBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -44,8 +53,8 @@ export default function PaywallModal({
             className="cc-paywall__plan"
             onClick={() => onSelect("PACK_5")}
           >
-            <span className="cc-paywall__plan-title">Get 5 AI reports</span>
-            <span className="cc-paywall__price">$1.99</span>
+            <span className="cc-paywall__plan-title">{products.find(p => p.type === 'consumable' && p.title.includes('5'))?.title || 'Get 5 AI reports'}</span>
+            <span className="cc-paywall__price">{products.find(p => p.type === 'consumable' && p.title.includes('5'))?.priceString || '$1.99'}</span>
             <span className="cc-paywall__hint">Perfect for occasional use</span>
           </button>
 
@@ -53,8 +62,8 @@ export default function PaywallModal({
             className="cc-paywall__plan"
             onClick={() => onSelect("PACK_60")}
           >
-            <span className="cc-paywall__plan-title">Get 60 AI reports</span>
-            <span className="cc-paywall__price">$19.99</span>
+            <span className="cc-paywall__plan-title">{products.find(p => p.type === 'consumable' && p.title.includes('60'))?.title || 'Get 60 AI reports'}</span>
+            <span className="cc-paywall__price">{products.find(p => p.type === 'consumable' && p.title.includes('60'))?.priceString || '$19.99'}</span>
             <span className="cc-paywall__hint">Best value for regular users</span>
           </button>
 
@@ -62,8 +71,8 @@ export default function PaywallModal({
             className="cc-paywall__plan cc-paywall__plan--primary"
             onClick={() => onSelect("UNLIMITED")}
           >
-            <span className="cc-paywall__plan-title">Go Unlimited</span>
-            <span className="cc-paywall__price">$99/mo</span>
+            <span className="cc-paywall__plan-title">{products.find(p => p.type === 'subscription')?.title || 'Go Unlimited'}</span>
+            <span className="cc-paywall__price">{products.find(p => p.type === 'subscription')?.priceString || '$99/mo'}</span>
             <span className="cc-paywall__hint">Unlimited AI reports for power users</span>
           </button>
         </div>
