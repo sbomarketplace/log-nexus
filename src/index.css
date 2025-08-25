@@ -192,10 +192,9 @@ All colors MUST be HSL.
 
 /* Layout utilities for consistent spacing */
 @layer utilities {
-  /* Page wrapper: applies bottom padding equal to nav height + safe-area + 8px */
+  /* Page wrapper: no bottom padding */
   .cc-page {
     min-height: 100%;
-    padding-bottom: calc(var(--cc-bottom-nav-h) + var(--cc-safe-bottom) + var(--cc-bottom-gap));
   }
 
   /* If a page has its own fixed CTA bar, keep it above the nav by 8px */
@@ -435,19 +434,16 @@ All colors MUST be HSL.
     pointer-events: none;
   }
 
-  /* Incident card spacing for bottom bar */
+  /* Incident card spacing - no bottom margin */
   .incident-list > div:last-child {
-    margin-bottom: calc(var(--cc-bottom-nav-h) + 2px) !important;
   }
   
-  /* Extra spacing when last card is expanded */
+  /* Extra spacing when last card is expanded - removed */
   .incident-list > div:last-child[data-state="open"] {
-    margin-bottom: calc(var(--cc-bottom-nav-h) + 2px) !important;
   }
 
-  /* Resources page bottom padding to clear bottom nav */
+  /* Resources page - no bottom padding */
   .resources-page {
-    padding-bottom: calc(var(--cc-bottom-nav-h) + env(safe-area-inset-bottom) + 16px);
   }
 
   /* Resources accordion content - expand in normal flow */

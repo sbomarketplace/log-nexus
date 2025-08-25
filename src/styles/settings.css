@@ -1,6 +1,5 @@
 /* Settings page layout */
 .settings-page {
-  padding-bottom: calc(var(--cc-bottom-nav-h, 0px) + 16px);
 }
 
 /* Floating modal styling */
