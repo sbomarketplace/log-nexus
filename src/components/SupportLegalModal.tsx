@@ -35,9 +35,6 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center"
       onClick={handleBackdropClick}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40" />
-
       {/* Container */}
       <div className="relative mx-4 w-full max-w-2xl rounded-2xl bg-white shadow-xl">
         {/* Header */}
