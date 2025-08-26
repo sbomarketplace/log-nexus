@@ -9,6 +9,9 @@
   --banner-h: 0px; /* 0 when hidden, 50px when visible */
   --banner-gap: 8px; /* required space above banner */
   --bottom-inset: calc(var(--safe-bottom) + var(--banner-h) + var(--banner-gap));
+  /* Hamburger footer sits banner height + 4px above bottom, including safe area */
+  --menu-footer-gap: 4px;
+  --menu-footer-offset: calc(var(--safe-bottom) + var(--banner-h) + var(--menu-footer-gap));
 }
 
 /* Sticky header baseline */

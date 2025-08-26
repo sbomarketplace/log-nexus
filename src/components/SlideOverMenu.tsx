@@ -95,12 +95,14 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
           translate-x-0
           rounded-l-2xl border-l border-border bg-card shadow-2xl
           px-3 pt-4
-          pb-[calc(var(--bottom-inset,0px)+8px)]
           transition-transform duration-200 ease-out
           overflow-y-auto
           flex flex-col
         "
-        style={{ WebkitOverflowScrolling: "touch" }}
+        style={{
+          WebkitOverflowScrolling: "touch",
+          paddingBottom: "var(--menu-footer-offset)",
+        }}
       >
         <div className="mb-2 px-1">
           <h2 className="text-lg font-semibold">Menu</h2>
@@ -130,7 +132,10 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
         {/* Spacer so footer hugs the bottom while links stay top aligned */}
         <div className="flex-1" />
         {/* Footer sits above the ad banner and safe-area because of panel padding */}
-        <div className="mt-4 text-center text-xs text-muted-foreground select-none">
+        <div
+          className="mt-4 text-center text-xs text-muted-foreground select-none"
+          style={{ marginBottom: "var(--menu-footer-gap)" }}
+        >
           (C) SBO Marketplace LLC 2025
         </div>
       </div>

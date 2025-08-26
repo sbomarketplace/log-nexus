@@ -66,7 +66,23 @@ export async function showBottomBanner(): Promise<void> {
     // Get ATT permission status and set NPA flag
     const npa = await requestATTAndGetNpaFlag();
     
-    await (window as any).AdMob?.showBanner({
+    // Listen for banner size events to get real height
+    const admob = (window as any).AdMob;
+    if (admob?.on) {
+      // Listen for banner load event which may include size info
+      admob.on('onBannerAdLoaded', (info: any) => {
+        const height = info?.size?.height ?? info?.height ?? 50;
+        setBannerVars(true, height);
+      });
+      
+      // Listen for banner size change events
+      admob.on('onBannerAdSizeChanged', (info: any) => {
+        const height = info?.size?.height ?? info?.height ?? 50;
+        setBannerVars(true, height);
+      });
+    }
+    
+    await admob?.showBanner({
       adId: BANNER_ID,
       position: 'BOTTOM_CENTER',
       size: 'ADAPTIVE_BANNER',
@@ -75,6 +91,7 @@ export async function showBottomBanner(): Promise<void> {
     });
     
     bannerShowing = true;
+    // Use fallback height until event fires with real height
     setBannerVars(true, 50);
     console.log('Banner ad shown with NPA flag:', npa);
   } catch (error) {
