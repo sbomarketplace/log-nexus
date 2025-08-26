@@ -628,66 +628,67 @@ const Home = () => {
         {/* Inline Banner Ad */}
         <InlineAd slot="home" />
 
-        {/* Section Title and Search/Filter Controls */}
-        {organizedIncidents.length > 0 && (
-          <div className="mb-6 space-y-4" data-incident-reports-section>
-            {/* Section Title */}
-            <div className="space-y-1 text-center">
-              <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
-              <p className="text-sm text-muted-foreground">View, edit, export, or delete any past incident reports</p>
-            </div>
-
-            {/* Search Bar */}
-            <div className="relative">
-              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by keyword, person, or Case #"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-10 rounded-lg"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
-                  aria-label="Clear search"
-                >
-                  <X className="h-3 w-3 text-muted-foreground" />
-                </button>
-              )}
-            </div>
-            
-            {/* Filter Controls */}
-            <div>
-              <Select value={filterCategory} onValueChange={setFilterCategory}>
-                <SelectTrigger className="w-full rounded-lg">
-                  <SelectValue placeholder="Filter by category" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {getAllCategories().map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        {/* Section Title and Search/Filter Controls - Always Visible */}
+        <div className="mb-6 space-y-4" data-incident-reports-section>
+          {/* Section Title */}
+          <div className="space-y-1 text-center">
+            <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
+            <p className="text-sm text-muted-foreground">View, edit, export, or delete any past incident reports</p>
           </div>
-        )}
+
+          {/* Search Bar */}
+          <div className="relative">
+            <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by keyword, person, or Case #"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 pr-10 rounded-lg"
+            />
+            {searchTerm && (
+              <button
+                onClick={() => setSearchTerm('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
+                aria-label="Clear search"
+              >
+                <X className="h-3 w-3 text-muted-foreground" />
+              </button>
+            )}
+          </div>
+          
+          {/* Filter Controls */}
+          <div>
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-full rounded-lg">
+                <SelectValue placeholder="Filter by category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {getAllCategories().map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Incidents List */}
         <div className="space-y-3 incident-list">
           {organizedIncidents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <AlertIcon className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="text-sm font-medium mb-1">No incidents recorded</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Start by organizing your first incident notes or creating a new incident report.
-                </p>
-              </CardContent>
-            </Card>
+            <>
+              <IncidentListControls visibleIds={[]} />
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <AlertIcon className="h-8 w-8 text-muted-foreground mb-3" />
+                  <h3 className="text-sm font-medium mb-1">No incidents recorded</h3>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Start by organizing your first incident notes or creating a new incident report.
+                  </p>
+                </CardContent>
+              </Card>
+            </>
           ) : (
             <>
               <IncidentListControls visibleIds={filteredIncidents.map(i => i.id)} />
