@@ -55,7 +55,7 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
         </div>
 
         {/* Scrollable Content */}
-        <div className="max-h-[70vh] overflow-y-auto px-5 py-4 space-y-6">
+        <div className="max-h-[calc(70vh-120px)] overflow-y-auto px-5 py-4 space-y-6">
           <p className="text-sm text-gray-500">Effective: {effectiveDate}</p>
 
           {/* TERMS */}

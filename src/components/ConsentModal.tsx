@@ -53,7 +53,7 @@ export const ConsentModal = ({ onConsentGiven }: ConsentModalProps) => {
             </div>
 
             {/* Scrollable Content */}
-            <ScrollArea className="h-[calc(90vh-200px)]">
+            <ScrollArea className="h-[calc(90vh-320px)]">
               <div className="p-6 space-y-8">
                 {/* Terms & Conditions */}
                 <section>
