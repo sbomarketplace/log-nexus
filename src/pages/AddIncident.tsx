@@ -750,7 +750,7 @@ const AddIncident = () => {
           </Card>
 
           {/* Submit Actions */}
-          <div className="add-incident-actions">
+          <div className="add-incident-actions pb-[calc(var(--bottom-inset,58px)+8px)]">
             <Button 
               type="submit" 
               className="w-full bg-primary text-primary-foreground rounded p-3 text-sm font-medium hover:bg-primary/90 transition-colors"
