@@ -7,7 +7,7 @@ export default function AppHeader() {
   const [open, setOpen] = useState(false);
   
   return (
-    <header className="cc-sticky-top flex items-center justify-between px-4">
+    <header className="app-header flex items-center justify-between px-4 bg-background/80 border-b">
       {/* Left: brand */}
       <Link to="/" className="flex items-center gap-2">
         <img 

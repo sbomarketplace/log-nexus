@@ -15,14 +15,8 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-[100dvh] flex flex-col bg-background">
       <AppHeader />
 
-      <main id="app-scroll" className="cc-page flex-1 pt-[56px]">
-        <div 
-          className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
-            showAds 
-              ? 'pb-[calc(1rem+50px+env(safe-area-inset-bottom)+8px)]' 
-              : 'pb-[calc(1rem+env(safe-area-inset-bottom))]'
-          }`}
-        >
+      <main className="page-container">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {children}
         </div>
       </main>

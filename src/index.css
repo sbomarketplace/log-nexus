@@ -2,6 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Layout variables for banner spacing and safe areas */
+:root {
+  --header-h: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --banner-h: 0px; /* 0 when hidden, 50px when visible */
+  --banner-gap: 8px; /* required space above banner */
+  --bottom-inset: calc(var(--safe-bottom) + var(--banner-h) + var(--banner-gap));
+}
+
+/* Sticky header baseline */
+.app-header {
+  position: sticky;
+  top: 0;
+  height: var(--header-h);
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(10px);
+}
+
+/* Page container that never collides with the banner */
+.page-container {
+  padding-top: var(--header-h);
+  padding-bottom: var(--bottom-inset);
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
+/* Drawer safe areas */
+.drawer-content {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
 /* Prevent iOS font zoom and respect dynamic viewport */
 html, body { 
   -webkit-text-size-adjust: 100%; 

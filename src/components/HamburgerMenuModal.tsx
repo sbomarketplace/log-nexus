@@ -89,7 +89,7 @@ export default function HamburgerMenuModal({ open, onClose }: Props) {
             </button>
           </div>
         </div>
-        <nav className="px-2 pb-3">
+        <nav className="px-2 pb-3 drawer-content">
           <ul className="space-y-2">
             {MENU.map((item, idx) => (
               <li key={item.to}>
