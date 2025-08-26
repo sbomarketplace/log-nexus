@@ -228,11 +228,7 @@ export function ResourcesSection() {
         {Object.entries(resourceCategories).map(([key, category]) => {
           const IconComponent = category.icon;
           return (
-            <Card 
-              key={key} 
-              className="overflow-hidden"
-              style={key === 'advocacy' ? { paddingBottom: 'calc(var(--bottom-inset, 0px) + 20px)' } : undefined}
-            >
+            <Card key={key} className="overflow-hidden">
               <Collapsible
                 open={openSections[key]}
                 onOpenChange={() => toggleSection(key)}
@@ -299,6 +295,9 @@ export function ResourcesSection() {
           );
         })}
       </div>
+
+      {/* Spacer so the last row clears the banner: banner height + 20px (respects safe area) */}
+      <div aria-hidden="true" style={{ height: "calc(var(--bottom-inset, 0px) + 20px)" }} />
 
       {/* Resource Modal */}
       <ResourceModal

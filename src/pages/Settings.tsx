@@ -361,10 +361,10 @@ const Settings = () => {
           </AccordionItem>
         </Accordion>
 
-        {/* Divider into Resources */}
-        <div id="resources" className="pt-4 scroll-mt-16" />
-        <Separator className="my-4" />
-        <h2 className="mb-4 text-lg font-medium text-foreground">Resources</h2>
+        {/* Divider into Resources (reduced spacing) */}
+        <div id="resources" className="pt-2 scroll-mt-16" />
+        <Separator className="my-2" />
+        <h2 className="mb-2 text-lg font-medium text-foreground">Resources</h2>
         <div className="scroll-mt-16">
           <ResourcesSection />
         </div>
