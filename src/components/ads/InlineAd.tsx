@@ -59,7 +59,8 @@ type PickedSize =
   | { kind: "BANNER"; width: number; height: number; admob: BannerAdSize }
   | { kind: "NONE"; width: 0; height: 0; admob: BannerAdSize };
 
-function pickSize(containerWidth: number): PickedSize {
+// NOTE: renamed to avoid any accidental shadowing with prior declarations
+function chooseBannerSize(containerWidth: number): PickedSize {
   // Pick a supported AdMob size by available width. Do not scale the ad.
   if (containerWidth >= 728) return { kind: "LEADERBOARD", width: 728, height: 90, admob: BannerAdSize.LEADERBOARD };
   if (containerWidth >= 480) return { kind: "FULL_BANNER", width: 468, height: 60, admob: BannerAdSize.FULL_BANNER };
@@ -87,7 +88,7 @@ export default function InlineAd({ slot }: { slot: Slot }) {
     if (!el) return;
     const compute = () => {
       const w = Math.round(el.getBoundingClientRect().width);
-      setSize(pickSize(w));
+      setSize(chooseBannerSize(w));
     };
     compute();
     const ro = new ResizeObserver(compute);
