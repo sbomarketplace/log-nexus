@@ -241,8 +241,8 @@ const Settings = () => {
           </p>
         </div>
 
-        {/* Settings section */}
-        <h2 id="settings" className="sr-only">Settings</h2>
+        {/* Settings title (visible, matching Resources style) */}
+        <h2 id="settings" className="mb-2 text-lg font-medium text-foreground">Settings</h2>
 
         {/* Settings Accordion */}
         <Accordion type="multiple" className="space-y-4">
@@ -361,10 +361,11 @@ const Settings = () => {
           </AccordionItem>
         </Accordion>
 
-        {/* Divider into Resources (reduced spacing) */}
-        <div id="resources" className="pt-2 scroll-mt-16" />
-        <Separator className="my-2" />
-        <h2 className="mb-2 text-lg font-medium text-foreground">Resources</h2>
+        {/* Balanced divider – equal spacing above and below the line */}
+        <Separator className="mt-4 mb-4" />
+
+        {/* Resources title (matching Settings style) */}
+        <h2 id="resources" className="mb-2 text-lg font-medium text-foreground scroll-mt-16">Resources</h2>
         <div className="scroll-mt-16">
           <ResourcesSection />
         </div>
