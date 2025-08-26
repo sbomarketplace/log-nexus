@@ -72,9 +72,8 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
   const qty = count();
 
   return (
-    <div className="flex items-center justify-between text-[11px] w-full py-2 px-1 min-w-0">
-      {/* Left side: Select all + count + clear */}
-      <div className="flex items-center gap-1.5 whitespace-nowrap flex-1 min-w-0">
+    <div className="flex items-center justify-center text-[11px] w-full py-2 px-1">
+      <div className="flex items-center gap-1.5 whitespace-nowrap">
         <label className="inline-flex items-center gap-1.5 flex-shrink-0">
           <input
             type="checkbox"
@@ -92,37 +91,6 @@ export function IncidentListControls({ visibleIds }: IncidentListControlsProps) 
         <span className="leading-none text-foreground/70 flex-shrink-0">
           <span className="tabular-nums">{qty}</span> selected
         </span>
-      </div>
-
-      {/* Right side: Actions with even spacing */}
-      <div className="flex items-center gap-2 flex-shrink-0 ml-8">
-        <Button
-          variant="blue"
-          size="sm"
-          onClick={clear}
-          disabled={isDeleting}
-          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
-        >
-          Clear
-        </Button>
-        <Button 
-          variant="default" 
-          size="sm" 
-          onClick={handleExportClick}
-          disabled={isDeleting || count() === 0}
-          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
-        >
-          Export
-        </Button>
-        <Button 
-          variant="destructive" 
-          size="sm" 
-          onClick={handleDeleteClick}
-          disabled={isDeleting || count() === 0}
-          className="px-1.5 py-0.5 text-[10px] h-5 whitespace-nowrap"
-        >
-          Delete
-        </Button>
       </div>
 
       <BulkExportModal
