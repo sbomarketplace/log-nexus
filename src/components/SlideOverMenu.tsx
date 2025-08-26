@@ -33,6 +33,7 @@ function Icon({ name }: { name: typeof LINKS[number]["icon"] }) {
 export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
   const navigate = useNavigate();
   const firstRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -48,7 +49,7 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
     };
   }, [open, onClose]);
 
-  // Handle outside clicks - close menu when clicking anywhere except the hamburger button
+  // Handle outside clicks - close menu when clicking anywhere except the hamburger button or menu panel
   useEffect(() => {
     if (!open) return;
 
@@ -57,6 +58,11 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
       
       // Don't close if clicking on the hamburger button (let it handle the toggle)
       if (anchorRef?.current && anchorRef.current.contains(target)) {
+        return;
+      }
+      
+      // Don't close if clicking within the slide-over panel
+      if (panelRef.current && panelRef.current.contains(target)) {
         return;
       }
       
@@ -88,6 +94,7 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
       />
       {/* slide-over panel */}
       <div
+        ref={panelRef}
         className="
           absolute right-0 top-[var(--header-h,56px)]
           h-[calc(100dvh-var(--header-h,56px))]
