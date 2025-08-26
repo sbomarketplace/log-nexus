@@ -1,16 +1,12 @@
 import { ReactNode } from 'react';
 import { Footer } from './Footer';
 import AppHeader from './common/AppHeader';
-import BottomAdBar from './ads/BottomAdBar';
-import { isRemoveAdsActive } from '@/lib/iap';
 
 interface LayoutProps {
   children: ReactNode;
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const showAds = !isRemoveAdsActive();
-
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
       <AppHeader />
@@ -21,7 +17,6 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </main>
 
-      <BottomAdBar />
       <Footer />
     </div>
   );

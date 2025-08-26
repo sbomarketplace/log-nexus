@@ -296,9 +296,6 @@ export function ResourcesSection() {
         })}
       </div>
 
-      {/* Spacer so the last row clears the banner: banner height + 20px (respects safe area) */}
-      <div aria-hidden="true" style={{ height: "calc(var(--bottom-inset, 0px) + 20px)" }} />
-
       {/* Resource Modal */}
       <ResourceModal
         open={modalOpen}

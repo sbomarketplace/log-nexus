@@ -2,16 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Layout variables for banner spacing and safe areas */
+/* Layout variables for safe areas (banner system removed) */
 :root {
   --header-h: 56px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --banner-h: 0px; /* 0 when hidden, 50px when visible */
-  --banner-gap: 8px; /* required space above banner */
-  --bottom-inset: calc(var(--safe-bottom) + var(--banner-h) + var(--banner-gap));
-  /* Hamburger footer sits banner height + 4px above bottom, including safe area */
+  --bottom-inset: var(--safe-bottom); /* Just safe area - no banner */
   --menu-footer-gap: 4px;
-  --menu-footer-offset: calc(var(--safe-bottom) + var(--banner-h) + var(--menu-footer-gap));
 }
 
 /* Sticky header baseline */
@@ -23,7 +19,7 @@
   backdrop-filter: saturate(180%) blur(10px);
 }
 
-/* Page container that never collides with the banner */
+/* Page container that uses only safe area spacing (no banner) */
 .page-container {
   padding-bottom: var(--bottom-inset);
   min-height: 100dvh;

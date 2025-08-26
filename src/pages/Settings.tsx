@@ -46,6 +46,7 @@ import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
 import { ResourcesSection } from '@/pages/Resources';
 import { Separator } from '@/components/ui/separator';
+import InlineMREC from '@/components/ads/InlineMREC';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -307,6 +308,9 @@ const Settings = () => {
               )}
             </AccordionContent>
           </AccordionItem>
+
+          {/* Inline MREC Ad */}
+          <InlineMREC slot="settings" />
 
           {/* Security & Privacy */}
           <AccordionItem value="security" className="settings-section">
