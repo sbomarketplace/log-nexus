@@ -1,11 +1,6 @@
-import { useState, useRef } from 'react';
-import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import SlideOverMenu from '@/components/SlideOverMenu';
 
 export default function AppHeader() {
-  const [open, setOpen] = useState(false);
-  const btnRef = useRef<HTMLButtonElement | null>(null);
   
   return (
     <header 
@@ -27,18 +22,8 @@ export default function AppHeader() {
         <span className="font-semibold text-[17px]">ClearCase</span>
       </Link>
 
-      {/* Right: hamburger */}
-      <button
-        ref={btnRef}
-        aria-label="Menu"
-        data-testid="hamburger-button"
-        onClick={() => setOpen(v => !v)}
-        className="h-10 w-10 -mr-2 grid place-items-center rounded-xl hover:bg-muted focus:outline-none focus:ring-2 focus:ring-ring active:scale-[0.98]"
-      >
-        <Menu className="h-6 w-6" />
-      </button>
-
-      <SlideOverMenu open={open} onClose={() => setOpen(false)} anchorRef={btnRef} />
+      {/* Right side intentionally empty now that we use bottom navigation */}
+      <span />
     </header>
   );
 }

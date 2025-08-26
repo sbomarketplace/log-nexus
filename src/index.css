@@ -2,12 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Layout variables for safe areas (banner system removed) */
+/* Layout variables for safe areas and bottom navigation */
 :root {
   --header-h: 56px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --bottom-inset: var(--safe-bottom); /* Just safe area - no banner */
-  --menu-footer-gap: 4px;
+  /* Bottom nav height (excluding safe area) */
+  --nav-h: 56px;
+  /* Content gap above bottom nav */
+  --content-gap: 8px;
+  /* Reserve space for sticky bottom nav + safe area + gap */
+  --content-bottom-inset: calc(var(--nav-h) + var(--safe-bottom) + var(--content-gap));
+  --bottom-inset: var(--safe-bottom); /* keep if referenced elsewhere */
+  --menu-footer-gap: 4px;            /* used by menu footer if still present in code */
 }
 
 /* Sticky header baseline */
@@ -19,9 +25,10 @@
   backdrop-filter: saturate(180%) blur(10px);
 }
 
-/* Page container that uses only safe area spacing (no banner) */
+/* Page container that reserves space for bottom navigation */
 .page-container {
-  padding-bottom: var(--bottom-inset);
+  /* Never collide with the sticky bottom nav */
+  padding-bottom: var(--content-bottom-inset);
   min-height: 100dvh;
   box-sizing: border-box;
 }

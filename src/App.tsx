@@ -18,6 +18,7 @@ import { useToastStore } from "@/lib/showToast";
 import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
 import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
+import BottomNav from "@/components/BottomNav";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -94,6 +95,7 @@ const App = () => {
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <BottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
