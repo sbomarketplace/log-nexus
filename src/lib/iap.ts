@@ -18,6 +18,18 @@ let initialized = false;
 // Consumers import these to update UI prices
 export type ProductInfo = { id: string; title: string; priceString: string; type: 'consumable'|'subscription' };
 
+// Credit packs mapping
+const PACK_CREDITS: { [key: string]: number } = {
+  [PID_5]: 5,
+  [PID_60]: 60,
+};
+
+// Export utilities for compatibility
+export const isNative = Boolean((window as any).__NATIVE__?.purchases);
+export function toast(msg: string) {
+  (window as any).__NATIVE__?.device?.toast?.(msg) ?? console.log("[toast]", msg);
+}
+
 export async function initIAP(): Promise<void> {
   if (initialized) return;
   
@@ -59,6 +71,9 @@ export async function initIAP(): Promise<void> {
     platform: CdvPurchase.Platform.APPLE_APPSTORE,
     options: { needAppReceipt: true }
   }]);
+
+  // Update product info from store
+  await store.update();
 
   initialized = true;
 }
@@ -105,6 +120,13 @@ export async function purchase(productId: string): Promise<{ok:boolean; error?:s
       if (error.code === CdvPurchase.ErrorCode.PAYMENT_CANCELLED) return { ok:false, error:'cancelled' };
       return { ok:false, error:String(error?.message || error) };
     }
+    
+    // Award credits immediately for successful consumable purchases
+    const credits = PACK_CREDITS[productId] || 0;
+    if (credits > 0) {
+      await addPack(credits);
+    }
+    
     return { ok:true };
   } catch (e:any) {
     return { ok:false, error:String(e?.message || e) };
@@ -133,8 +155,21 @@ async function onVerified(receipt: any) {
     }
   } catch {}
 
-  // Consumables are verified per transaction, but we don't get quantity here.
-  // Instead, add credits on purchase success (see paywall button handlers below).
+  // Award consumable credits from receipt transactions
+  try {
+    if (receipt?.transactions) {
+      for (const transaction of receipt.transactions) {
+        const productId = transaction.productId;
+        const creditsPerPack = PACK_CREDITS[productId];
+        if (creditsPerPack) {
+          const quantity = transaction.quantity || 1;
+          await addPack(creditsPerPack * quantity);
+        }
+      }
+    }
+  } catch (error) {
+    console.warn('Failed to process consumable credits from receipt:', error);
+  }
 }
 
 // Helper

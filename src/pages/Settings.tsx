@@ -27,8 +27,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
-import { restore } from '@/lib/iap';
-import { purchase, toast, isNative } from '@/utils/iap';
+import { restore, purchase, toast, isNative } from '@/lib/iap';
 import { AiCreditsPanel } from '@/components/AiCreditsPanel';
 import { addPack, setSubscription } from '@/lib/credits';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
@@ -197,9 +196,9 @@ const Settings = () => {
   };
 
   const openSubscriptionManagement = () => {
-    if (window.__NATIVE__) {
+    if (isNative && (window as any).Capacitor?.Plugins?.App) {
       // Native app - open App Store subscription management
-      window.open('itms-apps://apps.apple.com/account/subscriptions', '_system');
+      (window as any).Capacitor.Plugins.App.openUrl({ url: 'itms-apps://apps.apple.com/account/subscriptions' });
     } else {
       // Web fallback
       setActiveModal('subscription');
