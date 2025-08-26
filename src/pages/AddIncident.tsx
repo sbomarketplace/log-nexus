@@ -401,7 +401,7 @@ const AddIncident = () => {
 
   return (
     <Layout>
-      <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4">
+      <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4 pb-2">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
