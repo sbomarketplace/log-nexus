@@ -768,9 +768,6 @@ const AddIncident = () => {
               Cancel
             </Button>
           </div>
-
-          {/* This spacer MUST come immediately after the buttons */}
-          <div className="add-incident-bottom-spacer" aria-hidden="true" />
         </form>
 
         {/* Paywall Modal */}
