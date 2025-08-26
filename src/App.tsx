@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ConsentModal } from "@/components/ConsentModal";
 import { consentStorage } from "@/utils/consentStorage";
@@ -84,8 +84,10 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/add" element={<AddIncident />} />
-            <Route path="/resources" element={<Resources />} />
+            {/* Main combined page */}
             <Route path="/settings" element={<Settings />} />
+            {/* Legacy resources link - redirect into the resources anchor */}
+            <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
             {/* Legacy route redirects */}
             <Route path="/incident/:id" element={<IncidentRedirect />} />
             <Route path="/incident/:id/edit" element={<IncidentRedirect />} />

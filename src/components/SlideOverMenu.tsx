@@ -10,8 +10,7 @@ type Props = {
 const LINKS = [
   { label: "Home", to: "/", icon: "home", tid: "nav-home" },
   { label: "Add Incident", to: "/add", icon: "add", tid: "nav-add" },
-  { label: "Resources", to: "/resources", icon: "book", tid: "nav-resources" },
-  { label: "Settings", to: "/settings", icon: "gear", tid: "nav-settings" },
+  { label: "Settings & Resources", to: "/settings", icon: "gear", tid: "nav-settings-resources" },
 ] as const;
 
 function Icon({ name }: { name: typeof LINKS[number]["icon"] }) {
@@ -21,8 +20,6 @@ function Icon({ name }: { name: typeof LINKS[number]["icon"] }) {
       return <svg width="20" height="20" viewBox="0 0 24 24" {...common}><path d="M3 10.5 12 3l9 7.5" /><path d="M5 10v10h14V10" /></svg>;
     case "add":
       return <svg width="20" height="20" viewBox="0 0 24 24" {...common}><circle cx="12" cy="12" r="9" /><path d="M12 8v8M8 12h8" /></svg>;
-    case "book":
-      return <svg width="20" height="20" viewBox="0 0 24 24" {...common}><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" /><path d="M4 4h16v16" /><path d="M8 4v16" /></svg>;
     case "gear":
       return <svg width="20" height="20" viewBox="0 0 24 24" {...common}><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" /><path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 7.6 7.6 0 0 1-1.8.7 1 1 0 0 0-.8 1v.2a2 2 0 1 1-4 0V20a1 1 0 0 0-.8-1 7.6 7.6 0 0 1-1.8-.7 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 7.6 7.6 0 0 1-.7-1.8 1 1 0 0 0-1-.8H3a2 2 0 1 1 0-4h.2a1 1 0 0 0 1-.8 7.6 7.6 0 0 1 .7-1.8 1 1 0 0 0-.2-1.1l-.1-.1A2 2 0 1 1 5.6 3.2l.1.1a1 1 0 0 0 1.1.2 7.6 7.6 0 0 1 1.8-.7 1 1 0 0 0 .8-1V1a2 2 0 1 1 4 0v.2a1 1 0 0 0 .8 1 7.6 7.6 0 0 1 1.8.7 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 7.6 7.6 0 0 1 .7 1.8 1 1 0 0 0 1 .8H23a2 2 0 1 1 0 4h-.2a1 1 0 0 0-1 .8 7.6 7.6 0 0 1-.7 1.8Z" /></svg>;
     default:

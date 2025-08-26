@@ -20,7 +20,8 @@ import {
   AlertTriangle
 } from 'lucide-react';
 
-const Resources = () => {
+/** Reusable inner content of Resources, no page-container wrapper */
+export function ResourcesSection() {
   const [selectedResource, setSelectedResource] = useState<any>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [contactsModalOpen, setContactsModalOpen] = useState(false);
@@ -221,6 +222,106 @@ const Resources = () => {
   };
 
   return (
+    <>
+      {/* Resource Categories */}
+      <div className="space-y-4">
+        {Object.entries(resourceCategories).map(([key, category]) => {
+          const IconComponent = category.icon;
+          return (
+            <Card key={key} className="overflow-hidden">
+              <Collapsible
+                open={openSections[key]}
+                onOpenChange={() => toggleSection(key)}
+              >
+                <CollapsibleTrigger asChild>
+                  <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <IconComponent className="h-5 w-5 text-primary" />
+                        <CardTitle className="text-sm font-semibold">
+                          {category.title}
+                        </CardTitle>
+                      </div>
+                      <ChevronDown 
+                        className={`h-4 w-4 transition-transform duration-200 ${
+                          openSections[key] ? 'rotate-180' : ''
+                        }`} 
+                      />
+                    </div>
+                  </CardHeader>
+                </CollapsibleTrigger>
+                
+                <CollapsibleContent className="resources-acc-content">
+                  <CardContent className="pt-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {category.resources.map((resource, index) => (
+                        <Card 
+                          key={index} 
+                          className="cursor-pointer hover:shadow-md hover:border-primary/20 transition-all duration-200"
+                          onClick={() => {
+                            if (resource.isInteractive && resource.action) {
+                              resource.action();
+                            } else if (resource.isViewable && resource.mdPath) {
+                              openResourceViewer(resource.title, resource.mdPath);
+                            } else {
+                              openResourceModal(resource);
+                            }
+                          }}
+                        >
+                          <CardHeader className="pb-2 overflow-hidden">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 min-w-0">
+                                <CardTitle className="text-sm font-medium leading-tight break-words">
+                                  {resource.title}
+                                </CardTitle>
+                              </div>
+                              <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded ml-2 flex-shrink-0">
+                                {resource.type}
+                              </span>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="pt-0">
+                            <p className="text-xs text-muted-foreground line-clamp-2 break-words">
+                              {resource.description}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </CardContent>
+                </CollapsibleContent>
+              </Collapsible>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Resource Modal */}
+      <ResourceModal
+        open={modalOpen}
+        onOpenChange={setModalOpen}
+        resource={selectedResource}
+      />
+
+      {/* Emergency Contacts Modal */}
+      <EmergencyContactsModal
+        open={contactsModalOpen}
+        onOpenChange={setContactsModalOpen}
+      />
+
+      {/* Resource Viewer */}
+      <ResourceViewer
+        open={resourceViewerOpen}
+        onOpenChange={setResourceViewerOpen}
+        title={viewerConfig.title}
+        mdPath={viewerConfig.mdPath}
+      />
+    </>
+  );
+}
+
+const Resources = () => {
+  return (
     <Layout>
       <div className="resources-page space-y-6 -mt-4">
         {/* Header */}
@@ -232,101 +333,7 @@ const Resources = () => {
           <Separator className="mt-3" />
         </div>
 
-        {/* Resource Categories */}
-        <div className="space-y-4">
-          {Object.entries(resourceCategories).map(([key, category]) => {
-            const IconComponent = category.icon;
-            return (
-              <Card key={key} className="overflow-hidden">
-                <Collapsible
-                  open={openSections[key]}
-                  onOpenChange={() => toggleSection(key)}
-                >
-                  <CollapsibleTrigger asChild>
-                    <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <IconComponent className="h-5 w-5 text-primary" />
-                          <CardTitle className="text-sm font-semibold">
-                            {category.title}
-                          </CardTitle>
-                        </div>
-                        <ChevronDown 
-                          className={`h-4 w-4 transition-transform duration-200 ${
-                            openSections[key] ? 'rotate-180' : ''
-                          }`} 
-                        />
-                      </div>
-                    </CardHeader>
-                  </CollapsibleTrigger>
-                  
-                  <CollapsibleContent className="resources-acc-content">
-                    <CardContent className="pt-0">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        {category.resources.map((resource, index) => (
-                          <Card 
-                            key={index} 
-                            className="cursor-pointer hover:shadow-md hover:border-primary/20 transition-all duration-200"
-                            onClick={() => {
-                              if (resource.isInteractive && resource.action) {
-                                resource.action();
-                              } else if (resource.isViewable && resource.mdPath) {
-                                openResourceViewer(resource.title, resource.mdPath);
-                              } else {
-                                openResourceModal(resource);
-                              }
-                            }}
-                          >
-                            <CardHeader className="pb-2 overflow-hidden">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1 min-w-0">
-                                  <CardTitle className="text-sm font-medium leading-tight break-words">
-                                    {resource.title}
-                                  </CardTitle>
-                                </div>
-                                <span className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded ml-2 flex-shrink-0">
-                                  {resource.type}
-                                </span>
-                              </div>
-                            </CardHeader>
-                            <CardContent className="pt-0">
-                              <p className="text-xs text-muted-foreground line-clamp-2 break-words">
-                                {resource.description}
-                              </p>
-                            </CardContent>
-                          </Card>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </CollapsibleContent>
-                </Collapsible>
-              </Card>
-            );
-          })}
-        </div>
-
-
-
-        {/* Resource Modal */}
-        <ResourceModal
-          open={modalOpen}
-          onOpenChange={setModalOpen}
-          resource={selectedResource}
-        />
-
-        {/* Emergency Contacts Modal */}
-        <EmergencyContactsModal
-          open={contactsModalOpen}
-          onOpenChange={setContactsModalOpen}
-        />
-
-        {/* Resource Viewer */}
-        <ResourceViewer
-          open={resourceViewerOpen}
-          onOpenChange={setResourceViewerOpen}
-          title={viewerConfig.title}
-          mdPath={viewerConfig.mdPath}
-        />
+        <ResourcesSection />
       </div>
     </Layout>
   );

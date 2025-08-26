@@ -44,6 +44,8 @@ import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
 import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
+import { ResourcesSection } from '@/pages/Resources';
+import { Separator } from '@/components/ui/separator';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -233,11 +235,14 @@ const Settings = () => {
       <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography">
         {/* Header */}
         <div>
-          <h1 className="text-lg font-medium text-foreground">Settings</h1>
+          <h1 className="text-lg font-medium text-foreground">Settings & Resources</h1>
           <p className="text-xs text-muted-foreground mt-1">
-            Manage your incident reporting preferences and data
+            Manage your preferences and access helpful guides
           </p>
         </div>
+
+        {/* Settings section */}
+        <h2 id="settings" className="sr-only">Settings</h2>
 
         {/* Settings Accordion */}
         <Accordion type="multiple" className="space-y-4">
@@ -355,6 +360,14 @@ const Settings = () => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+
+        {/* Divider into Resources */}
+        <div id="resources" className="pt-4 scroll-mt-16" />
+        <Separator className="my-4" />
+        <h2 className="mb-4 text-lg font-medium text-foreground">Resources</h2>
+        <div className="scroll-mt-16">
+          <ResourcesSection />
+        </div>
 
         {/* Floating Modals */}
         <FloatingModal
