@@ -5,7 +5,7 @@ declare const CdvPurchase: any;
 
 const P5   = import.meta.env.VITE_IAP_CREDIT_PACK_5;
 const P60  = import.meta.env.VITE_IAP_CREDIT_PACK_60;
-const PSUB = import.meta.env.VITE_IAP_SUB_MONTHLY;
+const PSUB = import.meta.env.VITE_IAP_SUBSCRIPTION_MONTHLY;
 
 let store: Store | null = null;
 let initialized = false;
