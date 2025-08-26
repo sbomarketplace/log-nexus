@@ -9,7 +9,7 @@
   /* Bottom nav height (excluding safe area) */
   --nav-h: 56px;
   /* Content gap above bottom nav */
-  --content-gap: 8px;
+  --content-gap: 2px;
   /* Reserve space for sticky bottom nav + safe area + gap */
   --content-bottom-inset: calc(var(--nav-h) + var(--safe-bottom) + var(--content-gap));
   --bottom-inset: var(--safe-bottom); /* keep if referenced elsewhere */
