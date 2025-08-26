@@ -22,7 +22,6 @@
 
 /* Page container that never collides with the banner */
 .page-container {
-  padding-top: var(--header-h);
   padding-bottom: var(--bottom-inset);
   min-height: 100dvh;
   box-sizing: border-box;
