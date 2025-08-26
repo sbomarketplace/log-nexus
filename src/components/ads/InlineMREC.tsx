@@ -83,6 +83,30 @@ export default function InlineMREC({ slot }: InlineMRECProps) {
   const [adLoaded, setAdLoaded] = useState(false);
   const [showAd, setShowAd] = useState(false);
 
+  // Placeholder mode: show layout card in dev/web without touching AdMob
+  const PLACEHOLDER_MODE =
+    import.meta.env.VITE_SHOW_AD_PLACEHOLDERS === "true" ||
+    (!(window as any).cordova && import.meta.env.DEV);
+
+  const Placeholder = () => (
+    <div className="my-4">
+      <div className="rounded-2xl border border-dashed border-neutral-300 bg-neutral-50/60 overflow-hidden">
+        <div className="flex items-center gap-2 px-3 py-2 border-b border-neutral-200 bg-white">
+          <Badge variant="outline" className="text-xs">Ad</Badge>
+          <span className="text-xs text-neutral-500">Placeholder · 300×250 MREC</span>
+        </div>
+        <div className="flex items-center justify-center" style={{ height: 250 }}>
+          <div className="text-xs text-neutral-500">This is where the inline ad renders on device</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  // In placeholder mode, just render the card for layout and exit.
+  if (PLACEHOLDER_MODE) {
+    return <Placeholder />;
+  }
+
   useEffect(() => {
     // Don't show ads if user has premium subscription
     if (isRemoveAdsActive()) {
