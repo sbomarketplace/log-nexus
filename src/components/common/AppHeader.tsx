@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Menu } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import AppMenuDrawer from '@/components/navigation/AppMenuDrawer';
+import HamburgerMenuModal from '@/components/HamburgerMenuModal';
 
 export default function AppHeader() {
   const [open, setOpen] = useState(false);
@@ -27,7 +27,7 @@ export default function AppHeader() {
         <Menu className="h-6 w-6" />
       </button>
 
-      <AppMenuDrawer open={open} onClose={() => setOpen(false)} />
+      <HamburgerMenuModal open={open} onClose={() => setOpen(false)} />
     </header>
   );
 }
