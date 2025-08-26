@@ -30,6 +30,15 @@ export function toast(msg: string) {
   (window as any).__NATIVE__?.device?.toast?.(msg) ?? console.log("[toast]", msg);
 }
 
+// For the single subscription model (Remove Ads)
+export function isRemoveAdsActive(): boolean {
+  return Boolean(store?.owned?.(PID_SUB));
+}
+
+export async function purchaseRemoveAds(): Promise<{ok:boolean; error?:string}> {
+  return purchase(PID_SUB);
+}
+
 export async function initIAP(): Promise<void> {
   if (initialized) return;
   
