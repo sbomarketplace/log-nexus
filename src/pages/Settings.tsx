@@ -262,6 +262,18 @@ const Settings = () => {
               {/* AI Credits Panel */}
               <AiCreditsPanel />
 
+              {/* Dev Debug Info - IAP Product IDs */}
+              {import.meta.env.DEV && (
+                <div className="mt-4 p-3 bg-muted/30 rounded-lg border">
+                  <p className="text-xs font-mono text-muted-foreground mb-2">DEV: IAP Product IDs</p>
+                  <div className="space-y-1 text-xs font-mono">
+                    <div>5-Pack: {import.meta.env.VITE_IAP_CREDIT_PACK_5 || import.meta.env.VITE_IAP_CREDITS_5 || 'missing'}</div>
+                    <div>60-Pack: {import.meta.env.VITE_IAP_CREDIT_PACK_60 || import.meta.env.VITE_IAP_CREDITS_60 || 'missing'}</div>
+                    <div>Sub: {import.meta.env.VITE_IAP_SUB_MONTHLY || import.meta.env.VITE_IAP_SUBSCRIPTION_MONTHLY || 'missing'}</div>
+                  </div>
+                </div>
+              )}
+
               {/* Manage Subscription */}
               <div 
                 className="settings-row cursor-pointer hover:bg-muted/20 mt-4"
