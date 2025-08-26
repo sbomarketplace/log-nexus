@@ -143,7 +143,7 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
           className="mt-4 text-center text-xs text-muted-foreground select-none"
           style={{ 
             marginBottom: "var(--menu-footer-gap)",
-            paddingBottom: "20px"
+            paddingBottom: "60px"
           }}
         >
           (C) SBO Marketplace LLC 2025
