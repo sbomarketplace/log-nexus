@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 type Props = {
   open: boolean;
   onClose: () => void;
+  anchorRef?: React.RefObject<HTMLElement>;   // hamburger button
 };
 
 const LINKS = [
@@ -29,7 +30,7 @@ function Icon({ name }: { name: typeof LINKS[number]["icon"] }) {
   }
 }
 
-export default function SlideOverMenu({ open, onClose }: Props) {
+export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
   const navigate = useNavigate();
   const firstRef = useRef<HTMLButtonElement | null>(null);
 
@@ -47,6 +48,30 @@ export default function SlideOverMenu({ open, onClose }: Props) {
     };
   }, [open, onClose]);
 
+  // Handle outside clicks - close menu when clicking anywhere except the hamburger button
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      
+      // Don't close if clicking on the hamburger button (let it handle the toggle)
+      if (anchorRef?.current && anchorRef.current.contains(target)) {
+        return;
+      }
+      
+      // Close the menu for any other outside click
+      onClose();
+    };
+
+    // Use capture phase to ensure we catch the event before other handlers
+    document.addEventListener('mousedown', handleClickOutside, true);
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside, true);
+    };
+  }, [open, onClose, anchorRef]);
+
   if (!open) return null;
 
   const go = (to: string) => {
@@ -57,10 +82,9 @@ export default function SlideOverMenu({ open, onClose }: Props) {
   return (
     <div className="fixed inset-0 z-[1000]" aria-modal="true" role="dialog" aria-label="Main menu">
       {/* dimmed backdrop that starts below the header so the header remains visible */}
-      <button
+      <div
         className="absolute left-0 right-0 bottom-0 top-[var(--header-h,56px)] bg-black/30"
-        aria-label="Close menu"
-        onClick={onClose}
+        aria-hidden="true"
       />
       {/* slide-over panel */}
       <div
