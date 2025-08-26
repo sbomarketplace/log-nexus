@@ -22,7 +22,7 @@ import { ViewIncidentModal } from '@/components/ViewIncidentModal';
 import { ExportOptionsModal } from '@/components/ExportOptionsModal';
 import { IncidentListControls } from '@/components/IncidentListControls';
 import { BulkBarMobile } from '@/components/BulkBarMobile';
-import InlineMREC from '@/components/ads/InlineMREC';
+import InlineAd from '@/components/ads/InlineAd';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { getAllCategories } from '@/utils/incidentCategories';
@@ -625,8 +625,8 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Inline MREC Ad */}
-        <InlineMREC slot="home" />
+        {/* Inline Banner Ad */}
+        <InlineAd slot="home" />
 
         {/* Section Title and Search/Filter Controls */}
         {organizedIncidents.length > 0 && (
