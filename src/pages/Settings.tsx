@@ -27,7 +27,7 @@ import {
   Globe
 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
-import { restore, purchase, toast, isNative } from '@/lib/iap';
+import { isRemoveAdsActive, purchaseRemoveAds, restorePurchases, toast, isNative } from '@/lib/iap';
 import { AiCreditsPanel } from '@/components/AiCreditsPanel';
 import { addPack, setSubscription } from '@/lib/credits';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
@@ -186,7 +186,7 @@ const Settings = () => {
   const handleRestore = async () => {
     setPurchasing('restore');
     try {
-      await restore();
+      await restorePurchases();
       console.log("Purchases restored.");
     } catch (error) {
       console.error("Restore failed:", error);
@@ -249,41 +249,65 @@ const Settings = () => {
 
         {/* Settings Accordion */}
         <Accordion type="multiple" className="space-y-4">
-          {/* Account & Subscription */}
+          {/* Remove Ads Subscription */}
           <AccordionItem value="account" className="settings-section">
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Account & Subscription</span>
+                <span className="font-medium">Remove Ads Subscription</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
-              {/* AI Credits Panel */}
-              <AiCreditsPanel />
+              {/* Subscription Status */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-lg">
+                  <div>
+                    <h3 className="font-medium">Subscription Status</h3>
+                    <p className="text-sm text-muted-foreground">Current plan and billing</p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    isRemoveAdsActive() 
+                      ? 'bg-success/10 text-success' 
+                      : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {isRemoveAdsActive() ? 'ACTIVE' : 'FREE'}
+                  </div>
+                </div>
 
-              {/* Dev Debug Info - IAP Product IDs */}
+                {/* Purchase Buttons */}
+                {!isRemoveAdsActive() && (
+                  <PricingButton
+                    price="Remove Ads — $4.99/mo"
+                    caption="Hide banner ads permanently"
+                    loading={purchasing === 'removeAds'}
+                    onClick={() => handlePurchase('removeAds', async () => {
+                      const result = await purchaseRemoveAds();
+                      if (!result.ok && result.error && result.error !== 'cancelled') {
+                        console.error('Purchase failed:', result.error);
+                      }
+                    })}
+                    className="w-full"
+                  />
+                )}
+
+                <PricingButton
+                  price="Restore Purchases"
+                  caption="Restore previous purchases"
+                  loading={purchasing === 'restore'}
+                  onClick={handleRestore}
+                  className="w-full"
+                />
+              </div>
+
+              {/* Dev Debug Info */}
               {import.meta.env.DEV && (
                 <div className="mt-4 p-3 bg-muted/30 rounded-lg border">
                   <p className="text-xs font-mono text-muted-foreground mb-2">DEV: IAP Product IDs</p>
                   <div className="space-y-1 text-xs font-mono">
-                    <div>5-Pack: {import.meta.env.VITE_IAP_CREDIT_PACK_5 || import.meta.env.VITE_IAP_CREDITS_5 || 'missing'}</div>
-                    <div>60-Pack: {import.meta.env.VITE_IAP_CREDIT_PACK_60 || import.meta.env.VITE_IAP_CREDITS_60 || 'missing'}</div>
-                    <div>Sub: {import.meta.env.VITE_IAP_SUB_MONTHLY || import.meta.env.VITE_IAP_SUBSCRIPTION_MONTHLY || 'missing'}</div>
+                    <div>Remove Ads: {import.meta.env.VITE_IAP_REMOVE_ADS_MONTHLY || 'missing'}</div>
                   </div>
                 </div>
               )}
-
-              {/* Manage Subscription */}
-              <div 
-                className="settings-row cursor-pointer hover:bg-muted/20 mt-4"
-                onClick={openSubscriptionManagement}
-              >
-                <div className="settings-row-label">
-                  <span className="settings-row-title">Manage Subscription</span>
-                  <span className="settings-row-description">Restore purchases (App Store)</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-muted-foreground" />
-              </div>
             </AccordionContent>
           </AccordionItem>
 

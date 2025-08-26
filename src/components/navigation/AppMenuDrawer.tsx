@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { X, Home, PlusSquare, FileText, Settings, Crown, RotateCcw } from 'lucide-react';
-import { isRemoveAdsActive, purchaseRemoveAds, restore, toast } from '@/lib/iap';
+import { isRemoveAdsActive, purchaseRemoveAds, restorePurchases, toast } from '@/lib/iap';
 import React, { useMemo } from 'react';
 
 export default function AppMenuDrawer({
@@ -38,9 +38,9 @@ export default function AppMenuDrawer({
     }
   }
 
-  async function restorePurchases() {
+  async function handleRestore() {
     try {
-      await restore();
+      await restorePurchases();
       toast('Purchases restored');
     } catch (e: any) {
       toast(`Restore failed: ${e?.message || e}`);
@@ -92,7 +92,7 @@ export default function AppMenuDrawer({
             <div className="text-center text-[14px] text-success font-medium">Ads removed (active)</div>
           )}
           <button
-            onClick={restorePurchases}
+            onClick={handleRestore}
             className="w-full px-4 py-3 rounded-xl border flex items-center justify-center gap-2 hover:bg-muted/40"
           >
             <RotateCcw className="h-5 w-5" />
