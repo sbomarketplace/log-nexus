@@ -141,7 +141,10 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
         {/* Footer sits above the ad banner and safe-area because of panel padding */}
         <div
           className="mt-4 text-center text-xs text-muted-foreground select-none"
-          style={{ marginBottom: "var(--menu-footer-gap)" }}
+          style={{ 
+            marginBottom: "var(--menu-footer-gap)",
+            paddingBottom: "20px"
+          }}
         >
           (C) SBO Marketplace LLC 2025
         </div>
