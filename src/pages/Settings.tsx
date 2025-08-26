@@ -11,8 +11,6 @@ import {
   Shield, 
   Database, 
   FileText, 
-  Bell, 
-  Link, 
   HelpCircle, 
   Loader2,
   Upload,
@@ -45,9 +43,7 @@ import {
 import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
 import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
-import IntegrationsCard from '@/components/settings/IntegrationsCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
-import NotificationsCard from '@/components/settings/NotificationsCard';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -107,14 +103,10 @@ const Settings = () => {
     appLock,
     dataStorage,
     incidentDefaults,
-    notifications,
-    integrations,
     setHidePreviews,
     setAppLock,
     setDataStorage,
     setIncidentDefaults,
-    setNotifications,
-    setIntegrations,
   } = useSettingsStore();
   
   const [activeModal, setActiveModal] = useState<string | null>(null);
@@ -337,31 +329,6 @@ const Settings = () => {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Notifications */}
-          <AccordionItem value="notifications" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
-              <div className="flex items-center gap-3">
-                <Bell className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Notifications</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
-              <NotificationsCard />
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Integrations */}
-          <AccordionItem value="integrations" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
-              <div className="flex items-center gap-3">
-                <Link className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Integrations</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
-              <IntegrationsCard />
-            </AccordionContent>
-          </AccordionItem>
 
           {/* Support & About */}
           <AccordionItem value="support" className="settings-section">
