@@ -309,9 +309,6 @@ const Settings = () => {
             </AccordionContent>
           </AccordionItem>
 
-          {/* Inline Banner Ad */}
-          <InlineAd slot="settings" />
-
           {/* Security & Privacy */}
           <AccordionItem value="security" className="settings-section">
             <AccordionTrigger className="settings-section-header">
@@ -364,6 +361,9 @@ const Settings = () => {
             </AccordionContent>
           </AccordionItem>
         </Accordion>
+
+        {/* Inline Banner Ad */}
+        <InlineAd slot="settings" />
 
         {/* Balanced divider – equal spacing above and below the line */}
         <Separator className="mt-4 mb-4" />
