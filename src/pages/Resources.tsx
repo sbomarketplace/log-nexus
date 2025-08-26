@@ -237,8 +237,8 @@ export function ResourcesSection() {
                   <CardHeader className="cursor-pointer hover:bg-accent/50 transition-colors">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <IconComponent className="h-5 w-5 text-primary" />
-                        <CardTitle className="text-sm font-semibold">
+                        <IconComponent className="h-5 w-5 text-muted-foreground" />
+                        <CardTitle className="text-sm">
                           {category.title}
                         </CardTitle>
                       </div>

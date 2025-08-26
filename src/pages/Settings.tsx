@@ -252,7 +252,7 @@ const Settings = () => {
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Remove Ads Subscription</span>
+                <span>Remove Ads Subscription</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
@@ -314,7 +314,7 @@ const Settings = () => {
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Security & Privacy</span>
+                <span>Security & Privacy</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
@@ -327,7 +327,7 @@ const Settings = () => {
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <Database className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Data & Storage</span>
+                <span>Data & Storage</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
@@ -341,7 +341,7 @@ const Settings = () => {
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Support & Legal</span>
+                <span>Support & Legal</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
