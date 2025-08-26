@@ -1,6 +1,6 @@
 import * as React from "react";
 import { X } from "lucide-react";
-import { triggerRatePromptNow } from "@/lib/rateApp";
+import { openStoreReview } from "@/lib/rateApp";
 
 interface SupportLegalModalProps {
   onClose: () => void;
@@ -17,7 +17,7 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
   };
 
   const handleRateApp = () => {
-    triggerRatePromptNow();
+    openStoreReview();
   };
 
   // Handle backdrop click

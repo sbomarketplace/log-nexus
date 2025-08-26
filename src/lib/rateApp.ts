@@ -39,22 +39,30 @@ export function triggerRatePromptNow() {
 export function neverAskAgain() { const st = load(); st.neverAsk = true; save(st); }
 
 export async function openStoreReview() {
-  if (isNative) {
-    try {
-      const { AppReview } = await import('@capawesome/capacitor-app-review');
-      await AppReview.requestReview();
-      return;
-    } catch {}
+  try {
+    const { AppReview } = await import('@capawesome/capacitor-app-review');
+    await AppReview.requestReview();
+    return;
+  } catch {
+    // ignore and fall through to browser open
   }
-  const IOS_APP_ID = import.meta.env.VITE_IOS_APP_ID as string | undefined;
-  const ANDROID_PKG = import.meta.env.VITE_ANDROID_PACKAGE as string | undefined;
-  const ua = navigator.userAgent || '';
-  const isiOS = /iPad|iPhone|iPod/.test(ua);
-  const isAndroid = /Android/i.test(ua);
-  if (isiOS && IOS_APP_ID) { window.location.href = `itms-apps://apps.apple.com/app/id${IOS_APP_ID}?action=write-review`; return; }
-  if (isAndroid && ANDROID_PKG) { window.location.href = `market://details?id=${ANDROID_PKG}`; return; }
-  if (IOS_APP_ID) window.open(`https://apps.apple.com/app/id${IOS_APP_ID}`, '_blank');
-  if (ANDROID_PKG) window.open(`https://play.google.com/store/apps/details?id=${ANDROID_PKG}`, '_blank');
+
+  const appId = import.meta.env.VITE_IOS_APP_ID;
+  const url = appId
+    ? `https://apps.apple.com/app/id${appId}?action=write-review`
+    : "https://apps.apple.com";
+  
+  try {
+    if (isNative) {
+      const { Browser } = await import('@capacitor/browser');
+      await Browser.open({ url });
+    } else {
+      window.open(url, '_blank');
+    }
+  } catch {
+    // fallback to window.open if Browser fails
+    window.open(url, '_blank');
+  }
 }
 
 export function sendFeedbackEmail() {
