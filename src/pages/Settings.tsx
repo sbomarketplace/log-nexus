@@ -234,7 +234,7 @@ const Settings = () => {
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography">
         {/* Header */}
-        <div>
+        <div className="text-center">
           <h1 className="text-lg font-medium text-foreground">Settings & Resources</h1>
           <p className="text-xs text-muted-foreground mt-1">
             Manage your preferences and access helpful guides
