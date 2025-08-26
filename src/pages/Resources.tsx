@@ -228,7 +228,11 @@ export function ResourcesSection() {
         {Object.entries(resourceCategories).map(([key, category]) => {
           const IconComponent = category.icon;
           return (
-            <Card key={key} className="overflow-hidden">
+            <Card 
+              key={key} 
+              className="overflow-hidden"
+              style={key === 'advocacy' ? { paddingBottom: 'calc(var(--bottom-inset, 0px) + 20px)' } : undefined}
+            >
               <Collapsible
                 open={openSections[key]}
                 onOpenChange={() => toggleSection(key)}

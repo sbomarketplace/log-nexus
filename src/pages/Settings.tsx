@@ -335,12 +335,12 @@ const Settings = () => {
           </AccordionItem>
 
 
-          {/* Support & About */}
+          {/* Support & Legal */}
           <AccordionItem value="support" className="settings-section">
             <AccordionTrigger className="settings-section-header">
               <div className="flex items-center gap-3">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Support & About</span>
+                <span className="font-medium">Support & Legal</span>
               </div>
             </AccordionTrigger>
             <AccordionContent className="settings-section-content cc-acc-content">
