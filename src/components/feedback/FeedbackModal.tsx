@@ -29,7 +29,10 @@ export default function FeedbackModal({ rating, onClose }: Props) {
         },
       });
       showSuccessToast("Thanks for the feedback!");
-      onClose();
+      // Close modal after brief delay to show success message
+      setTimeout(() => {
+        onClose();
+      }, 500);
     } catch (e) {
       // Fallback: open a mail draft
       const subj = encodeURIComponent("ClearCase Feedback");
