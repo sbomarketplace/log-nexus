@@ -90,10 +90,10 @@ const PricingButton = ({
       `.trim()}
     >
       {loading && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
-      <span className={`font-semibold text-[17px] md:text-[18px] ${selected ? 'text-primary-foreground' : 'text-foreground'}`}>
+      <span className={`font-semibold text-base ${selected ? 'text-primary-foreground' : 'text-foreground'}`}>
         {price}
       </span>
-      <span className={`text-[14px] ${selected ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}>
+      <span className={`text-base ${selected ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}>
         {caption}
       </span>
     </button>
@@ -260,8 +260,8 @@ const Settings = () => {
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
-                    <h3 className="font-medium">Subscription Status</h3>
-                    <p className="text-sm text-muted-foreground">Current plan and billing</p>
+                    <div className="text-base font-semibold">Subscription Status</div>
+                    <div className="text-base text-muted-foreground">Current plan and billing</div>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
                     isRemoveAdsActive() 
@@ -297,12 +297,12 @@ const Settings = () => {
                 />
               </div>
 
-              {/* Dev Debug Info */}
-              {import.meta.env.DEV && (
+              {/* Dev Debug Info (hidden unless explicitly enabled) */}
+              {(import.meta.env.DEV && import.meta.env.VITE_SHOW_DEV_IAP === "true") && (
                 <div className="mt-4 p-3 bg-muted/30 rounded-lg border">
                   <p className="text-xs font-mono text-muted-foreground mb-2">DEV: IAP Product IDs</p>
                   <div className="space-y-1 text-xs font-mono">
-                    <div>Remove Ads: {import.meta.env.VITE_IAP_REMOVE_ADS_MONTHLY || 'missing'}</div>
+                    <div>Remove Ads: {import.meta.env.VITE_IAP_REMOVE_ADS_MONTHLY || 'cc.remove.ads.monthly'}</div>
                   </div>
                 </div>
               )}
