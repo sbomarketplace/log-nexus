@@ -2,10 +2,24 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AdMob, BannerAdOptions, BannerAdPosition, BannerAdSize } from "@capacitor-community/admob";
 import { isRemoveAdsActive } from '@/lib/iap';
 
-type Slot = "home" | "settings";
+type Slot = "home" | "home2" | "home3" | "settings";
 
 const LS_DAY_KEY = "ad_daily_count_v1";
-const SESSION_FLAGS: Record<Slot, boolean> = { home: false, settings: false };
+const SESSION_FLAGS: Record<Slot, boolean> = { home: false, home2: false, home3: false, settings: false };
+
+// Global visibility guard: only one inline ad visible at a time
+let VISIBLE_INLINE_SLOT: Slot | null = null;
+function claimVisibility(slot: Slot) {
+  if (VISIBLE_INLINE_SLOT && VISIBLE_INLINE_SLOT !== slot) return false;
+  VISIBLE_INLINE_SLOT = slot;
+  return true;
+}
+function releaseVisibility(slot: Slot) {
+  if (VISIBLE_INLINE_SLOT === slot) {
+    VISIBLE_INLINE_SLOT = null;
+    document.dispatchEvent(new CustomEvent("inline-ad:released"));
+  }
+}
 
 function todayKey() {
   const d = new Date();
@@ -72,6 +86,7 @@ function chooseBannerSize(containerWidth: number): PickedSize {
 export default function InlineAd({ slot }: { slot: Slot }) {
   const [active, setActive] = useState(false);
   const [size, setSize] = useState<PickedSize>({ kind: "NONE", width: 0, height: 0, admob: BannerAdSize.BANNER });
+  const [isIntersecting, setIsIntersecting] = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const boxRef = useRef<HTMLDivElement | null>(null);
@@ -134,14 +149,13 @@ export default function InlineAd({ slot }: { slot: Slot }) {
     const box = boxRef.current;
     if (!box) return;
 
-    obsRef.current = new IntersectionObserver(async entries => {
-      const e = entries[0];
-      if (!e?.isIntersecting || e.intersectionRatio < 0.5) return;
-      if (adShownRef.current) return;
-      adShownRef.current = true;
+    const tryShow = async () => {
+      if (!isIntersecting || adShownRef.current) return;
+      if (!claimVisibility(slot)) return; // another inline ad is visible
 
       SESSION_FLAGS[slot] = true;
       incDailyCount();
+      adShownRef.current = true;
 
       const rect = box.getBoundingClientRect();
       const scrollX = window.scrollX || window.pageXOffset;
@@ -168,35 +182,59 @@ export default function InlineAd({ slot }: { slot: Slot }) {
         setActive(true);
       } catch (err) {
         console.warn("Inline banner error", err);
+        releaseVisibility(slot);
       }
+    };
 
-      const onMove = () => {
-        const r = box.getBoundingClientRect();
-        const x = Math.round(r.left + (window.scrollX || window.pageXOffset));
-        const y = Math.round(r.top + (window.scrollY || window.pageYOffset));
-        // Try to update banner position if method exists
-        try {
-          (AdMob as any).updateBannerPosition?.({ x, y, offsetX: x, offsetY: y });
-        } catch {
-          // Method not available, skip position updates
+    obsRef.current = new IntersectionObserver((entries) => {
+      const e = entries[0];
+      const nowIntersecting = !!e?.isIntersecting && e.intersectionRatio >= 0.5;
+      setIsIntersecting(nowIntersecting);
+      if (nowIntersecting) {
+        void tryShow();
+      } else {
+        // If this ad was active and just scrolled out, hide & release so another slot can claim
+        if (active && VISIBLE_INLINE_SLOT === slot) {
+          AdMob.hideBanner().catch(() => {});
+          setActive(false);
+          releaseVisibility(slot);
         }
-      };
-      window.addEventListener("scroll", onMove, { passive: true });
-      window.addEventListener("resize", onMove);
-      window.addEventListener("orientationchange", onMove);
-      return () => {
-        window.removeEventListener("scroll", onMove);
-        window.removeEventListener("resize", onMove);
-        window.removeEventListener("orientationchange", onMove);
-      };
+      }
     }, { threshold: 0.5 });
+
+    const onMove = () => {
+      if (!active) return;
+      const r = box.getBoundingClientRect();
+      const x = Math.round(r.left + (window.scrollX || window.pageXOffset));
+      const y = Math.round(r.top + (window.scrollY || window.pageYOffset));
+      // Try to update banner position if method exists
+      try {
+        (AdMob as any).updateBannerPosition?.({ x, y, offsetX: x, offsetY: y });
+      } catch {
+        // Method not available, skip position updates
+      }
+    };
+    
+    const onReleased = () => { void tryShow(); };
+
+    window.addEventListener("scroll", onMove, { passive: true });
+    window.addEventListener("resize", onMove);
+    window.addEventListener("orientationchange", onMove);
+    document.addEventListener("inline-ad:released", onReleased);
 
     obsRef.current.observe(box);
     return () => {
       obsRef.current?.disconnect();
-      if (active) AdMob.hideBanner().catch(() => {});
+      window.removeEventListener("scroll", onMove);
+      window.removeEventListener("resize", onMove);
+      window.removeEventListener("orientationchange", onMove);
+      document.removeEventListener("inline-ad:released", onReleased);
+      if (active) {
+        AdMob.hideBanner().catch(() => {});
+        releaseVisibility(slot);
+      }
     };
-  }, [eligible, active, size, slot]);
+  }, [eligible, active, size, slot, isIntersecting]);
 
   return (
     <div className="my-3" ref={containerRef}>

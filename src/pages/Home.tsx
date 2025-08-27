@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -705,18 +705,23 @@ const Home = () => {
                 </Card>
               ) : (
                 orderWithPins(filteredIncidents).map((incident, index) => (
-                  <IncidentCard
-                    key={incident.id}
-                    incident={incident}
-                    index={index}
-                    pageIds={orderWithPins(filteredIncidents).map(i => i.id)}
-                    onView={() => handleViewIncident(incident)}
-                    onExport={() => handleExport(incident)}
-                    onDelete={() => setDeleteId(incident.id)}
-                    onUpdate={loadIncidents}
-                    getCategoryTagClass={getCategoryTagClass}
-                    initialEditMode={mode === 'edit' && incident.id === incidentId}
-                  />
+                  <React.Fragment key={incident.id}>
+                    <IncidentCard
+                      incident={incident}
+                      index={index}
+                      pageIds={orderWithPins(filteredIncidents).map(i => i.id)}
+                      onView={() => handleViewIncident(incident)}
+                      onExport={() => handleExport(incident)}
+                      onDelete={() => setDeleteId(incident.id)}
+                      onUpdate={loadIncidents}
+                      getCategoryTagClass={getCategoryTagClass}
+                      initialEditMode={mode === 'edit' && incident.id === incidentId}
+                    />
+                    {/* After the 7th card (0-based index 6), render second ad if list is long */}
+                    {index === 6 && filteredIncidents.length > 7 && <InlineAd slot="home2" />}
+                    {/* After the 19th card (7 + 12), render third ad for very long lists */}
+                    {index === 18 && filteredIncidents.length > 19 && <InlineAd slot="home3" />}
+                  </React.Fragment>
                 ))
               )}
             </>
