@@ -1,30 +1,28 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Home, Plus, Settings } from "lucide-react";
 
 type Tab = { label: string; to: string; icon: (active: boolean) => JSX.Element; tid: string; aria: string };
 
 const IconHome = (active: boolean) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"
-       className={active ? "text-orange-600" : "text-muted-foreground"}>
-    <path d="M3 10.5 12 3l9 7.5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-    <path d="M5 10v10h14V10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-  </svg>
+  <Home 
+    size={24} 
+    className={active ? "text-orange-600" : "text-muted-foreground"}
+  />
 );
 
 const IconPlus = (active: boolean) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"
-       className={active ? "text-orange-600" : "text-muted-foreground"}>
-    <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="2" />
-    <path d="M12 8v8M8 12h8" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-  </svg>
+  <Plus 
+    size={24} 
+    className={active ? "text-orange-600" : "text-muted-foreground"}
+  />
 );
 
 const IconGear = (active: boolean) => (
-  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"
-       className={active ? "text-orange-600" : "text-muted-foreground"}>
-    <path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" fill="none" stroke="currentColor" strokeWidth="2"/>
-    <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 7.6 7.6 0 0 1-1.8.7 1 1 0 0 0-.8 1V21a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.8-1 7.6 7.6 0 0 1-1.8-.7 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 7.6 7.6 0 0 1-.7-1.8 1 1 0 0 0-1-.8H3a2 2 0 1 1 0-4h.2a1 1 0 0 0 1-.8 7.6 7.6 0 0 1 .7-1.8 1 1 0 0 0-.2-1.1l-.1-.1A2 2 0 1 1 5.6 3.2l.1.1a1 1 0 0 0 1.1.2 7.6 7.6 0 0 1 1.8-.7 1 1 0 0 0 .8-1V1a2 2 0 1 1 4 0v.2a1 1 0 0 0 .8 1 7.6 7.6 0 0 1 1.8.7 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 7.6 7.6 0 0 1 .7 1.8Z" fill="none" stroke="currentColor" strokeWidth="2"/>
-  </svg>
+  <Settings 
+    size={24} 
+    className={active ? "text-orange-600" : "text-muted-foreground"}
+  />
 );
 
 const TABS: Tab[] = [
