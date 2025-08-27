@@ -77,6 +77,13 @@ export function RemoveAdsPrompt({ open, onClose }: RemoveAdsPromptProps) {
               {loading ? "Restoring..." : "Restore Purchases"}
             </Button>
           </div>
+          
+          <p className="mt-3 text-[11px] text-muted-foreground leading-snug text-center">
+            Subscription auto-renews monthly at $4.99 until canceled. Manage or cancel anytime in your{" "}
+            <a className="underline underline-offset-2" href="itms-apps://apps.apple.com/account/subscriptions">Apple Subscriptions</a>.
+            By continuing you agree to our <a className="underline underline-offset-2" href="/terms" target="_blank" rel="noopener">Terms</a> and
+            <a className="underline underline-offset-2" href="/privacy" target="_blank" rel="noopener"> Privacy Policy</a>.
+          </p>
         </div>
       </div>
     </div>
