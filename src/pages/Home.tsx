@@ -633,7 +633,7 @@ const Home = () => {
           {/* Section Title */}
           <div className="space-y-1 text-center">
             <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
-            <p className="text-sm text-muted-foreground">View, edit, export, or delete any past incident reports</p>
+            <p className="text-xs text-muted-foreground">View, edit, export, or delete any past incident reports</p>
           </div>
 
           {/* Search Bar */}
