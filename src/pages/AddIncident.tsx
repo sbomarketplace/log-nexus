@@ -15,7 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { validateCaseNumber, toUTCISO, combineDateAndTime } from '@/utils/datetime';
 import { Wand2, Loader2 } from 'lucide-react';
 import { prefillIncidentFromNotes } from '@/lib/notesPrefill';
-import { withAIGate } from '@/utils/aiGate';
+import { ensureAIAllowed } from '@/lib/ai-quota';
 import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import { cn } from '@/lib/utils';
 
@@ -64,7 +64,55 @@ const AddIncident = () => {
   const [rewriteError, setRewriteError] = useState<string>('');
   const [showPaywall, setShowPaywall] = useState(false);
   
-  const openPaywall = () => setShowPaywall(true);
+  // AI is unlimited - no paywall needed
+  const handleAIRewrite = async () => {
+    await ensureAIAllowed(); // AI is unlimited
+    
+    if (!formData.what.trim()) {
+      toast({
+        title: "Nothing to Rewrite",
+        description: "Please enter some content in the 'What happened?' field first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsRewriting(true);
+    setRewriteError('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke('rewrite-incident', {
+        body: { text: formData.what }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      if (data.rewritten) {
+        handleInputChange('what', data.rewritten);
+        toast({
+          title: "Content Rewritten",
+          description: "The incident description has been improved by AI.",
+        });
+      }
+    } catch (error) {
+      console.error('Error rewriting content:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Could not rewrite at this time. Please try again.';
+      setRewriteError(errorMessage);
+      toast({
+        title: "Rewrite Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsRewriting(false);
+    }
+  };
 
   const validateAndSubmit = () => {
     const t = (formData.title || "").trim();
@@ -292,54 +340,6 @@ const AddIncident = () => {
     navigate(`/?incidentId=${organizedIncident.id}`);
   };
 
-  const runRewrite = async () => {
-    if (!formData.what.trim()) {
-      toast({
-        title: "Nothing to Rewrite",
-        description: "Please enter some content in the 'What happened?' field first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsRewriting(true);
-    setRewriteError('');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('rewrite-incident', {
-        body: { text: formData.what }
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      if (data.rewritten) {
-        handleInputChange('what', data.rewritten);
-        toast({
-          title: "Content Rewritten",
-          description: "The incident description has been improved by AI.",
-        });
-      }
-    } catch (error) {
-      console.error('Error rewriting content:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Could not rewrite at this time. Please try again.';
-      setRewriteError(errorMessage);
-      toast({
-        title: "Rewrite Failed",
-        description: errorMessage,
-        variant: "destructive",
-      });
-    } finally {
-      setIsRewriting(false);
-    }
-  };
-
-  const handleAIRewrite = withAIGate(runRewrite, openPaywall);
 
   const renderPersonSection = (
     title: string,

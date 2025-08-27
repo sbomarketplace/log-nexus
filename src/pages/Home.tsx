@@ -15,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
-import { withAIGate } from '@/utils/aiGate';
+import { ensureAIAllowed } from '@/lib/ai-quota';
 import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import { IncidentCard } from '@/components/IncidentCard';
 import { ViewIncidentModal } from '@/components/ViewIncidentModal';
@@ -52,7 +52,7 @@ const Home = () => {
   const [titleError, setTitleError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
   
-  const openPaywall = () => setShowPaywall(true);
+  // AI is unlimited - no paywall needed  
   const MAX_CHARS = 10000;
   const WARN_THRESHOLD = 8000;
   const [limitReached, setLimitReached] = useState(false);
@@ -65,6 +65,23 @@ const Home = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const incidentId = searchParams.get('incidentId');
   const mode = searchParams.get('mode'); // 'edit' or null (for view)
+  
+  const quickNotesRef = useRef<HTMLTextAreaElement>(null);
+
+  const loadIncidents = async () => {
+    const stored = organizedIncidentStorage.getAll();
+    setOrganizedIncidents(stored);
+  };
+
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = textarea.scrollHeight + 'px';
+  };
+
+  const handleQuickNotesOrganize = async () => {
+    await ensureAIAllowed(); // AI is unlimited
+    return runOrganize();
+  };
 
   const handleSaveAndView = (savedIncident: OrganizedIncident) => {
     // Reload incidents to reflect changes
@@ -205,6 +222,8 @@ const Home = () => {
   };
 
   const runOrganize = async () => {
+    await ensureAIAllowed(); // AI is unlimited
+    
     setQuickNotesError('');
     setTitleError('');
     
@@ -298,9 +317,8 @@ const Home = () => {
     } finally {
       setIsOrganizing(false);
     }
+    }
   };
-
-  const handleQuickNotesOrganize = withAIGate(runOrganize, openPaywall);
 
   const handleDeleteIncident = async (id: string) => {
     try {
@@ -534,7 +552,7 @@ const Home = () => {
                         setLimitReached(false);
                       }
                       setQuickNotes(v);
-                      adjustTextareaHeight();
+                      adjustTextareaHeight(e.currentTarget);
                     }}
                     onPaste={(e) => {
                       const el = e.currentTarget;
@@ -556,7 +574,7 @@ const Home = () => {
                       e.preventDefault();
                       setQuickNotes(next);
                       setTimeout(() => {
-                        adjustTextareaHeight();
+                        adjustTextareaHeight(quickNotesRef.current!);
                       }, 0);
                     }}
                     placeholder="Type or paste raw notes…"

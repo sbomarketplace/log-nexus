@@ -55,7 +55,7 @@ export function RemoveAdsPrompt({ open, onClose }: RemoveAdsPromptProps) {
         <div className="text-center space-y-4">
           <h2 className="text-xl font-semibold">Remove Ads</h2>
           <p className="text-muted-foreground">
-            Enjoy an ad-free experience with our monthly subscription.
+            Hide ads across the app and enjoy a cleaner experience.
           </p>
           
           <div className="space-y-3">
