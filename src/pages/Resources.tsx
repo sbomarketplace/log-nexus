@@ -238,7 +238,7 @@ export function ResourcesSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <IconComponent className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle className="!text-xs">
+                        <CardTitle className="!text-sm font-medium">
                           {category.title}
                         </CardTitle>
                       </div>
@@ -271,7 +271,7 @@ export function ResourcesSection() {
                           <CardHeader className="pb-2 overflow-hidden">
                             <div className="flex items-start justify-between">
                               <div className="flex-1 min-w-0">
-                                <CardTitle className="text-sm font-medium leading-tight break-words">
+                                <CardTitle className="!text-sm font-medium leading-tight break-words">
                                   {resource.title}
                                 </CardTitle>
                               </div>
