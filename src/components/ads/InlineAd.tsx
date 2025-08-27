@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { AdMob, BannerAdOptions, BannerAdPosition, BannerAdSize } from "@capacitor-community/admob";
-import { isRemoveAdsActive } from '@/lib/iap';
+import { useSubscription } from '@/lib/subscription';
 
 type Slot = "home" | "home2" | "home3" | "settings";
 
@@ -84,6 +84,7 @@ function chooseBannerSize(containerWidth: number): PickedSize {
 }
 
 export default function InlineAd({ slot }: { slot: Slot }) {
+  const { isSubscribed } = useSubscription();
   const [active, setActive] = useState(false);
   const [size, setSize] = useState<PickedSize>({ kind: "NONE", width: 0, height: 0, admob: BannerAdSize.BANNER });
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -116,11 +117,11 @@ export default function InlineAd({ slot }: { slot: Slot }) {
   }, []);
 
   const eligible = useMemo(() => {
-    if (isRemoveAdsActive() && !PLACEHOLDER_MODE) return false;
+    if (isSubscribed && !PLACEHOLDER_MODE) return false;
     if (SESSION_FLAGS[slot]) return false;
     if (getDailyCount() >= 5) return false;
     return true;
-  }, [slot, PLACEHOLDER_MODE]);
+  }, [isSubscribed, slot, PLACEHOLDER_MODE]);
 
   // Placeholder for dev and web preview
   if (PLACEHOLDER_MODE) {
@@ -143,6 +144,28 @@ export default function InlineAd({ slot }: { slot: Slot }) {
 
   // If not enough width for a compliant banner, do not render
   if (!eligible || size.kind === "NONE") return null;
+
+  // If user becomes subscribed while an ad is active, hide it immediately
+  useEffect(() => {
+    if (isSubscribed && active) {
+      AdMob.hideBanner().catch(() => {});
+      setActive(false);
+      releaseVisibility(slot);
+    }
+  }, [isSubscribed, active, slot]);
+
+  // Also respond to a global 'ads:disable' broadcast (purchase/restore)
+  useEffect(() => {
+    const handler = () => {
+      if (active) {
+        AdMob.hideBanner().catch(() => {});
+        setActive(false);
+        releaseVisibility(slot);
+      }
+    };
+    window.addEventListener("ads:disable", handler as any);
+    return () => window.removeEventListener("ads:disable", handler as any);
+  }, [active, slot]);
 
   useEffect(() => {
     if (!eligible) return;

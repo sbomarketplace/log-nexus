@@ -5,6 +5,7 @@ import './styles/typography.css'
 import './styles/paywall.css'
 import { migrateIncidentsToDateTime } from './utils/incidentMigration'
 import { isNative } from './lib/platform'
+import { SubscriptionProvider } from './lib/subscription'
 
 // Run migration on app startup
 migrateIncidentsToDateTime()
@@ -15,4 +16,8 @@ if (!isNative && 'serviceWorker' in navigator) {
   // navigator.serviceWorker.register('/sw.js').catch(console.warn);
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <SubscriptionProvider>
+    <App />
+  </SubscriptionProvider>
+);
