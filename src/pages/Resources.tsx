@@ -238,7 +238,7 @@ export function ResourcesSection() {
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <IconComponent className="h-5 w-5 text-muted-foreground" />
-                        <CardTitle className="text-base">
+                        <CardTitle className="!text-xs">
                           {category.title}
                         </CardTitle>
                       </div>
