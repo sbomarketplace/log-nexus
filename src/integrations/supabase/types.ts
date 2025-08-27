@@ -55,7 +55,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_shared_incident: {
+        Args: { p_incident_id: string }
+        Returns: {
+          case_number: string
+          created_at: string
+          id: string
+          title: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
