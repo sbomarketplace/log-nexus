@@ -1,105 +1,152 @@
-import fs from "node:fs";
-import path from "node:path";
+#!/usr/bin/env node
 
-const root = process.cwd();
-const envProd = path.join(root, ".env.production");
-const envDev  = path.join(root, ".env");
-const plist   = path.join(root, "ios", "App", "App", "Info.plist");
+/**
+ * iOS Preflight Verification Script
+ * Checks environment variables and Info.plist for App Store readiness
+ */
+
+import { readFileSync, existsSync } from 'fs';
+import { join } from 'path';
 
 function readEnvFile() {
-  const file = fs.existsSync(envProd) ? envProd : (fs.existsSync(envDev) ? envDev : null);
-  if (!file) return { file: null, vars: {} };
-  const text = fs.readFileSync(file, "utf8");
-  const vars = {};
-  for (const line of text.split(/\r?\n/)) {
-    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.+?)\s*$/);
-    if (m) vars[m[1]] = m[2].replace(/^['"]|['"]$/g, "");
+  const envProdPath = '.env.production';
+  const envPath = '.env';
+  
+  let envFile = null;
+  let filePath = null;
+  
+  if (existsSync(envProdPath)) {
+    envFile = readFileSync(envProdPath, 'utf8');
+    filePath = envProdPath;
+  } else if (existsSync(envPath)) {
+    envFile = readFileSync(envPath, 'utf8');
+    filePath = envPath;
   }
-  return { file, vars };
+  
+  if (!envFile) return { filePath: null, vars: {} };
+  
+  const vars = {};
+  for (const line of envFile.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#')) {
+      const [key, ...valueParts] = trimmed.split('=');
+      if (key && valueParts.length > 0) {
+        vars[key] = valueParts.join('=').replace(/^"(.*)"$/, '$1');
+      }
+    }
+  }
+  
+  return { filePath, vars };
 }
 
 function readPlistText() {
-  if (!fs.existsSync(plist)) return null;
-  return fs.readFileSync(plist, "utf8");
+  const plistPath = 'ios/App/App/Info.plist';
+  if (!existsSync(plistPath)) return null;
+  return readFileSync(plistPath, 'utf8');
 }
 
 function extractPlistString(xml, keyName) {
-  const re = new RegExp(`<key>${keyName}<\\/key>\\s*<string>([^<]+)<\\/string>`, "m");
-  const m = xml.match(re);
-  return m ? m[1] : null;
+  const keyRegex = new RegExp(`<key>${keyName}</key>\\s*<string>([^<]*)</string>`, 'i');
+  const match = xml.match(keyRegex);
+  return match ? match[1] : null;
 }
 
-function ok(msg)  { console.log(`✅ ${msg}`); }
-function bad(msg) { console.error(`❌ ${msg}`); }
-
-const { file: envFile, vars } = readEnvFile();
-const xml = readPlistText();
-
-let failed = false;
-
-// 1) ENV checks
-if (!envFile) {
-  bad("No .env.production or .env file found.");
-  failed = true;
-} else {
-  ok(`Using env file: ${path.basename(envFile)}`);
-}
-
-const required = [
-  "VITE_IAP_REMOVE_ADS_MONTHLY",
-  "VITE_ADMOB_APP_ID_IOS",
-  "VITE_ADMOB_INLINE_BANNER_ID_IOS",
-  "VITE_SHOW_AD_PLACEHOLDERS",
-];
-
-for (const k of required) {
-  if (!vars[k]) { bad(`Missing ${k} in ${envFile || "env file"}`); failed = true; }
-}
-
-// Format validation
-const appId = vars.VITE_ADMOB_APP_ID_IOS || "";
-const unitId = vars.VITE_ADMOB_INLINE_BANNER_ID_IOS || "";
-const appIdOk  = /^ca-app-pub-\d{16}~\d+$/.test(appId);
-const unitIdOk = /^ca-app-pub-\d{16}\/\d+$/.test(unitId);
-if (!appIdOk)  { bad("VITE_ADMOB_APP_ID_IOS format invalid."); failed = true; } else { ok("AdMob App ID format looks valid."); }
-if (!unitIdOk) { bad("VITE_ADMOB_INLINE_BANNER_ID_IOS format invalid."); failed = true; } else { ok("Inline Banner Unit ID format looks valid."); }
-if (/^ca-app-pub-3940256099942544/.test(unitId)) { bad("Inline Banner Unit ID is using Google TEST ID — replace with your real unit."); failed = true; }
-
-if (vars.VITE_SHOW_AD_PLACEHOLDERS !== "false") {
-  console.warn("⚠️  VITE_SHOW_AD_PLACEHOLDERS is not 'false'. Placeholders may render in prod.");
-} else {
-  ok("Placeholders disabled for production.");
-}
-
-// 2) Info.plist checks
-if (!xml) {
-  bad("ios/App/App/Info.plist not found.");
-  failed = true;
-} else {
-  const plistAppId = extractPlistString(xml, "GADApplicationIdentifier");
-  const attText    = extractPlistString(xml, "NSUserTrackingUsageDescription");
-
-  if (!plistAppId) {
-    bad("Info.plist missing GADApplicationIdentifier key.");
-    failed = true;
-  } else if (plistAppId !== appId) {
-    bad(`Info.plist GADApplicationIdentifier does not match env. Plist: ${plistAppId}  Env: ${appId}`);
-    failed = true;
+function main() {
+  console.log('🔍 iOS Preflight Verification\n');
+  
+  let hasErrors = false;
+  
+  // Check environment file
+  const { filePath, vars } = readEnvFile();
+  if (!filePath) {
+    console.error('❌ No .env or .env.production file found');
+    hasErrors = true;
   } else {
-    ok("Info.plist GADApplicationIdentifier matches env.");
+    console.log(`✅ Found environment file: ${filePath}`);
   }
-
-  if (!attText || !attText.trim()) {
-    bad("Info.plist missing NSUserTrackingUsageDescription or it is empty.");
-    failed = true;
+  
+  // Check required environment variables
+  const requiredVars = [
+    'VITE_ADMOB_APP_ID_IOS',
+    'VITE_ADMOB_INLINE_BANNER_ID_IOS',
+    'VITE_IAP_REMOVE_ADS_MONTHLY',
+    'VITE_SHOW_AD_PLACEHOLDERS'
+  ];
+  
+  for (const varName of requiredVars) {
+    if (!vars[varName]) {
+      console.error(`❌ Missing environment variable: ${varName}`);
+      hasErrors = true;
+    } else {
+      console.log(`✅ Found ${varName}: ${vars[varName]}`);
+    }
+  }
+  
+  // Validate AdMob App ID format
+  const appId = vars['VITE_ADMOB_APP_ID_IOS'];
+  if (appId && !appId.match(/^ca-app-pub-\d+~\d+$/)) {
+    console.error(`❌ Invalid AdMob App ID format: ${appId}`);
+    console.error('   Expected format: ca-app-pub-XXXXXXXXXXXXXXXX~XXXXXXXXXX');
+    hasErrors = true;
+  }
+  
+  // Validate AdMob Unit ID format
+  const unitId = vars['VITE_ADMOB_INLINE_BANNER_ID_IOS'];
+  if (unitId && !unitId.match(/^ca-app-pub-\d+\/\d+$/)) {
+    console.error(`❌ Invalid AdMob Unit ID format: ${unitId}`);
+    console.error('   Expected format: ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX');
+    hasErrors = true;
+  }
+  
+  // Check ad placeholders are disabled for production
+  if (vars['VITE_SHOW_AD_PLACEHOLDERS'] === 'true') {
+    console.error('❌ VITE_SHOW_AD_PLACEHOLDERS should be false for production');
+    hasErrors = true;
+  }
+  
+  // Check Info.plist
+  const plistContent = readPlistText();
+  if (!plistContent) {
+    console.error('❌ ios/App/App/Info.plist not found');
+    hasErrors = true;
   } else {
-    ok("Info.plist has NSUserTrackingUsageDescription.");
+    console.log('✅ Found Info.plist');
+    
+    // Check GADApplicationIdentifier matches env
+    const plistAppId = extractPlistString(plistContent, 'GADApplicationIdentifier');
+    if (!plistAppId) {
+      console.error('❌ GADApplicationIdentifier not found in Info.plist');
+      hasErrors = true;
+    } else if (plistAppId !== appId) {
+      console.error(`❌ GADApplicationIdentifier mismatch:`);
+      console.error(`   Info.plist: ${plistAppId}`);
+      console.error(`   Environment: ${appId}`);
+      hasErrors = true;
+    } else {
+      console.log(`✅ GADApplicationIdentifier matches: ${plistAppId}`);
+    }
+    
+    // Check NSUserTrackingUsageDescription
+    const trackingDesc = extractPlistString(plistContent, 'NSUserTrackingUsageDescription');
+    if (!trackingDesc) {
+      console.error('❌ NSUserTrackingUsageDescription not found in Info.plist');
+      hasErrors = true;
+    } else if (trackingDesc.length < 10) {
+      console.error('❌ NSUserTrackingUsageDescription too short (needs meaningful description)');
+      hasErrors = true;
+    } else {
+      console.log('✅ NSUserTrackingUsageDescription present');
+    }
+  }
+  
+  console.log('\n' + '='.repeat(50));
+  if (hasErrors) {
+    console.error('❌ Preflight check FAILED - fix issues above before building');
+    process.exit(1);
+  } else {
+    console.log('✅ Preflight check PASSED - ready for iOS build');
+    process.exit(0);
   }
 }
 
-if (failed) {
-  console.error("\nOne or more checks failed. Fix the issues above, then re-run: npm run verify:ios\n");
-  process.exit(1);
-} else {
-  console.log("\n🎉 iOS Ad/IAP preflight looks good.");
-}
+main();
