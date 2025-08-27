@@ -25,7 +25,8 @@ import {
   Globe
 } from 'lucide-react';
 import { useSettingsStore } from '@/state/settingsStore';
-import { isRemoveAdsActive, purchaseRemoveAds, restorePurchases, toast, isNative } from '@/lib/iap';
+import { isRemoveAdsActive, toast, isNative } from '@/lib/iap';
+import { useSubscription } from '@/lib/subscription';
 import { AiCreditsPanel } from '@/components/AiCreditsPanel';
 import { addPack, setSubscription } from '@/lib/credits';
 import { getPlanDisplayInfo } from '@/utils/parsingGate';
@@ -111,6 +112,8 @@ const Settings = () => {
     setDataStorage,
     setIncidentDefaults,
   } = useSettingsStore();
+  
+  const { isSubscribed, purchaseRemoveAds, restorePurchases } = useSubscription();
   
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
@@ -261,40 +264,42 @@ const Settings = () => {
                 <div className="flex items-center justify-between p-4 border rounded-lg">
                   <div>
                     <div className="text-base font-semibold">Subscription Status</div>
-                    <div className="text-base text-muted-foreground">Current plan and billing</div>
+                    <div className="text-base text-muted-foreground">
+                      {isSubscribed ? "Your ad-free subscription is active." : "Current plan and billing"}
+                    </div>
                   </div>
                   <div className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    isRemoveAdsActive() 
-                      ? 'bg-success/10 text-success' 
+                    isSubscribed
+                      ? 'bg-green-100 text-green-700' 
                       : 'bg-muted text-muted-foreground'
                   }`}>
-                    {isRemoveAdsActive() ? 'ACTIVE' : 'FREE'}
+                    {isSubscribed ? 'PAID' : 'FREE'}
                   </div>
                 </div>
 
-                {/* Purchase Buttons */}
-                {!isRemoveAdsActive() && (
-                  <PricingButton
-                    price="Remove Ads — $4.99/mo"
-                    caption="Hide banner ads permanently"
-                    loading={purchasing === 'removeAds'}
-                    onClick={() => handlePurchase('removeAds', async () => {
-                      const result = await purchaseRemoveAds();
-                      if (!result.ok && result.error && result.error !== 'cancelled') {
-                        console.error('Purchase failed:', result.error);
-                      }
-                    })}
-                    className="w-full"
-                  />
+                {/* Purchase Buttons (hidden when subscribed) */}
+                {!isSubscribed && (
+                  <>
+                    <PricingButton
+                      price="Remove Ads — $4.99/mo"
+                      caption="Hide banner ads permanently"
+                      loading={purchasing === 'removeAds'}
+                      onClick={() => handlePurchase('removeAds', async () => {
+                        await purchaseRemoveAds();
+                      })}
+                      className="w-full"
+                    />
+                    <PricingButton
+                      price="Restore Purchases"
+                      caption="Restore previous purchases"
+                      loading={purchasing === 'restore'}
+                      onClick={() => handlePurchase('restore', async () => {
+                        await restorePurchases();
+                      })}
+                      className="w-full"
+                    />
+                  </>
                 )}
-
-                <PricingButton
-                  price="Restore Purchases"
-                  caption="Restore previous purchases"
-                  loading={purchasing === 'restore'}
-                  onClick={handleRestore}
-                  className="w-full"
-                />
               </div>
 
               {/* Dev Debug Info (hidden unless explicitly enabled) */}
