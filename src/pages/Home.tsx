@@ -66,17 +66,6 @@ const Home = () => {
   const incidentId = searchParams.get('incidentId');
   const mode = searchParams.get('mode'); // 'edit' or null (for view)
   
-  const quickNotesRef = useRef<HTMLTextAreaElement>(null);
-
-  const loadIncidents = async () => {
-    const stored = organizedIncidentStorage.getAll();
-    setOrganizedIncidents(stored);
-  };
-
-  const adjustTextareaHeight = (textarea: HTMLTextAreaElement) => {
-    textarea.style.height = 'auto';
-    textarea.style.height = textarea.scrollHeight + 'px';
-  };
 
   const handleQuickNotesOrganize = async () => {
     await ensureAIAllowed(); // AI is unlimited
@@ -317,7 +306,6 @@ const Home = () => {
     } finally {
       setIsOrganizing(false);
     }
-    }
   };
 
   const handleDeleteIncident = async (id: string) => {
@@ -552,7 +540,7 @@ const Home = () => {
                         setLimitReached(false);
                       }
                       setQuickNotes(v);
-                      adjustTextareaHeight(e.currentTarget);
+                      adjustTextareaHeight();
                     }}
                     onPaste={(e) => {
                       const el = e.currentTarget;
@@ -574,7 +562,7 @@ const Home = () => {
                       e.preventDefault();
                       setQuickNotes(next);
                       setTimeout(() => {
-                        adjustTextareaHeight(quickNotesRef.current!);
+                        adjustTextareaHeight();
                       }, 0);
                     }}
                     placeholder="Type or paste raw notes…"
