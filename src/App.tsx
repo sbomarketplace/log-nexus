@@ -47,9 +47,15 @@ const App = () => {
 
   // Show rate prompt after a delay if conditions are met
   useEffect(() => {
-    if (hasConsent && shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
-      const id = setTimeout(() => triggerRatePromptNow(), 2000);
-      return () => clearTimeout(id);
+    if (hasConsent) {
+      // Small delay to ensure session counter has been updated
+      const checkDelay = setTimeout(() => {
+        if (shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
+          const id = setTimeout(() => triggerRatePromptNow(), 2000);
+          return () => clearTimeout(id);
+        }
+      }, 100);
+      return () => clearTimeout(checkDelay);
     }
   }, [hasConsent]);
 
