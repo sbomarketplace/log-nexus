@@ -60,15 +60,7 @@ export default function DataStorageCard() {
         <p className="text-xs text-gray-500">{stats.items} items • {formatBytes(stats.bytes)}</p>
 
         <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            onClick={() => setConfirmClear(true)}
-            disabled={busy === "clear"}
-            className="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-60"
-          >
-            <Trash2 className="h-4 w-4" />
-            Clear cache
-          </button>
-
+          {/* Clear Cache removed per product decision */}
           <button
             onClick={() => setConfirmDeleteAll(true)}
             disabled={busy === "delete"}
@@ -80,20 +72,7 @@ export default function DataStorageCard() {
         </div>
       </div>
 
-      {/* Confirm: clear cache */}
-      <ConfirmModal
-        open={confirmClear}
-        onClose={() => setConfirmClear(false)}
-        title="Clear cache?"
-        description={
-          <div className="space-y-2">
-            <p>This removes temporary files (thumbnails, exports, AI caches). Your incident reports remain.</p>
-            <p className="text-xs text-gray-500">You can't undo this action.</p>
-          </div>
-        }
-        confirmLabel={busy === "clear" ? "Clearing…" : "Clear cache"}
-        onConfirm={onClear}
-      />
+      {/* Clear Cache functionality removed */}
 
       {/* Double confirm: delete all incidents */}
       <ConfirmModal

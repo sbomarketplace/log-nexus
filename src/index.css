@@ -407,14 +407,59 @@ All colors MUST be HSL.
   }
   .animate-shake { animation: shake 320ms ease-in-out; }
 
-  /* Safe bottom helpers for inner scrollers / long articles */
-  .pb-safe {
-    padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 12px);
-  }
-  .bottom-safe-spacer {
-    height: calc(var(--tabbar-h) + var(--safe-bottom) + 12px);
-    pointer-events: none;
-  }
+/* ==== Section titles (shared) ==== */
+.section-title {
+  /* Match "Workplace Incident Reports" scale */
+  font-size: clamp(24px, 3.5vw, 28px);
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+/* ==== Toast portal (safe-area aware, below modals) ==== */
+.toast-portal {
+  position: fixed;
+  left: 0; right: 0;
+  bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 8px);
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 70; /* modals should be > 80 */
+}
+.toast-portal .toast-card {
+  pointer-events: auto;
+}
+
+/* ==== Modal safe margins (top/bottom −8px tighter than default) ==== */
+.modal-safe-wrap {
+  margin-top: calc(var(--safe-top) + 8px);
+  margin-bottom: calc(var(--safe-bottom) + 8px);
+}
+.modal-safe-panel {
+  max-height: calc(100dvh - (var(--safe-top) + var(--safe-bottom) + 16px));
+  overflow: auto;
+}
+
+/* ==== Helpers for long articles/notes vs tabbar ==== */
+.pb-safe { padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 12px); }
+.bottom-safe-spacer { height: calc(var(--tabbar-h) + var(--safe-bottom) + 12px); pointer-events: none; }
+
+/* ==== Debug overlay for safe areas (toggle with env flag) ==== */
+.safe-area-debug {
+  position: fixed; inset: 0; z-index: 2000; pointer-events: none;
+}
+.safe-area-debug::before, .safe-area-debug::after {
+  content: ""; position: absolute; left: 0; right: 0;
+}
+.safe-area-debug::before {
+  top: 0; height: var(--safe-top);
+  outline: 2px dashed rgba(255, 0, 0, 0.6);
+  background: rgba(255, 0, 0, 0.06);
+}
+.safe-area-debug::after {
+  bottom: 0; height: calc(var(--safe-bottom) + var(--tabbar-h));
+  outline: 2px dashed rgba(0, 120, 255, 0.6);
+  background: rgba(0, 120, 255, 0.06);
+}
 
   /* Chip micro-tuning for smallest phones */
   @media (max-width: 380px) {

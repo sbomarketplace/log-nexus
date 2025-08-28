@@ -20,6 +20,7 @@ import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
 import Header from "@/components/Header";
 import TabBar from "@/components/TabBar";
+import SafeAreaDebug from "@/dev/SafeAreaDebug";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -85,7 +86,10 @@ const App = () => {
         <Toaster />
         <Sonner />
         {node}
+        {/* toast portal root */}
+        <div id="toast-root" className="toast-portal" />
         <ScreenPrivacyOverlay />
+        <SafeAreaDebug />
         <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
         <BrowserRouter>
           <ScrollToTop />
