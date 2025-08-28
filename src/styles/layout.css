@@ -33,9 +33,9 @@ body { overflow: hidden; }
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 
-  /* Top/bottom padding kept minimal (8px) and safe for bars */
-  padding-top: calc(var(--safe-top) + var(--header-h) + var(--gap-v));
-  padding-bottom: calc(var(--safe-bottom) + var(--nav-h) + var(--gap-v));
+  /* No extra gap - content touches header/nav bars */
+  padding-top: calc(var(--safe-top) + var(--header-h));
+  padding-bottom: calc(var(--safe-bottom) + var(--nav-h));
   padding-left: max(16px, var(--safe-left));
   padding-right: max(16px, var(--safe-right));
 }
