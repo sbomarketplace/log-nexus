@@ -1,77 +1,98 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Home, Plus, Settings } from "lucide-react";
 
-type Tab = { label: string; to: string; icon: (active: boolean) => JSX.Element; tid: string; aria: string };
+type Tab = {
+  to: string;
+  aria: string;
+  icon: (active: boolean) => JSX.Element;
+  tid: string;
+};
 
 const IconHome = (active: boolean) => (
-  <Home 
-    size={24} 
-    className={active ? "text-orange-600" : "text-muted-foreground"}
-  />
+  <Home size={24} className={active ? "text-orange-600" : "text-muted-foreground"} />
 );
-
 const IconPlus = (active: boolean) => (
-  <Plus 
-    size={24} 
-    className={active ? "text-orange-600" : "text-muted-foreground"}
-  />
+  <Plus size={24} className={active ? "text-orange-600" : "text-muted-foreground"} />
 );
-
 const IconGear = (active: boolean) => (
-  <Settings 
-    size={24} 
-    className={active ? "text-orange-600" : "text-muted-foreground"}
-  />
+  <Settings size={24} className={active ? "text-orange-600" : "text-muted-foreground"} />
 );
 
 const TABS: Tab[] = [
-  { label: "Home",      to: "/",         icon: IconHome, tid: "tab-home",      aria: "Home" },
-  { label: "Add",       to: "/add",      icon: IconPlus, tid: "tab-add",       aria: "Add Incident" },
-  { label: "Settings",  to: "/settings", icon: IconGear, tid: "tab-settings",  aria: "Settings & Resources" },
+  { to: "/", aria: "Home", icon: IconHome, tid: "tab-home" },
+  { to: "/add", aria: "Add Incident", icon: IconPlus, tid: "tab-add" },
+  { to: "/settings", aria: "Settings & Resources", icon: IconGear, tid: "tab-settings" },
 ];
 
-export default function BottomNav() {
+// Compact base height for the bar (excluding the safe-area filler)
+const BASE_H = 56; // px
+
+export default function TabBar() {
   const { pathname } = useLocation();
+  const rootRef = useRef<HTMLElement | null>(null);
+
+  // Publish the base height so content padding matches the bar
+  useEffect(() => {
+    const r = document.documentElement;
+    r.style.setProperty("--tabbar-h", `${BASE_H}px`);
+    return () => {
+      // don’t leave stale values around on hot reloads
+      r.style.setProperty("--tabbar-h", `${BASE_H}px`);
+    };
+  }, []);
+
   const isActive = (to: string) => (to === "/" ? pathname === "/" : pathname.startsWith(to));
 
   return (
     <nav
+      ref={rootRef}
+      aria-label="Primary"
       className="
         fixed inset-x-0 bottom-0 z-[950]
-        border-t border-border bg-background/95 backdrop-blur
+        bg-background/95 backdrop-blur border-t border-border
+        pointer-events-auto
       "
-      style={{ height: `calc(var(--nav-h) + var(--safe-bottom))` }}
-      aria-label="Primary"
+      // Height = bar (BASE_H) + safe area; content gap is handled in App.tsx
+      style={{ height: `calc(${BASE_H}px + env(safe-area-inset-bottom, 0px))` }}
     >
-      <div className="mx-auto flex h-[var(--nav-h)] max-w-screen-md items-stretch justify-around px-2">
-        {TABS.map((t) => {
-          const active = isActive(t.to);
+      {/* The bar itself (BASE_H tall). Safe-area filler is added below. */}
+      <div
+        data-role="bar"
+        className="mx-auto max-w-screen-md h-14 flex items-stretch justify-around px-2"
+        // h-14 = 56px (tailwind); matches BASE_H
+      >
+        {TABS.map((tab) => {
+          const active = isActive(tab.to);
           return (
             <Link
-              key={t.to}
-              to={t.to}
-              data-testid={t.tid}
-              aria-label={t.aria}
+              key={tab.to}
+              to={tab.to}
+              data-testid={tab.tid}
+              aria-label={tab.aria}
               className="
                 relative flex flex-1 items-center justify-center
-                focus:outline-none focus:ring rounded-lg mx-1
+                mx-1 rounded-lg focus:outline-none focus-visible:ring
+                transition-colors
               "
             >
-              {t.icon(active)}
-              {/* subtle active indicator line (optional but nice) */}
+              {tab.icon(active)}
+              {/* thin active indicator line */}
               <span
                 aria-hidden="true"
-                className={`absolute top-0 h-0.5 w-8 rounded-full transition-opacity ${active ? "bg-orange-600 opacity-100" : "opacity-0"}`}
+                className={`absolute top-0 h-0.5 w-8 rounded-full transition-opacity ${
+                  active ? "bg-orange-600 opacity-100" : "opacity-0"
+                }`}
               />
-              {/* screen-reader only label to keep accessibility with icon-only UI */}
-              <span className="sr-only">{t.label}</span>
+              {/* keep an accessible text label for screen readers */}
+              <span className="sr-only">{tab.aria}</span>
             </Link>
           );
         })}
       </div>
-      {/* safe-area filler so taps don't collide with the home indicator */}
-      <div style={{ height: "var(--safe-bottom)" }} />
+
+      {/* Safe-area filler so taps don’t collide with the home indicator */}
+      <div style={{ height: "env(safe-area-inset-bottom, 0px)" }} />
     </nav>
   );
 }
