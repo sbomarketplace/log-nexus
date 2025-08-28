@@ -2,42 +2,32 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Layout variables for fixed header and bottom nav */
 :root {
-  /* Fixed layout variables for locked header and bottom nav */
   --header-h: 56px;
-  --nav-h: 56px;
+  --tabbar-h: 56px; /* icons-only bar */
   --safe-top: env(safe-area-inset-top, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --content-gap: 8px;
-  /* Content padding that accounts for fixed bars */
-  --content-bottom-inset: calc(var(--nav-h) + var(--safe-bottom) + var(--content-gap));
-  --bottom-inset: var(--safe-bottom); /* keep if referenced elsewhere */
-  --menu-footer-gap: 4px;            /* used by menu footer if still present in code */
 }
 
-/* Single scroll container for smooth inertial scrolling */
-html, body {
+html, body, #root {
   height: 100%;
+}
+html, body {
   margin: 0;
+  overscroll-behavior-y: none;       /* prevent body rubber-band */
+  overflow: hidden;                  /* body doesn't scroll */
 }
-
-body {
-  overflow: hidden; /* body doesn't scroll */
-  -webkit-text-size-adjust: 100%;
-}
-
+/* the only scroll container in the app */
 #app-scroll {
   height: 100dvh;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS inertial scrolling */
-  overscroll-behavior-y: contain; /* reduce rubber-band side effects */
-  scroll-behavior: auto; /* natural user scroll feel */
+  -webkit-overflow-scrolling: touch; /* iOS momentum */
+  overscroll-behavior-y: contain;    /* keep overscroll inside */
+  scroll-behavior: auto;
 }
 
-/* Fixed header baseline */
+/* Header: FIXED (not sticky) */
 .app-header {
   position: fixed;
   top: var(--safe-top);
@@ -48,13 +38,24 @@ body {
   backdrop-filter: saturate(180%) blur(10px);
 }
 
-/* Content padding that never collides with fixed bars */
+/* Page content never collides with bars */
 .page-container {
-  /* Account for fixed header and bottom nav */
   padding-top: calc(var(--header-h) + var(--safe-top));
-  padding-bottom: var(--content-bottom-inset);
+  padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + var(--content-gap));
   min-height: 100dvh;
   box-sizing: border-box;
+}
+
+/* Fixed bottom tab bar */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: var(--safe-bottom);
+  height: var(--tabbar-h);
+  z-index: 51;
+  background: hsl(var(--background));
+  border-top: 1px solid hsl(var(--border));
 }
 
 /* Drawer safe areas */
@@ -65,10 +66,9 @@ body {
   padding-bottom: calc(16px + var(--safe-bottom));
 }
 
-/* Ensure no transforms on ancestors that would re-anchor fixed elements */
-#root, .app-root, .app-shell {
+/* Ensure no ancestor breaks fixed positioning */
+#root, .app-root, .app-shell { 
   transform: none !important;
-  will-change: auto;
   height: 100%;
   min-height: 100dvh;
 }
