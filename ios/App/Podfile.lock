@@ -1,0 +1,71 @@
+PODS:
+  - AparajitaCapacitorBiometricAuth (9.0.0):
+    - Capacitor
+  - Capacitor (7.4.3):
+    - CapacitorCordova
+  - CapacitorApp (7.0.2):
+    - Capacitor
+  - CapacitorCommunityPrivacyScreen (6.0.0):
+    - Capacitor
+  - CapacitorCordova (7.4.3)
+  - CapacitorFilesystem (7.1.4):
+    - Capacitor
+    - IONFilesystemLib (~> 1.0.1)
+  - CapacitorLocalNotifications (7.0.2):
+    - Capacitor
+  - CapacitorShare (7.0.2):
+    - Capacitor
+  - CapawesomeCapacitorAppReview (7.0.1):
+    - Capacitor
+  - IONFilesystemLib (1.0.1)
+
+DEPENDENCIES:
+  - "AparajitaCapacitorBiometricAuth (from `../../node_modules/@aparajita/capacitor-biometric-auth`)"
+  - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorApp (from `../../node_modules/@capacitor/app`)"
+  - "CapacitorCommunityPrivacyScreen (from `../../node_modules/@capacitor-community/privacy-screen`)"
+  - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorFilesystem (from `../../node_modules/@capacitor/filesystem`)"
+  - "CapacitorLocalNotifications (from `../../node_modules/@capacitor/local-notifications`)"
+  - "CapacitorShare (from `../../node_modules/@capacitor/share`)"
+  - "CapawesomeCapacitorAppReview (from `../../node_modules/@capawesome/capacitor-app-review`)"
+
+SPEC REPOS:
+  trunk:
+    - IONFilesystemLib
+
+EXTERNAL SOURCES:
+  AparajitaCapacitorBiometricAuth:
+    :path: "../../node_modules/@aparajita/capacitor-biometric-auth"
+  Capacitor:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorApp:
+    :path: "../../node_modules/@capacitor/app"
+  CapacitorCommunityPrivacyScreen:
+    :path: "../../node_modules/@capacitor-community/privacy-screen"
+  CapacitorCordova:
+    :path: "../../node_modules/@capacitor/ios"
+  CapacitorFilesystem:
+    :path: "../../node_modules/@capacitor/filesystem"
+  CapacitorLocalNotifications:
+    :path: "../../node_modules/@capacitor/local-notifications"
+  CapacitorShare:
+    :path: "../../node_modules/@capacitor/share"
+  CapawesomeCapacitorAppReview:
+    :path: "../../node_modules/@capawesome/capacitor-app-review"
+
+SPEC CHECKSUMS:
+  AparajitaCapacitorBiometricAuth: 77be369942778adf29e20893caa5c0a75e5936fa
+  Capacitor: 28d6c01026a9a3f7156529498ec1f389a2a28dbc
+  CapacitorApp: 1f6922c9c5c8b1c538d7fbe92ebe44a81b34bed3
+  CapacitorCommunityPrivacyScreen: 682470c41cce325d7a85b95907887919d4694066
+  CapacitorCordova: 435121e81a2df4d0034f0fb11fcefab5104cfdb5
+  CapacitorFilesystem: f9bd850c41e048180e5dc0cbb90f2033ede9d2cc
+  CapacitorLocalNotifications: 665188ae8accd40806129073896fb2b39322d858
+  CapacitorShare: be166411fa995ead2d39b104aa0aae56d8615c66
+  CapawesomeCapacitorAppReview: ee9cb9d34e59534efcdb120dbef4d7166421e2ee
+  IONFilesystemLib: 89258b8e3e85465da93127d25d7ce37f977e8a6f
+
+PODFILE CHECKSUM: b4ac9a632b8ff088d412aa9c062f3e7ae52a7363
+
+COCOAPODS: 1.16.2
