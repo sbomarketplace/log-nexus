@@ -18,20 +18,20 @@ import { showSuccessToast, showErrorToast } from '@/lib/showToast';
 import { useSelection } from "@/state/selection";
 import { cn } from '@/lib/utils';
 
-// Ultra-compact chip component for mobile
+// Medium-sized chip component
 function ChipXs({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
   return (
     <span
       className="
-        inline-flex items-center gap-1 rounded-full
+        inline-flex items-center gap-1.5 rounded-full
         bg-muted/80 text-foreground/80
-        px-2 py-[3px]
-        chip-xs-text font-medium leading-tight
+        px-3 py-1.5
+        text-xs font-medium leading-tight
         max-w-full
       "
     >
       {icon}
-      <span className="truncate chip-xs-text">{children}</span>
+      <span className="truncate text-xs">{children}</span>
     </span>
   );
 }
@@ -427,9 +427,9 @@ export const IncidentCard = ({
                      // Date pill removed - to be rebuilt elsewhere
                      null
                    ) : (
-                     <ChipXs icon={<CalendarIcon className="h-3.5 w-3.5" aria-hidden />}>
-                       {dateChip}
-                     </ChipXs>
+                      <ChipXs icon={<CalendarIcon className="h-4 w-4" aria-hidden />}>
+                        {dateChip}
+                      </ChipXs>
                    )}
 
                    {/* Time Chip */}
@@ -438,9 +438,9 @@ export const IncidentCard = ({
                        // Time pill removed - to be rebuilt elsewhere
                        null
                      ) : (
-                       <ChipXs icon={<ClockIcon className="h-3.5 w-3.5" aria-hidden />}>
-                         {timeChip}
-                       </ChipXs>
+                        <ChipXs icon={<ClockIcon className="h-4 w-4" aria-hidden />}>
+                          {timeChip}
+                        </ChipXs>
                      )
                    )}
 
@@ -460,10 +460,10 @@ export const IncidentCard = ({
                         />
                       </div>
                     ) : (
-                      <ChipXs icon={<Hash className="h-3.5 w-3.5" aria-hidden />}>
-                        <span className="sm:hidden chip-xs-text">{caseMobile}</span>
-                        <span className="hidden sm:inline chip-xs-text">{caseDesktop}</span>
-                      </ChipXs>
+                       <ChipXs icon={<Hash className="h-4 w-4" aria-hidden />}>
+                         <span className="sm:hidden text-xs">{caseMobile}</span>
+                         <span className="hidden sm:inline text-xs">{caseDesktop}</span>
+                       </ChipXs>
                     )
                   )}
 
