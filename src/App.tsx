@@ -10,14 +10,18 @@ import { consentStorage } from "@/utils/consentStorage";
 import { initIAP } from "@/lib/iap";
 import Home from "./pages/Home";
 import AddIncident from "./pages/AddIncident";
-import Resources from "./pages/Resources";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
 import { useToastStore } from "@/lib/showToast";
 import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
 import RateAppModal from "@/components/feedback/RateAppModal";
-import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
+import {
+  registerRateModalController,
+  shouldShowRatePrompt,
+  triggerRatePromptNow,
+  bumpSessionCounter,
+} from "@/lib/rateApp";
 import Header from "@/components/Header";
 import TabBar from "@/components/TabBar";
 import SafeAreaDebug from "@/dev/SafeAreaDebug";
@@ -32,38 +36,29 @@ const App = () => {
   const { node } = useToastStore();
 
   useEffect(() => {
-    // Check if user has given consent
     const hasValidConsent = consentStorage.hasValidConsent();
     setHasConsent(hasValidConsent);
     setIsLoading(false);
-    
-    // Initialize IAP on app start
     initIAP().catch(console.error);
   }, []);
 
-  // Register rate modal controller and bump session counter
   useEffect(() => {
     registerRateModalController({ open: () => setRateModalOpen(true) });
     bumpSessionCounter();
   }, []);
 
-  // Show rate prompt after a delay if conditions are met
   useEffect(() => {
-    if (hasConsent) {
-      // Small delay to ensure session counter has been updated
-      const checkDelay = setTimeout(() => {
-        if (shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
-          const id = setTimeout(() => triggerRatePromptNow(), 2000);
-          return () => clearTimeout(id);
-        }
-      }, 100);
-      return () => clearTimeout(checkDelay);
-    }
+    if (!hasConsent) return;
+    const checkDelay = setTimeout(() => {
+      if (shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
+        const id = setTimeout(() => triggerRatePromptNow(), 2000);
+        return () => clearTimeout(id);
+      }
+    }, 100);
+    return () => clearTimeout(checkDelay);
   }, [hasConsent]);
 
-  const handleConsentGiven = () => {
-    setHasConsent(true);
-  };
+  const handleConsentGiven = () => setHasConsent(true);
 
   if (isLoading) {
     return (
@@ -91,26 +86,46 @@ const App = () => {
         <ScreenPrivacyOverlay />
         <SafeAreaDebug />
         <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
+
         <BrowserRouter>
-          <ScrollToTop />
+          {/* Fixed header */}
           <Header />
-          <div id="app-scroll">
+
+          {/* Ensure route changes scroll to top inside our dedicated container */}
+          <ScrollToTop />
+
+          {/* Single dedicated scroll container.
+              We’ll finalize the CSS in the global stylesheet next. */}
+          <main
+            id="app-scroll"
+            className="app-scroll"
+            style={{
+              // lock the viewport height and scroll only this container
+              height: "100dvh",
+              overflowY: "auto",
+              WebkitOverflowScrolling: "touch",
+              overscrollBehaviorY: "contain",
+
+              // respect sticky bars and safe area (CSS vars finalized in global CSS)
+              paddingTop: "var(--header-h,56px)",
+              paddingBottom:
+                "calc(var(--tabbar-h,64px) + env(safe-area-inset-bottom,0px) + 8px)",
+            }}
+          >
             <div className="page-container">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/add" element={<AddIncident />} />
-                {/* Main combined page */}
                 <Route path="/settings" element={<Settings />} />
-                {/* Legacy resources link - redirect into the resources anchor */}
                 <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
-                {/* Legacy route redirects */}
                 <Route path="/incident/:id" element={<IncidentRedirect />} />
                 <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </div>
-          </div>
+          </main>
+
+          {/* Fixed bottom tab bar */}
           <TabBar />
         </BrowserRouter>
       </TooltipProvider>
