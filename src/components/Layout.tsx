@@ -12,9 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
       <AppHeader />
 
       <main className="app-main">
-        <div className="max-w-7xl mx-auto">
-          {children}
-        </div>
+        {children}
       </main>
 
       <Footer />
