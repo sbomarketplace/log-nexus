@@ -40,7 +40,7 @@ html, body {
 
 /* Page content never collides with bars */
 .page-container {
-  padding-top: calc(var(--header-h) + var(--safe-top));
+  padding-top: calc(var(--header-h) + var(--safe-top) + var(--content-gap));
   padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + var(--content-gap));
   min-height: 100dvh;
   box-sizing: border-box;
