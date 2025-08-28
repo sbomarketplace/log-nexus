@@ -26,6 +26,7 @@ import Header from "@/components/Header";
 import TabBar from "@/components/TabBar";
 import SafeAreaDebug from "@/dev/SafeAreaDebug";
 import "@/styles/sensitive.css";
+import "@/styles/layout.css";
 
 const queryClient = new QueryClient();
 
@@ -96,23 +97,8 @@ const App = () => {
 
           {/* Single dedicated scroll container.
               We’ll finalize the CSS in the global stylesheet next. */}
-          <main
-            id="app-scroll"
-            className="app-scroll"
-            style={{
-              // lock the viewport height and scroll only this container
-              height: "100dvh",
-              overflowY: "auto",
-              WebkitOverflowScrolling: "touch",
-              overscrollBehaviorY: "contain",
-
-              // respect sticky bars and safe area (CSS vars finalized in global CSS)
-              paddingTop: "var(--header-h,56px)",
-              paddingBottom:
-                "calc(var(--tabbar-h,64px) + env(safe-area-inset-bottom,0px) + 8px)",
-            }}
-          >
-            <div className="page-container">
+          <main className="app-main">
+            <div className="mx-auto w-full max-w-screen-md">
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/add" element={<AddIncident />} />
