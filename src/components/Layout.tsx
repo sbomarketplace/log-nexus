@@ -11,8 +11,8 @@ export const Layout = ({ children }: LayoutProps) => {
     <div className="min-h-[100dvh] flex flex-col bg-background">
       <AppHeader />
 
-      <main className="page-container">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="app-main">
+        <div className="max-w-7xl mx-auto">
           {children}
         </div>
       </main>
