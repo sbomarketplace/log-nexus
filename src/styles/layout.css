@@ -8,7 +8,7 @@
   /* Bar heights + standard vertical gap */
   --header-h: 56px;
   --nav-h: 56px;
-  --gap-v: 8px;        /* <— target vertical padding everywhere */
+  --gap-v: 4px;        /* <— minimal vertical padding */
 }
 
 /* Lock the viewport; only the main content scrolls */
