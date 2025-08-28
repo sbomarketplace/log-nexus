@@ -1,1 +1,26 @@
-.cc-sensitive-previews body { /* no blur while visible */ }
+.cc-sensitive-previews body { /* no blur while visible */ }/* --- Layout plumbing for fixed header & tab bar --- */
+:root {
+  /* These are set by components on mount; keep sane defaults for SSR/dev */
+  --header-h: calc(56px + env(safe-area-inset-top, 0px));
+  --tabbar-h: 56px;
+}
+
+/* The main scroll container under <Header /> and above <TabBar /> */
+#app-scroll {
+  min-height: 100dvh;
+  overscroll-behavior-y: contain;         /* prevents rubber-band pulling bars */
+}
+
+/* Pages use this class in App.tsx */
+.page-container {
+  padding-top: var(--header-h);
+  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
+  min-height: 100dvh;
+}
+
+/* Smoother feel on iOS */
+html, body {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  overscroll-behavior-y: none;
+}
