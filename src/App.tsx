@@ -88,19 +88,21 @@ const App = () => {
         <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
         <BrowserRouter>
           <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/add" element={<AddIncident />} />
-            {/* Main combined page */}
-            <Route path="/settings" element={<Settings />} />
-            {/* Legacy resources link - redirect into the resources anchor */}
-            <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
-            {/* Legacy route redirects */}
-            <Route path="/incident/:id" element={<IncidentRedirect />} />
-            <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <div id="app-scroll">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/add" element={<AddIncident />} />
+              {/* Main combined page */}
+              <Route path="/settings" element={<Settings />} />
+              {/* Legacy resources link - redirect into the resources anchor */}
+              <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
+              {/* Legacy route redirects */}
+              <Route path="/incident/:id" element={<IncidentRedirect />} />
+              <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
           <BottomNav />
         </BrowserRouter>
       </TooltipProvider>
