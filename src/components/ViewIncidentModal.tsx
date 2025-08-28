@@ -526,7 +526,7 @@ export const ViewIncidentModal = ({
 
           {/* Scrollable Content */}
           <div 
-            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2 pb-28' : 'py-3'}`}
+            className={`flex-1 overflow-y-auto px-5 ${isEditMode ? 'py-2 pb-28' : 'py-3 pb-safe'}`}
             data-scroll-container
           >
             {/* Header row with date, case number and category - editable in edit mode */}
@@ -906,6 +906,7 @@ export const ViewIncidentModal = ({
                 </div>
               </div>
             )}
+            <div className="bottom-safe-spacer" />
           </div>
         </div>
         

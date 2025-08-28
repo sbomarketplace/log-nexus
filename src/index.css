@@ -407,6 +407,15 @@ All colors MUST be HSL.
   }
   .animate-shake { animation: shake 320ms ease-in-out; }
 
+  /* Safe bottom helpers for inner scrollers / long articles */
+  .pb-safe {
+    padding-bottom: calc(var(--tabbar-h) + var(--safe-bottom) + 12px);
+  }
+  .bottom-safe-spacer {
+    height: calc(var(--tabbar-h) + var(--safe-bottom) + 12px);
+    pointer-events: none;
+  }
+
   /* Chip micro-tuning for smallest phones */
   @media (max-width: 380px) {
     .chip-xs { 
