@@ -1,26 +1,31 @@
-.cc-sensitive-previews body { /* no blur while visible */ }/* --- Layout plumbing for fixed header & tab bar --- */
-:root {
-  /* These are set by components on mount; keep sane defaults for SSR/dev */
-  --header-h: calc(56px + env(safe-area-inset-top, 0px));
-  --tabbar-h: 56px;
+/* src/styles/sensitive.css */
+
+/* Default: blur the whole app when privacy mode is active
+   (ScreenPrivacyOverlay toggles .cc-sensitive on <html> or <body>) */
+html.cc-sensitive body,
+body.cc-sensitive {
+  filter: blur(18px) saturate(85%) contrast(90%);
+  -webkit-filter: blur(18px) saturate(85%) contrast(90%);
+  opacity: 0.2;
+  transition: filter .2s ease, opacity .2s ease;
 }
 
-/* The main scroll container under <Header /> and above <TabBar /> */
-#app-scroll {
-  min-height: 100dvh;
-  overscroll-behavior-y: contain;         /* prevents rubber-band pulling bars */
+/* Keep modals/toasts crisp even when background is blurred */
+html.cc-sensitive .modal,
+html.cc-sensitive [role="dialog"],
+html.cc-sensitive .toast-portal,
+body.cc-sensitive .modal,
+body.cc-sensitive [role="dialog"],
+body.cc-sensitive .toast-portal {
+  filter: none !important;
+  -webkit-filter: none !important;
+  opacity: 1 !important;
 }
 
-/* Pages use this class in App.tsx */
-.page-container {
-  padding-top: var(--header-h);
-  padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom, 0px));
-  min-height: 100dvh;
-}
-
-/* Smoother feel on iOS */
-html, body {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  overscroll-behavior-y: none;
+/* ✅ While doing in-app “sensitive previews”, DISABLE the blur entirely */
+html.cc-sensitive-previews body,
+body.cc-sensitive-previews {
+  filter: none !important;
+  -webkit-filter: none !important;
+  opacity: 1 !important;
 }
