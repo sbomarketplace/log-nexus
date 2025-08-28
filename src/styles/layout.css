@@ -1,17 +1,21 @@
 :root{
+  /* iOS safe areas */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
   --safe-left: env(safe-area-inset-left, 0px);
   --safe-right: env(safe-area-inset-right, 0px);
 
+  /* Bar heights + standard vertical gap */
   --header-h: 56px;
   --nav-h: 56px;
-  --content-x: 16px;
+  --gap-v: 8px;        /* <— target vertical padding everywhere */
 }
 
+/* Lock the viewport; only the main content scrolls */
 html, body, #root { height: 100%; }
 body { overflow: hidden; }
 
+/* Fixed header */
 .app-header{
   position: fixed;
   top: 0; left: 0; right: 0;
@@ -22,19 +26,45 @@ body { overflow: hidden; }
   border-bottom: 1px solid hsl(var(--border));
 }
 
+/* Scrollable content area */
 .app-main{
   position: relative;
   height: 100%;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  scroll-behavior: smooth;
 
-  padding:
-    calc(var(--header-h) + var(--safe-top) + 8px)
-    calc(var(--safe-right) + var(--content-x))
-    calc(var(--nav-h) + var(--safe-bottom) + 8px)
-    calc(var(--safe-left) + var(--content-x));
+  /* Top/bottom padding kept minimal (8px) and safe for bars */
+  padding-top: calc(var(--safe-top) + var(--header-h) + var(--gap-v));
+  padding-bottom: calc(var(--safe-bottom) + var(--nav-h) + var(--gap-v));
+  padding-left: max(16px, var(--safe-left));
+  padding-right: max(16px, var(--safe-right));
 }
 
-.app-main > * { margin-top: 0 !important; }
+/* Center column behaves like your old page container */
+.app-main > .mx-auto{
+  max-width: 1024px;
+  margin: 0 auto !important;
+
+  /* Kill any extra first-child margin a page might set (e.g., mt-10/mt-16) */
+  margin-top: 0 !important;
+}
+
+/* Ensure the very first block never introduces extra gap */
+.app-main > .mx-auto > *:first-child{
+  margin-top: 0 !important;
+}
+
+/* Bottom tab bar fixed */
+nav[aria-label="Primary"]{
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: calc(var(--nav-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  z-index: 950;
+  background: color-mix(in oklab, var(--background) 95%, transparent);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-top: 1px solid hsl(var(--border));
+}
+
+/* Optional: keep scroll smooth */
+.app-main{ scroll-behavior: smooth; }
