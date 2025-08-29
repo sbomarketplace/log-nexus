@@ -773,7 +773,6 @@ const AddIncident = () => {
           isOpen={showPaywall}
           onClose={() => setShowPaywall(false)}
         />
-      </div>
     </div>
   );
 };

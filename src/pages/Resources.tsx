@@ -332,7 +332,6 @@ const Resources = () => {
         </div>
 
         <ResourcesSection />
-      </div>
     </div>
   );
 };

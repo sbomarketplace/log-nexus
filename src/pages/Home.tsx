@@ -453,7 +453,7 @@ const Home = () => {
 
   return (
     <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
-        {/* Action Buttons */}
+      {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
@@ -811,14 +811,13 @@ const Home = () => {
             </div>
           </>
         )}
+
+        <PaywallWrapper
+          isOpen={showPaywall}
+          onClose={() => setShowPaywall(false)}
+        />
       </div>
-      
-      <PaywallWrapper
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-      />
-    </div>
-  );
+    );
 };
 
 export default Home;

@@ -403,7 +403,6 @@ const Settings = () => {
         {supportLegalOpen && (
           <SupportLegalModal onClose={() => setSupportLegalOpen(false)} />
         )}
-      </div>
     </div>
   );
 };
