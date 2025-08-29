@@ -454,7 +454,7 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-4 -mt-4 -mb-1">
+      <div className="space-y-4">
         {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">

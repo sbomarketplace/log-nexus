@@ -7,7 +7,7 @@
   --tabbar-h: 56px; /* icons-only bar */
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --content-gap: 8px;
+  --content-gap: 4px;
 }
 
 html, body, #root {

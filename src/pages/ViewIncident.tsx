@@ -102,7 +102,7 @@ const ViewIncident = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-4 -mb-1">
+      <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>

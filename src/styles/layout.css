@@ -33,9 +33,9 @@ body { overflow: hidden; }
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 
-  /* No extra gap - content touches header/nav bars */
-  padding-top: calc(var(--safe-top) + var(--header-h));
-  padding-bottom: calc(var(--safe-bottom) + var(--nav-h));
+  /* Content should have 4px gap from header and bottom nav */
+  padding-top: calc(var(--safe-top) + var(--header-h) + var(--content-gap));
+  padding-bottom: calc(var(--safe-bottom) + var(--nav-h) + var(--content-gap));
   padding-left: max(16px, var(--safe-left));
   padding-right: max(16px, var(--safe-right));
 }
