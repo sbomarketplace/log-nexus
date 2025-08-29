@@ -420,7 +420,7 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent 
         showClose={false}
-        className="fixed left-[50%] top-[calc(50%-5px)] z-50 w-[95%] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border bg-background p-0 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 max-h-[90vh] overflow-hidden flex flex-col"
+        className="fixed left-[50%] top-[50%] z-50 w-[95%] max-w-[700px] translate-x-[-50%] translate-y-[-50%] rounded-2xl border bg-background p-0 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 max-h-[90vh] overflow-hidden flex flex-col"
         aria-busy={isSaving}
       >
         {/* Header */}

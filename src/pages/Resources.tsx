@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -321,7 +322,8 @@ export function ResourcesSection() {
 
 const Resources = () => {
   return (
-    <div className="resources-page space-y-6 -mt-4">
+    <Layout>
+      <div className="resources-page space-y-6 -mt-4">
         {/* Header */}
         <div>
           <h1 className="text-lg font-medium text-foreground">Resources</h1>
@@ -332,7 +334,8 @@ const Resources = () => {
         </div>
 
         <ResourcesSection />
-    </div>
+      </div>
+    </Layout>
   );
 };
 

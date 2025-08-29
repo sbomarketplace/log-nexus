@@ -41,6 +41,7 @@ import {
   nativeToast,
   nativeEmail
 } from '@/utils/native';
+import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
 import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
@@ -234,7 +235,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography">
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-lg font-medium text-foreground">Settings & Resources</h1>
@@ -403,7 +405,8 @@ const Settings = () => {
         {supportLegalOpen && (
           <SupportLegalModal onClose={() => setSupportLegalOpen(false)} />
         )}
-    </div>
+      </div>
+    </Layout>
   );
 };
 

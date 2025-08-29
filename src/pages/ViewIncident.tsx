@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -23,13 +24,15 @@ const ViewIncident = () => {
 
   if (!incident) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
+      <Layout>
+        <div className="flex flex-col items-center justify-center py-12">
           <h2 className="text-sm font-medium mb-2">Incident Not Found</h2>
           <p className="text-xs text-muted-foreground mb-4">The requested incident could not be found.</p>
           <Button onClick={() => navigate('/')} size="sm">
-          Return to Dashboard
-        </Button>
-      </div>
+            Return to Dashboard
+          </Button>
+        </div>
+      </Layout>
     );
   }
 
@@ -98,7 +101,8 @@ const ViewIncident = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-4">
+    <Layout>
+      <div className="max-w-4xl mx-auto space-y-4">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
@@ -272,7 +276,8 @@ const ViewIncident = () => {
           </Card>
         )}
       </div>
-    );
+    </Layout>
+  );
 };
 
 export default ViewIncident;
