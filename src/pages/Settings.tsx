@@ -236,7 +236,7 @@ const Settings = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography">
+      <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography -mb-1">
         {/* Header */}
         <div className="text-center">
           <h1 className="text-lg font-medium text-foreground">Settings & Resources</h1>
