@@ -10,7 +10,6 @@ import { consentStorage } from "@/utils/consentStorage";
 import { initIAP } from "@/lib/iap";
 import Home from "./pages/Home";
 import AddIncident from "./pages/AddIncident";
-import Resources from "./pages/Resources";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
@@ -18,7 +17,9 @@ import { useToastStore } from "@/lib/showToast";
 import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
 import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
-import BottomNav from "@/components/BottomNav";
+import Header from "@/components/Header";
+import TabBar from "@/components/TabBar";
+import "@/styles/layout.css";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -85,24 +86,37 @@ const App = () => {
         <Sonner />
         {node}
         <ScreenPrivacyOverlay />
-        <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
+        
         <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/add" element={<AddIncident />} />
-            {/* Main combined page */}
-            <Route path="/settings" element={<Settings />} />
-            {/* Legacy resources link - redirect into the resources anchor */}
-            <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
-            {/* Legacy route redirects */}
-            <Route path="/incident/:id" element={<IncidentRedirect />} />
-            <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <BottomNav />
+          <div className="app-shell">
+            <header className="app-header">
+              <Header />
+            </header>
+
+            <main id="app-scroll" role="main">
+              <ScrollToTop />
+              <div className="page-container">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/add" element={<AddIncident />} />
+                  <Route path="/settings" element={<Settings />} />
+                  <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
+                  <Route path="/incident/:id" element={<IncidentRedirect />} />
+                  <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+            </main>
+
+            <footer className="app-footer">
+              <TabBar />
+            </footer>
+          </div>
         </BrowserRouter>
+
+        {/* Modal/chart portal layer above header/footer */}
+        <div id="modal-root" className="modal-layer" />
+        <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
       </TooltipProvider>
     </QueryClientProvider>
   );
