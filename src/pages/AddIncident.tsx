@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Layout } from '@/components/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -400,8 +399,7 @@ const AddIncident = () => {
   );
 
   return (
-    <Layout>
-      <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4 pb-[calc(var(--bottom-inset,58px)+24px)]">
+    <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4 pb-[calc(var(--bottom-inset,58px)+24px)]">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
@@ -776,7 +774,7 @@ const AddIncident = () => {
           onClose={() => setShowPaywall(false)}
         />
       </div>
-    </Layout>
+    </div>
   );
 };
 

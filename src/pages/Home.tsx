@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { Layout } from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -453,8 +452,7 @@ const Home = () => {
   };
 
   return (
-    <Layout>
-      <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
+    <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
         {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
@@ -819,7 +817,7 @@ const Home = () => {
         isOpen={showPaywall}
         onClose={() => setShowPaywall(false)}
       />
-    </Layout>
+    </div>
   );
 };
 

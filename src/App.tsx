@@ -3,22 +3,15 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import ScrollToTop from "@/components/ScrollToTop";
 import { ConsentModal } from "@/components/ConsentModal";
 import { consentStorage } from "@/utils/consentStorage";
 import { initIAP } from "@/lib/iap";
-import Home from "./pages/Home";
-import AddIncident from "./pages/AddIncident";
-import Resources from "./pages/Resources";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import { IncidentRedirect } from "./components/IncidentRedirect";
 import { useToastStore } from "@/lib/showToast";
 import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
 import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
-import BottomNav from "@/components/BottomNav";
+import { AppShell } from "@/components/AppShell";
+import "@/styles/layout.css";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -81,28 +74,13 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        {node}
-        <ScreenPrivacyOverlay />
-        <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/add" element={<AddIncident />} />
-            {/* Main combined page */}
-            <Route path="/settings" element={<Settings />} />
-            {/* Legacy resources link - redirect into the resources anchor */}
-            <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
-            {/* Legacy route redirects */}
-            <Route path="/incident/:id" element={<IncidentRedirect />} />
-            <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <BottomNav />
-        </BrowserRouter>
+        <AppShell>
+          <Toaster />
+          <Sonner />
+          {node}
+          <ScreenPrivacyOverlay />
+          <RateAppModal open={rateModalOpen} onClose={() => setRateModalOpen(false)} />
+        </AppShell>
       </TooltipProvider>
     </QueryClientProvider>
   );
