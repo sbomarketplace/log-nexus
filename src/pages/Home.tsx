@@ -454,14 +454,14 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-4">
+      <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
         {/* Action Buttons */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
                 <div className="mb-2 text-center">
-                  <h1 id="quick-entry-title" className="section-title">Quick Incident Entry</h1>
+                  <h2 id="quick-entry-title" className="text-sm font-semibold">Quick Incident Entry</h2>
                 </div>
 
                 <p className="text-xs text-muted-foreground mb-2">

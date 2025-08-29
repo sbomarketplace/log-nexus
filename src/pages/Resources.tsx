@@ -323,7 +323,7 @@ export function ResourcesSection() {
 const Resources = () => {
   return (
     <Layout>
-      <div className="resources-page space-y-6">
+      <div className="resources-page space-y-6 -mt-4">
         {/* Header */}
         <div>
           <h1 className="text-lg font-medium text-foreground">Resources</h1>
