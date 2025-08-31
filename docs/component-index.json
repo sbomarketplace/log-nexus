@@ -1,0 +1,242 @@
+[
+  {
+    "path": "src/App.tsx",
+    "name": "App",
+    "export": "default",
+    "role": "root",
+    "parents": [],
+    "children": ["src/components/Layout.tsx", "src/components/BottomNav.tsx", "src/components/ConsentModal.tsx", "src/components/feedback/RateAppModal.tsx"],
+    "routes": ["all"],
+    "notes": "Root app component with routing, global providers, and consent flow"
+  },
+  {
+    "path": "src/components/Layout.tsx",
+    "name": "Layout",
+    "export": "named",
+    "role": "layout",
+    "parents": ["src/pages/Home.tsx", "src/pages/AddIncident.tsx", "src/pages/Settings.tsx"],
+    "children": ["src/components/common/AppHeader.tsx", "src/components/Footer.tsx"],
+    "routes": ["/", "/add", "/settings"],
+    "notes": "Main page layout wrapper with header and footer"
+  },
+  {
+    "path": "src/components/common/AppHeader.tsx",
+    "name": "AppHeader",
+    "export": "default",
+    "role": "header",
+    "parents": ["src/components/Layout.tsx"],
+    "children": ["src/components/BrandLogo.tsx"],
+    "routes": [],
+    "notes": "Sticky top navigation with brand logo"
+  },
+  {
+    "path": "src/components/Footer.tsx",
+    "name": "Footer",
+    "export": "named",
+    "role": "footer",
+    "parents": ["src/components/Layout.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "App footer, hidden on mobile devices"
+  },
+  {
+    "path": "src/components/BottomNav.tsx",
+    "name": "BottomNav",
+    "export": "default",
+    "role": "navigation",
+    "parents": ["src/App.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Mobile bottom navigation with Home, Add, Settings tabs"
+  },
+  {
+    "path": "src/components/BrandLogo.tsx",
+    "name": "BrandLogo",
+    "export": "named",
+    "role": "chrome",
+    "parents": ["src/components/common/AppHeader.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Brand logo component with optional text display"
+  },
+  {
+    "path": "src/pages/Home.tsx",
+    "name": "Home",
+    "export": "default",
+    "role": "page",
+    "parents": ["src/App.tsx"],
+    "children": ["src/components/Layout.tsx", "src/components/IncidentCard.tsx", "src/components/IncidentModal.tsx"],
+    "routes": ["/"],
+    "notes": "Main incidents list page with search and bulk actions"
+  },
+  {
+    "path": "src/pages/AddIncident.tsx",
+    "name": "AddIncident",
+    "export": "default",
+    "role": "page",
+    "parents": ["src/App.tsx"],
+    "children": ["src/components/Layout.tsx", "src/components/SharedIncidentForm.tsx"],
+    "routes": ["/add"],
+    "notes": "Add new incident form page with AI assistance"
+  },
+  {
+    "path": "src/pages/Settings.tsx",
+    "name": "Settings",
+    "export": "default",
+    "role": "page",
+    "parents": ["src/App.tsx"],
+    "children": ["src/components/Layout.tsx"],
+    "routes": ["/settings"],
+    "notes": "Settings and resources combined page"
+  },
+  {
+    "path": "src/pages/NotFound.tsx",
+    "name": "NotFound",
+    "export": "default",
+    "role": "page",
+    "parents": ["src/App.tsx"],
+    "children": [],
+    "routes": ["*"],
+    "notes": "404 error page"
+  },
+  {
+    "path": "src/components/IncidentModal.tsx",
+    "name": "IncidentModal",
+    "export": "named",
+    "role": "modal",
+    "parents": ["src/pages/Home.tsx"],
+    "children": ["src/components/SharedIncidentForm.tsx"],
+    "routes": [],
+    "notes": "Quick add/edit incident modal dialog"
+  },
+  {
+    "path": "src/components/ConsentModal.tsx",
+    "name": "ConsentModal",
+    "export": "named",
+    "role": "modal",
+    "parents": ["src/App.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Initial consent and onboarding modal"
+  },
+  {
+    "path": "src/components/BulkExportModal.tsx",
+    "name": "BulkExportModal",
+    "export": "named",
+    "role": "modal",
+    "parents": ["src/components/BulkBarMobile.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Bulk export incidents dialog with format selection"
+  },
+  {
+    "path": "src/components/ExportModal.tsx",
+    "name": "ExportModal",
+    "export": "named",
+    "role": "modal",
+    "parents": ["src/components/IncidentCard.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Single incident export dialog"
+  },
+  {
+    "path": "src/components/ConfirmDeleteModal.tsx",
+    "name": "ConfirmDeleteModal",
+    "export": "named",
+    "role": "modal",
+    "parents": ["src/components/BulkBarMobile.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Delete confirmation dialog with loading state"
+  },
+  {
+    "path": "src/components/SharedIncidentForm.tsx",
+    "name": "SharedIncidentForm",
+    "export": "named",
+    "role": "form",
+    "parents": ["src/pages/AddIncident.tsx", "src/components/IncidentModal.tsx"],
+    "children": ["src/components/PillInputs.tsx"],
+    "routes": [],
+    "notes": "Main incident form component with validation and AI features"
+  },
+  {
+    "path": "src/components/IncidentCard.tsx",
+    "name": "IncidentCard",
+    "export": "named",
+    "role": "content",
+    "parents": ["src/pages/Home.tsx"],
+    "children": ["src/components/IncidentCardHeader.tsx"],
+    "routes": [],
+    "notes": "Individual incident display card with actions"
+  },
+  {
+    "path": "src/components/feedback/RateAppModal.tsx",
+    "name": "RateAppModal",
+    "export": "default",
+    "role": "modal",
+    "parents": ["src/App.tsx"],
+    "children": ["src/components/feedback/FeedbackModal.tsx"],
+    "routes": [],
+    "notes": "App rating prompt dialog with star rating"
+  },
+  {
+    "path": "src/components/paywall/PaywallModal.tsx",
+    "name": "PaywallModal",
+    "export": "default",
+    "role": "modal",
+    "parents": ["src/components/paywall/PaywallWrapper.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Subscription paywall dialog with feature benefits"
+  },
+  {
+    "path": "src/components/common/ConfirmModal.tsx",
+    "name": "ConfirmModal",
+    "export": "default",
+    "role": "modal",
+    "parents": ["multiple"],
+    "children": [],
+    "routes": [],
+    "notes": "Generic confirmation modal using createPortal"
+  },
+  {
+    "path": "src/components/ScrollToTop.tsx",
+    "name": "ScrollToTop",
+    "export": "default",
+    "role": "utility",
+    "parents": ["src/App.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Utility component for auto-scroll on route changes"
+  },
+  {
+    "path": "src/components/common/ScreenPrivacyOverlay.tsx",
+    "name": "ScreenPrivacyOverlay",
+    "export": "default",
+    "role": "overlay",
+    "parents": ["src/App.tsx"],
+    "children": [],
+    "routes": [],
+    "notes": "Privacy screen overlay for native app task switching"
+  },
+  {
+    "path": "src/components/Toast.tsx",
+    "name": "Toast",
+    "export": "named",
+    "role": "toast",
+    "parents": ["multiple"],
+    "children": [],
+    "routes": [],
+    "notes": "Custom toast notification component"
+  },
+  {
+    "path": "src/components/SuccessToast.tsx",
+    "name": "SuccessToast",
+    "export": "named",
+    "role": "toast",
+    "parents": ["multiple"],
+    "children": [],
+    "routes": [],
+    "notes": "Success message toast with createPortal rendering"
+  }
+]
