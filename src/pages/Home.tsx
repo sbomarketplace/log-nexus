@@ -13,6 +13,7 @@ import { AlertIcon } from '@/components/icons/CustomIcons';
 import { SearchIcon, X, Loader2, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizeIncidents } from '@/services/ai';
+import { organizeQuickNotes } from '@/lib/invokeOrganizeNotes';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
 import { ensureAIAllowed } from '@/lib/ai-quota';
@@ -245,7 +246,9 @@ const Home = () => {
 
     setIsOrganizing(true);
     try {
-      const results = await organizeIncidents(quickNotes);
+      // Use the new CORS-hardened invoke helper
+      const result = await organizeQuickNotes({ title: quickNotesTitle, notes: quickNotes });
+      const results = result?.normalized?.incidents || [];
       
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
