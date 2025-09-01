@@ -6,9 +6,8 @@ export default function AppHeader() {
     <header 
       className="
         app-header
-        sticky top-0 z-[900] h-[56px] w-full
         border-b border-border bg-background/95 backdrop-blur
-        flex items-center justify-between px-4
+        justify-between px-4
       "
       style={{ ["--header-h" as any]: "56px" }}
     >

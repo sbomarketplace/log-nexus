@@ -38,13 +38,12 @@ export default function BottomNav() {
   return (
     <nav
       className="
-        fixed inset-x-0 bottom-0 z-[950]
+        app-footer
         border-t border-border bg-background/95 backdrop-blur
       "
-      style={{ height: `calc(var(--nav-h) + var(--safe-bottom))` }}
       aria-label="Primary"
     >
-      <div className="mx-auto flex h-[var(--nav-h)] max-w-screen-md items-stretch justify-around px-2">
+      <div className="mx-auto flex h-[var(--footer-h)] max-w-screen-md items-stretch justify-around px-2">
         {TABS.map((t) => {
           const active = isActive(t.to);
           return (
@@ -70,8 +69,6 @@ export default function BottomNav() {
           );
         })}
       </div>
-      {/* safe-area filler so taps don't collide with the home indicator */}
-      <div style={{ height: "var(--safe-bottom)" }} />
     </nav>
   );
 }

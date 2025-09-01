@@ -1,0 +1,51 @@
+:root {
+  --header-h: 56px;
+  --footer-h: 56px;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+
+/* Lock the viewport and prevent body scroll */
+html, body, #root {
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Fixed header that respects safe areas */
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--header-h) + var(--safe-top));
+  padding-top: var(--safe-top);
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Fixed footer with bottom safe area */
+.app-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--footer-h) + var(--safe-bottom));
+  padding-bottom: var(--safe-bottom);
+  display: flex;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Only this area scrolls. It sits between header and footer. */
+.app-content {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: calc(var(--header-h) + var(--safe-top));
+  bottom: calc(var(--footer-h) + var(--safe-bottom));
+  overflow: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain; /* prevent scroll chaining into the page */
+}
