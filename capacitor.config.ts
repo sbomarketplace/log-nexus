@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   plugins: {
     PrivacyScreen: {
-      enable: true,
+      enable: false,  // Let runtime toggle control it
       showInAppSwitcher: false,
       imageName: 'splash.png'
     }

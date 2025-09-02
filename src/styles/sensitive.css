@@ -1,1 +1,5 @@
 .cc-sensitive-previews body { /* no blur while visible */ }
+
+[data-privacy-veil] {
+  backdrop-filter: blur(12px);
+}

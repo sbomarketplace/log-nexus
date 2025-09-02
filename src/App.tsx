@@ -19,6 +19,7 @@ import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
 import BottomNav from "@/components/BottomNav";
 import { useStatusBar } from "@/hooks/useStatusBar";
+import { applyPrivacyFromStorage, initPrivacyScreen } from "@/lib/privacyScreen";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,16 @@ const App = () => {
 
   // Configure status bar for iOS/Android
   useStatusBar();
+
+  // Initialize privacy screen system
+  useEffect(() => {
+    const initPrivacy = async () => {
+      await applyPrivacyFromStorage();
+      await initPrivacyScreen();
+    };
+    
+    initPrivacy();
+  }, []);
 
   useEffect(() => {
     // Check if user has given consent
