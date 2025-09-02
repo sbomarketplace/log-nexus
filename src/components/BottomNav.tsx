@@ -8,7 +8,7 @@ export default function BottomNav() {
           <NavLink to="/" className="flex h-[56px] grow flex-col items-center justify-center gap-1 text-xs">Home</NavLink>
         </li>
         <li className="flex">
-          <NavLink to="/add" className="flex h-[56px] grow flex-col items-center justify-center gap-1 text-xs">Add</NavLink>
+          <NavLink to="/incidents/new" className="flex h-[56px] grow flex-col items-center justify-center gap-1 text-xs">Add</NavLink>
         </li>
         <li className="flex">
           <NavLink to="/incidents" className="flex h-[56px] grow flex-col items-center justify-center gap-1 text-xs">Incidents</NavLink>
