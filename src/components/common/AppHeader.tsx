@@ -7,11 +7,11 @@ export default function AppHeader() {
       className="
         app-header
         border-b border-border bg-background/95 backdrop-blur
-        justify-between px-4
+        justify-center px-4
       "
       style={{ ["--header-h" as any]: "56px" }}
     >
-      {/* Left: brand */}
+      {/* Centered brand */}
       <Link to="/" className="flex items-center gap-2">
         <img 
           src="/lovable-uploads/581b2158-980b-43c9-89b0-e73fc6de832d.png" 
@@ -20,9 +20,6 @@ export default function AppHeader() {
         />
         <span className="font-semibold text-[17px]">ClearCase</span>
       </Link>
-
-      {/* Right side intentionally empty now that we use bottom navigation */}
-      <span />
     </header>
   );
 }
