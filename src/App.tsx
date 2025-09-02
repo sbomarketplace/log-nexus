@@ -7,7 +7,6 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "@/components/ScrollToTop";
 import { ConsentModal } from "@/components/ConsentModal";
 import { consentStorage } from "@/utils/consentStorage";
-import { initIAP } from "@/lib/iap";
 import Home from "./pages/Home";
 import AddIncident from "./pages/AddIncident";
 import Resources from "./pages/Resources";
@@ -35,8 +34,7 @@ const App = () => {
     setHasConsent(hasValidConsent);
     setIsLoading(false);
     
-    // Initialize IAP on app start
-    initIAP().catch(console.error);
+    // IAP disabled on purpose
   }, []);
 
   // Register rate modal controller and bump session counter
