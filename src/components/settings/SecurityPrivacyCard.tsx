@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Shield } from "lucide-react";
 import Lock from "@/lib/lock";
+import PrivacyPreviewToggle from "./PrivacyPreviewToggle";
 
 const AUTO_OPTIONS = [
   { label: "1 minute", value: 1 },
@@ -57,7 +58,7 @@ export default function SecurityPrivacyCard() {
         <Row
           title="Hide Sensitive Previews"
           subtitle="Blur app switcher/screenshot overlay"
-          right={<Switch checked={!!settings?.hideSensitivePreviews} onChange={(v)=>{ Lock.setHideSensitivePreviews(v); }} />}
+          right={<PrivacyPreviewToggle />}
         />
 
         <Row

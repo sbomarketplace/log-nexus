@@ -1,7 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { App } from '@capacitor/app';
 import { PrivacyScreen } from '@capacitor-community/privacy-screen';
-import { isNative } from './platform';
+import { readSecuritySettings } from './securitySettings';
 import { showInfoToast } from './showToast';
 
 let veilEl: HTMLDivElement | null = null;
@@ -31,74 +31,64 @@ function showVeil(ms = 1000) {
 }
 
 export async function applyPrivacyFromStorage() {
-  if (!isNative) return;
-  
   try {
-    const settings = JSON.parse(localStorage.getItem("cc_security_settings_v1") || "{}");
-    const enabled = settings?.hideSensitivePreviews || false;
-    
+    const enabled = readSecuritySettings().hideSensitivePreviews;
     if (enabled) {
       await PrivacyScreen.enable();
     } else {
       await PrivacyScreen.disable();
     }
-  } catch (error) {
-    console.warn('Failed to apply privacy screen from storage:', error);
+  } catch (err) {
+    console.warn("Failed to apply privacy screen from storage:", err);
   }
 }
 
 export async function initPrivacyScreen() {
-  if (!isNative || isInitialized) return;
-  
+  if (isInitialized) return;
   try {
-    // Re-apply on app state changes so background/app switcher is correct
-    await App.addListener('appStateChange', async ({ isActive }) => {
-      const settings = JSON.parse(localStorage.getItem("cc_security_settings_v1") || "{}");
-      const enabled = settings?.hideSensitivePreviews || false;
-      
+    // Keep app switcher state in sync with the toggle
+    await App.addListener("appStateChange", async ({ isActive }) => {
+      const enabled = readSecuritySettings().hideSensitivePreviews;
       try {
         if (enabled) {
           await PrivacyScreen.enable();
           if (!isActive && Capacitor.getPlatform() === "ios") {
-            // just before going inactive, veil immediately
             showVeil(1000);
           }
         } else {
           await PrivacyScreen.disable();
         }
-      } catch (error) {
-        console.warn('Failed to handle app state change for privacy screen:', error);
+      } catch (err) {
+        console.warn("Failed to handle appStateChange for privacy screen:", err);
       }
     });
 
-    // iOS screenshot hint (cannot block, just mask briefly)
-    if (Capacitor.getPlatform() === "ios") {
-      // @ts-ignore: iOS posts this DOM event in webview; safe to no-op if absent
-      window.addEventListener("userDidTakeScreenshot", () => {
-        const settings = JSON.parse(localStorage.getItem("cc_security_settings_v1") || "{}");
-        if (settings?.hideSensitivePreviews) {
+    // iOS screenshot hint - briefly veil and show a toast if enabled
+    // Newer versions expose 'screenshotTaken' listener
+    try {
+      // @ts-ignore
+      PrivacyScreen.addListener?.("screenshotTaken", () => {
+        if (readSecuritySettings().hideSensitivePreviews) {
           showVeil(1000);
           showInfoToast("Sensitive content hidden");
         }
       });
-    }
-    
+    } catch {}
+
     isInitialized = true;
-  } catch (error) {
-    console.warn('Failed to initialize privacy screen:', error);
+  } catch (err) {
+    console.warn("Failed to initialize privacy screen:", err);
   }
 }
 
 export async function setPrivacyScreenEnabled(enabled: boolean) {
-  if (!isNative) return;
-  
   try {
     if (enabled) {
       await PrivacyScreen.enable();
     } else {
       await PrivacyScreen.disable();
     }
-  } catch (error) {
-    console.warn('Failed to set privacy screen:', error);
+  } catch (err) {
+    console.warn("Failed to set privacy screen:", err);
   }
 }
