@@ -18,6 +18,7 @@ import ScreenPrivacyOverlay from "@/components/common/ScreenPrivacyOverlay";
 import RateAppModal from "@/components/feedback/RateAppModal";
 import { registerRateModalController, shouldShowRatePrompt, triggerRatePromptNow, bumpSessionCounter } from "@/lib/rateApp";
 import BottomNav from "@/components/BottomNav";
+import { useStatusBar } from "@/hooks/useStatusBar";
 import "@/styles/sensitive.css";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,9 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [rateModalOpen, setRateModalOpen] = useState(false);
   const { node } = useToastStore();
+
+  // Configure status bar for iOS/Android
+  useStatusBar();
 
   useEffect(() => {
     // Check if user has given consent
