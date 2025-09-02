@@ -1,31 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Loader2 } from 'lucide-react';
+import { SearchIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizeQuickNotes } from '@/lib/invokeOrganizeNotes';
+import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
+import { IncidentModal } from '@/components/IncidentModal';
 import { ensureAIAllowed } from '@/lib/ai-quota';
-import { PaywallWrapper } from '@/components/paywall/PaywallWrapper';
 import InlineAd from '@/components/ads/InlineAd';
 import IncidentExplorer from '@/components/incidents/IncidentExplorer';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { processIncident } from '@/services/incidentProcessor';
-import { getDateSafely } from '@/utils/safeDate';
 import { cn } from '@/lib/utils';
+import { getDateSafely } from '@/utils/safeDate';
 
+// Home page keeps Quick Entry, then uses the shared explorer for the list.
 const Home = () => {
-  // Quick notes state
+  const [organizedIncidents, setOrganizedIncidents] = useState<OrganizedIncident[]>([]);
   const [quickNotes, setQuickNotes] = useState('');
   const [quickNotesTitle, setQuickNotesTitle] = useState('');
   const [quickNotesError, setQuickNotesError] = useState('');
   const [titleError, setTitleError] = useState('');
   const [showPaywall, setShowPaywall] = useState(false);
-  
-  // AI is unlimited - no paywall needed  
+
   const MAX_CHARS = 10000;
   const WARN_THRESHOLD = 8000;
   const [limitReached, setLimitReached] = useState(false);
@@ -34,48 +35,50 @@ const Home = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const handleQuickNotesOrganize = async () => {
     await ensureAIAllowed(); // AI is unlimited
     return runOrganize();
   };
 
   const loadIncidents = () => {
-    // Trigger refresh event for IncidentExplorer
-    window.dispatchEvent(new Event('incidentsUpdated'));
+    try {
+      const incidents = organizedIncidentStorage.getAll();
+      setOrganizedIncidents(incidents);
+    } catch (error) {
+      console.error('Error loading incidents:', error);
+      toast({
+        title: "Load Failed",
+        description: "Failed to load incidents from storage.",
+        variant: "destructive",
+      });
+    }
   };
 
   useEffect(() => {
-    // Restore quick notes draft from localStorage
+    loadIncidents();
+
+    // restore quick notes drafts
     const saved = localStorage.getItem('quickNotesDraft');
     const savedTitle = localStorage.getItem('quickNotesTitleDraft');
-    if (saved) {
-      setQuickNotes(saved);
-    }
-    if (savedTitle) {
-      setQuickNotesTitle(savedTitle);
-    }
+    if (saved) setQuickNotes(saved);
+    if (savedTitle) setQuickNotesTitle(savedTitle);
   }, []);
 
   // Save quick notes draft to localStorage (throttled)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (quickNotes.trim()) {
-        localStorage.setItem('quickNotesDraft', quickNotes);
-      } else {
-        localStorage.removeItem('quickNotesDraft');
-      }
-      
-      if (quickNotesTitle.trim()) {
-        localStorage.setItem('quickNotesTitleDraft', quickNotesTitle);
-      } else {
-        localStorage.removeItem('quickNotesTitleDraft');
-      }
-    }, 500);
+      if (quickNotes.trim()) localStorage.setItem('quickNotesDraft', quickNotes);
+      else localStorage.removeItem('quickNotesDraft');
 
+      if (quickNotesTitle.trim()) localStorage.setItem('quickNotesTitleDraft', quickNotesTitle);
+      else localStorage.removeItem('quickNotesTitleDraft');
+    }, 500);
     return () => clearTimeout(timeoutId);
   }, [quickNotes, quickNotesTitle]);
 
-  // Auto-grow textarea up to max height
+  // Auto-grow textarea
   const quickNotesRef = useRef<HTMLTextAreaElement | null>(null);
   const MAX_QN_HEIGHT = 375;
   const MIN_QN_HEIGHT = 225;
@@ -87,39 +90,24 @@ const Home = () => {
     el.style.height = `${newHeight}px`;
     el.style.overflowY = el.scrollHeight > MAX_QN_HEIGHT ? 'auto' : 'hidden';
   };
-
-  useEffect(() => {
-    adjustTextareaHeight();
-  }, [quickNotes]);
+  useEffect(() => { adjustTextareaHeight(); }, [quickNotes]);
 
   const runOrganize = async () => {
     await ensureAIAllowed(); // AI is unlimited
-    
     setQuickNotesError('');
     setTitleError('');
-    
-    // Validate title
+
     const trimmedTitle = quickNotesTitle.trim();
     if (!trimmedTitle) {
       setTitleError('Title is required');
-      toast({
-        title: "Add a title",
-        description: "A title is required before you can organize notes.",
-        variant: "destructive",
-      });
+      toast({ title: "Add a title", description: "A title is required before you can organize notes.", variant: "destructive" });
       return;
     }
-    
     if (trimmedTitle.length > 80) {
       setTitleError('Title must be 80 characters or fewer');
-      toast({
-        title: "Title too long",
-        description: "Keep it under 80 characters.",
-        variant: "destructive",
-      });
+      toast({ title: "Title too long", description: "Keep it under 80 characters.", variant: "destructive" });
       return;
     }
-    
     if (!quickNotes.trim()) {
       setQuickNotesError('Please enter notes to organize.');
       return;
@@ -127,52 +115,48 @@ const Home = () => {
 
     setIsOrganizing(true);
     try {
-      // Use the new CORS-hardened invoke helper
       const result = await organizeQuickNotes({ title: quickNotesTitle, notes: quickNotes });
       const results = result?.normalized?.incidents || [];
-      
+
       if (!results?.length) {
         setQuickNotesError('No incidents were identified. Please review your notes and try again.');
       } else {
-        // Save all organized incidents with processing
-        const incidentsToSave = await Promise.all(results.map(async incident => {
-          const baseIncident: OrganizedIncident = {
-            id: crypto.randomUUID(),
-            title: trimmedTitle, // Use the provided title
-            date: getDateSafely(incident, ''),
-            categoryOrIssue: incident.categoryOrIssue,
-            who: incident.who,
-            what: incident.what,
-            where: incident.where,
-            when: incident.when,
-            witnesses: incident.witnesses,
-            notes: incident.notes,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          };
-          
-          // Process incident for enhanced features (fast parsing)
-          return await processIncident(baseIncident, {
-            authorPerspective: 'first_person',
-            rawNotes: quickNotes,
-            improveGrammar: false
-          });
-        }));
-        
+        const incidentsToSave = await Promise.all(
+          results.map(async (incident: any) => {
+            const baseIncident: OrganizedIncident = {
+              id: crypto.randomUUID(),
+              title: trimmedTitle,
+              date: getDateSafely(incident, ''),
+              categoryOrIssue: incident.categoryOrIssue,
+              who: incident.who,
+              what: incident.what,
+              where: incident.where,
+              when: incident.when,
+              witnesses: incident.witnesses,
+              notes: incident.notes,
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString(),
+            };
+            return await processIncident(baseIncident, {
+              authorPerspective: 'first_person',
+              rawNotes: quickNotes,
+              improveGrammar: false,
+            });
+          })
+        );
+
         organizedIncidentStorage.saveMultiple(incidentsToSave);
-        
-        // Clear the textarea and draft
+
         setQuickNotes('');
         setQuickNotesTitle('');
         setLimitReached(false);
         setLimitAnnounce('');
         localStorage.removeItem('quickNotesDraft');
         localStorage.removeItem('quickNotesTitleDraft');
-        loadIncidents();
-        
-        // Navigate to incidents page and view the first created incident
+
+        // open the first new incident in the shared explorer modal via URL param
         if (incidentsToSave.length > 0) {
-          navigate(`/incidents?incidentId=${incidentsToSave[0].id}`);
+          setSearchParams({ incidentId: incidentsToSave[0].id });
         }
       }
     } catch (error: any) {
@@ -185,7 +169,7 @@ const Home = () => {
   return (
     <Layout>
       <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
-        {/* Action Buttons */}
+        {/* Quick Incident Entry */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
@@ -193,24 +177,20 @@ const Home = () => {
                 <div className="mb-2 text-center">
                   <h2 id="quick-entry-title" className="text-xl font-bold">Quick Incident Entry</h2>
                 </div>
-
                 <p className="text-xs text-muted-foreground mb-2">
                   Use ClearCase to document workplace incidents, protect your rights, and stay organized.
                 </p>
-
                 <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-3">
                   Include Who, What, When, Where, Why, and How for best results.
                 </p>
 
-                {/* Title Input */}
+                {/* Title */}
                 <div className="mb-3">
                   <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
                     <label htmlFor="quick-title-input" className="text-xs font-medium text-foreground block">
                       Title <span className="text-red-600">*</span>
                     </label>
-                    <span className="text-xs text-muted-foreground">
-                      {80 - quickNotesTitle.length} characters left
-                    </span>
+                    <span className="text-xs text-muted-foreground">{80 - quickNotesTitle.length} characters left</span>
                   </div>
                   <Input
                     id="quick-title-input"
@@ -218,40 +198,25 @@ const Home = () => {
                     value={quickNotesTitle}
                     onChange={(e) => {
                       const value = e.target.value.slice(0, 80);
+                      if (titleError) setTitleError('');
                       setQuickNotesTitle(value);
-                      if (titleError) {
-                        setTitleError('');
-                      }
                     }}
-                    onBlur={() => setQuickNotesTitle(prev => prev.trim())}
+                    onBlur={() => setQuickNotesTitle((prev) => prev.trim())}
                     required
                     maxLength={80}
                     placeholder="Short, clear title (max 80)"
-                    className={cn(
-                      "rounded-2xl shadow-sm border border-border",
-                      titleError ? "border-red-500 animate-shake" : ""
-                    )}
+                    className={cn("rounded-2xl shadow-sm border border-border", titleError ? "border-red-500 animate-shake" : "")}
                     aria-invalid={Boolean(titleError)}
                     aria-describedby={titleError ? "title-error" : undefined}
                   />
-                  {titleError && (
-                    <div id="title-error" className="mt-1 text-xs text-red-600">
-                      {titleError}
-                    </div>
-                  )}
+                  {titleError && <div id="title-error" className="mt-1 text-xs text-red-600">{titleError}</div>}
                 </div>
 
+                {/* Notes */}
                 <div className="mb-2">
                   <div className="mb-1 flex items-baseline justify-between gap-2 flex-wrap">
-                    <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground block">
-                      Notes
-                    </label>
-                    <span
-                      id="quick-notes-counter"
-                      role="status"
-                      aria-live="polite"
-                      className={`text-xs ${quickNotes.length >= MAX_CHARS ? 'text-destructive' : quickNotes.length >= WARN_THRESHOLD ? 'text-primary' : 'text-muted-foreground'} ml-auto`}
-                    >
+                    <label htmlFor="quick-notes-input" className="text-xs font-medium text-foreground block">Notes</label>
+                    <span id="quick-notes-counter" role="status" aria-live="polite" className={`text-xs ${quickNotes.length >= MAX_CHARS ? 'text-destructive' : quickNotes.length >= WARN_THRESHOLD ? 'text-primary' : 'text-muted-foreground'} ml-auto`}>
                       {quickNotes.length} / 10,000
                     </span>
                   </div>
@@ -270,7 +235,14 @@ const Home = () => {
                         setLimitReached(false);
                       }
                       setQuickNotes(v);
-                      adjustTextareaHeight();
+                      // adjust height
+                      const el = quickNotesRef.current;
+                      if (el) {
+                        el.style.height = 'auto';
+                        const newHeight = Math.min(Math.max(el.scrollHeight, 225), 375);
+                        el.style.height = `${newHeight}px`;
+                        el.style.overflowY = el.scrollHeight > 375 ? 'auto' : 'hidden';
+                      }
                     }}
                     onPaste={(e) => {
                       const el = e.currentTarget;
@@ -292,7 +264,13 @@ const Home = () => {
                       e.preventDefault();
                       setQuickNotes(next);
                       setTimeout(() => {
-                        adjustTextareaHeight();
+                        const area = quickNotesRef.current;
+                        if (area) {
+                          area.style.height = 'auto';
+                          const newHeight = Math.min(Math.max(area.scrollHeight, 225), 375);
+                          area.style.height = `${newHeight}px`;
+                          area.style.overflowY = area.scrollHeight > 375 ? 'auto' : 'hidden';
+                        }
                       }, 0);
                     }}
                     placeholder="Type or paste raw notes…"
@@ -306,52 +284,17 @@ const Home = () => {
                     }}
                   />
                   <div aria-live="polite" className="sr-only">{limitAnnounce}</div>
-                  {limitReached && (
-                    <div id="quick-notes-limit" className="mt-1 text-xs text-destructive">
-                      Limit reached (10,000 characters).
-                    </div>
-                  )}
-                  {quickNotesError && (
-                    <div
-                      id="quick-notes-error"
-                      className="mt-1 text-xs text-red-600 dark:text-red-400"
-                    >
-                      {quickNotesError}
-                    </div>
-                  )}
+                  {limitReached && <div id="quick-notes-limit" className="mt-1 text-xs text-destructive">Limit reached (10,000 characters).</div>}
+                  {quickNotesError && <div id="quick-notes-error" className="mt-1 text-xs text-red-600">{quickNotesError}</div>}
                 </div>
 
                 <div className="mt-2">
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      onClick={handleQuickNotesOrganize}
-                      disabled={isOrganizing}
-                      aria-label="Organize Quick Notes"
-                      className="flex-1 min-w-[150px] h-11 rounded-xl"
-                    >
-                      {isOrganizing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Organizing...
-                        </>
-                      ) : (
-                        'Organize Quick Notes'
-                      )}
+                    <Button onClick={handleQuickNotesOrganize} disabled={isOrganizing} aria-label="Organize Quick Notes" className="flex-1 min-w-[150px] h-11 rounded-xl">
+                      {isOrganizing ? (<><Loader2 className="h-4 w-4 mr-2 animate-spin" />Organizing...</>) : ('Organize Quick Notes')}
                     </Button>
-
-                    <Link
-                      to="/add"
-                      onClick={(e) => { if (isOrganizing) e.preventDefault(); }}
-                      className="flex-1 min-w-[150px]"
-                    >
-                      <Button
-                        variant="outline"
-                        disabled={isOrganizing}
-                        aria-label="Log Manually"
-                        className="w-full h-11 rounded-xl"
-                      >
-                        Log Manually
-                      </Button>
+                    <Link to="/add" onClick={(e) => { if (isOrganizing) e.preventDefault(); }} className="flex-1 min-w-[150px]">
+                      <Button variant="outline" disabled={isOrganizing} aria-label="Log Manually" className="w-full h-11 rounded-xl">Log Manually</Button>
                     </Link>
                   </div>
                   <p className="mt-2 text-xs text-muted-foreground">AI will structure your notes into a report.</p>
@@ -361,17 +304,12 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Inline Banner Ad */}
+        {/* Inline banner that is already on Home */}
         <InlineAd slot="home" />
 
-        {/* Reuse the incident explorer component */}
+        {/* Shared explorer renders the full list, search, filters, modals */}
         <IncidentExplorer />
       </div>
-      
-      <PaywallWrapper
-        isOpen={showPaywall}
-        onClose={() => setShowPaywall(false)}
-      />
     </Layout>
   );
 };
