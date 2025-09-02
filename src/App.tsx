@@ -11,6 +11,7 @@ import Home from "./pages/Home";
 import AddIncident from "./pages/AddIncident";
 import Resources from "./pages/Resources";
 import Settings from "./pages/Settings";
+import IncidentsPage from "./pages/Incidents";
 import NotFound from "./pages/NotFound";
 import { IncidentRedirect } from "./components/IncidentRedirect";
 import { useToastStore } from "@/lib/showToast";
@@ -104,6 +105,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/add" element={<AddIncident />} />
+            <Route path="/incidents" element={<IncidentsPage />} />
             {/* Main combined page */}
             <Route path="/settings" element={<Settings />} />
             {/* Legacy resources link - redirect into the resources anchor */}
