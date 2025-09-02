@@ -16,8 +16,7 @@ export default function PrivacyPreviewToggle() {
     try {
       if (next) await PrivacyScreen.enable();
       else await PrivacyScreen.disable();
-    } catch (e) {
-      // Roll back if the platform call throws
+    } catch {
       setEnabled(!next);
       writeSecuritySettings({ hideSensitivePreviews: !next });
     }

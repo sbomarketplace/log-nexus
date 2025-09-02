@@ -21,7 +21,7 @@ export const Layout = ({ children }: LayoutProps) => {
   }, []);
 
   return (
-    <div id="app-shell" className="bg-background">
+    <div className="app-shell bg-background">
       <AppHeader />
 
       <main className="app-content">
