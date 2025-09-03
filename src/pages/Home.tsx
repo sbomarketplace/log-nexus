@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import Layout from '@/components/Layout';
+import { Layout } from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -169,7 +169,7 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="max-w-screen-md mx-auto px-4 space-y-4">
+      <div className="cc-page space-y-4">
         {/* Quick Incident Entry */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">

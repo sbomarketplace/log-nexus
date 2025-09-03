@@ -2,27 +2,125 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Design tokens */
+/* Layout variables for safe areas and bottom navigation */
+:root {
+  --header-h: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* Bottom nav height (excluding safe area) */
+  --nav-h: 56px;
+  /* Content gap above bottom nav */
+  --content-gap: -4px;
+  /* Reserve space for sticky bottom nav + safe area + gap */
+  --content-bottom-inset: calc(var(--nav-h) + var(--safe-bottom) + var(--content-gap));
+  --bottom-inset: var(--safe-bottom); /* keep if referenced elsewhere */
+  --menu-footer-gap: 4px;            /* used by menu footer if still present in code */
+}
+
+/* Sticky header baseline */
+.app-header {
+  position: sticky;
+  top: 0;
+  height: var(--header-h);
+  z-index: 50;
+  backdrop-filter: saturate(180%) blur(10px);
+}
+
+/* Page container that reserves space for bottom navigation */
+.page-container {
+  /* Never collide with the sticky bottom nav */
+  padding-bottom: var(--content-bottom-inset);
+  min-height: 100dvh;
+  box-sizing: border-box;
+}
+
+/* Drawer safe areas */
+.drawer-content {
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+/* Prevent iOS font zoom and respect dynamic viewport */
+html, body { 
+  -webkit-text-size-adjust: 100%; 
+  height: 100%;
+  scroll-behavior: smooth;
+}
+
+#root { 
+  height: 100%;
+  min-height: 100dvh;
+}
+
+/* Ensure anchors do not hide under sticky header */
+[id] {
+  scroll-margin-top: 64px;
+}
+
+/* iOS-only: keep inputs >=16px so focusing doesn't zoom */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select { font-size: 16px !important; }
+}
+
+/* Smooth keyboard behavior and prevent rubber-banding jumps */
+:root { 
+  overscroll-behavior-y: none;
+  /* Layout variables for consistent spacing */
+  --cc-bottom-nav-h: 72px;
+  --cc-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cc-bottom-gap: 8px;
+}
+
+body { 
+  overscroll-behavior-y: none; 
+}
+
+/* Helpers for sticky bars that respect iPhone safe areas */
+.cc-sticky-top {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 50;
+  height: 56px;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  transform: translateZ(0); /* avoid flicker */
+}
+.cc-sticky-bottom {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  height: 64px;
+  background: rgba(255,255,255,0.9);
+  -webkit-backdrop-filter: saturate(180%) blur(8px);
+  backdrop-filter: saturate(180%) blur(8px);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateZ(0);
+}
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
 @layer base {
   :root {
-    /* Darker app surface */
-    --background: 220 14% 10%;        /* charcoal */
-    --foreground: 0 0% 100%;          /* white */
+    --background: 0 0% 98%;
+    --foreground: 220 9% 15%;
 
-    /* Cards stay white with dark text */
     --card: 0 0% 100%;
     --card-foreground: 220 9% 15%;
+
     --popover: 0 0% 100%;
     --popover-foreground: 220 9% 15%;
 
-    --primary: 25 95% 53%;            /* Bitcoin orange brand stays */
+    --primary: 25 95% 53%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 15% 96%;
     --secondary-foreground: 220 9% 15%;
 
     --muted: 220 13% 95%;
-    --muted-foreground: 220 8% 38%;
+    --muted-foreground: 220 9% 46%;
 
     --accent: 214 100% 50%;
     --accent-foreground: 0 0% 100%;
@@ -39,19 +137,22 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* App chrome sizing */
-    --app-header-height: 56px;
-    --app-tabbar-height: 64px;
-    --app-bottom-gap: 8px;            /* global gap above bottom bar */
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -93,46 +194,6 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  html, body, #root {
-    height: 100%;
-  }
-
-  body {
-    @apply bg-background text-foreground antialiased;
-    overscroll-behavior-y: none; /* prevent pull on app chrome */
-  }
-
-  /* Utility wrapper for content that sits directly on the dark background.
-     Inputs and text inside this wrapper get on-dark styling without affecting cards. */
-  .on-dark {
-    color: hsl(var(--foreground));
-  }
-
-  /* On-dark form fields. Targets native inputs plus shadcn inputs and selects. */
-  .on-dark input,
-  .on-dark textarea,
-  .on-dark select,
-  .on-dark .input,
-  .on-dark .Textarea,
-  .on-dark .SelectTrigger,
-  .on-dark .shadcn-input {
-    background-color: rgba(255, 255, 255, 0.08) !important;
-    color: hsl(var(--foreground)) !important;
-    border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  }
-  .on-dark input::placeholder,
-  .on-dark textarea::placeholder {
-    color: rgba(255, 255, 255, 0.7) !important;
-  }
-
-  /* Helpful layout helpers */
-  .app-main {
-    padding-top: var(--app-header-height);
-    padding-bottom: calc(var(--app-tabbar-height) + var(--app-bottom-gap) + env(safe-area-inset-bottom, 0px));
-    min-height: 100%;
-    overscroll-behavior: contain; /* stop rubber band from dragging header/footer */
   }
 }
 
