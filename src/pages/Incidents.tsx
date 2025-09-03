@@ -199,7 +199,6 @@ const IncidentsPage: React.FC = () => {
                     index={index}
                     pageIds={orderWithPins(filteredIncidents).map((i) => i.id)}
                     onView={() => handleViewIncident(incident)}
-                    onExport={() => setExportIncident(incident)}
                     onDelete={() => setDeleteId(incident.id)}
                     onUpdate={loadIncidents}
                     getCategoryTagClass={getCategoryTagClass}

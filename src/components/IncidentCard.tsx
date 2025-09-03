@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { CalendarIcon, ClockIcon, Hash, X, FileDown, Trash2 } from 'lucide-react';
+import { CalendarIcon, ClockIcon, Hash, X, Trash2 } from 'lucide-react';
 import { PillInput } from '@/components/PillInputs';
 import { caseChipText } from '@/lib/caseFormat';
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
@@ -17,6 +17,7 @@ import { makePhoneNumbersClickable } from '@/utils/phoneUtils';
 import { showSuccessToast, showErrorToast } from '@/lib/showToast';
 import { useSelection } from "@/state/selection";
 import { cn } from '@/lib/utils';
+import { shareIncident } from '@/utils/shareIncident';
 
 // Ultra-compact chip component for mobile
 function ChipXs({ children, icon }: { children: React.ReactNode; icon?: React.ReactNode }) {
@@ -55,7 +56,6 @@ type Draft = {
 interface IncidentCardProps {
   incident: OrganizedIncident;
   onView: () => void;
-  onExport: () => void;
   onDelete: () => void;
   onUpdate: () => void;
   getCategoryTagClass: (category: string) => string;
@@ -67,7 +67,6 @@ interface IncidentCardProps {
 export const IncidentCard = ({ 
   incident, 
   onView, 
-  onExport, 
   onDelete, 
   onUpdate, 
   getCategoryTagClass,
@@ -700,9 +699,9 @@ export const IncidentCard = ({
                     variant="outline" 
                     size="sm" 
                     className="text-[11px] sm:text-[12px] px-2.5 py-1 h-8 flex-1 font-normal"
-                    onClick={onExport}
+                    onClick={(e) => {e.stopPropagation(); shareIncident(incident);}}
                   >
-                    Export
+                    Share
                   </Button>
                   <Button 
                     variant="destructive" 
