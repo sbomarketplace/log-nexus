@@ -405,7 +405,7 @@ const AddIncident = () => {
   return (
     <Layout>
       <div className="add-incident-content cc-page space-y-6">
-        <header className="text-center pt-6 pb-2">
+        <header className="text-center pt-3 pb-2">
           <h1 className="text-3xl font-bold tracking-tight">Report New Incident</h1>
           <p className="mt-2 text-muted-foreground">
             Provide detailed information about the incident
