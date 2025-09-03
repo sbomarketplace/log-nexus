@@ -119,10 +119,10 @@ const IncidentsPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 pb-safe-bottom">
+      <div className="cc-page space-y-6">
         {/* Title */}
         <div className="space-y-1 text-center">
-          <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
+          <h2 className="cc-title text-xl font-bold text-foreground">Workplace Incident Reports</h2>
           <p className="text-xs text-muted-foreground">
             View, edit, export, or delete any past incident reports
           </p>

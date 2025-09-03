@@ -168,14 +168,14 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-4 -mt-4 pb-safe-bottom">
+      <div className="cc-page space-y-4">
         {/* Quick Incident Entry */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
                 <div className="mb-2 text-center">
-                  <h2 id="quick-entry-title" className="text-xl font-bold">Quick Incident Entry</h2>
+                  <h2 id="quick-entry-title" className="cc-title text-xl font-bold">Quick Incident Entry</h2>
                 </div>
                 <p className="text-xs text-muted-foreground mb-2">
                   Use ClearCase to document workplace incidents, protect your rights, and stay organized.

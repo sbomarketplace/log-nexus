@@ -323,10 +323,10 @@ export function ResourcesSection() {
 const Resources = () => {
   return (
     <Layout>
-      <div className="resources-page space-y-6 -mt-4">
+      <div className="resources-page cc-page space-y-6">
         {/* Header */}
         <div>
-          <h1 className="text-lg font-medium text-foreground">Resources</h1>
+          <h1 className="cc-title text-lg font-medium text-foreground">Resources</h1>
           <p className="text-xs text-muted-foreground opacity-80">
             Essential documents and guidelines for incident management
           </p>

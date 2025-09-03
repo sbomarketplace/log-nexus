@@ -404,14 +404,14 @@ const AddIncident = () => {
 
   return (
     <Layout>
-      <div className="add-incident-content max-w-4xl mx-auto space-y-6 -mt-4 pb-safe-bottom">
+      <div className="add-incident-content cc-page space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
             <ArrowLeftIcon size={16} />
           </Button>
           <div>
-            <h1 className="text-lg font-medium text-foreground">Report New Incident</h1>
+            <h1 className="cc-title text-lg font-medium text-foreground">Report New Incident</h1>
             <p className="text-xs text-muted-foreground">Provide detailed information about the incident</p>
           </div>
         </div>
