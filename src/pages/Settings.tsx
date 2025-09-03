@@ -1,49 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { 
   X, 
   ChevronRight, 
   Shield, 
   Database, 
-  FileText, 
   HelpCircle, 
-  Loader2,
-  Upload,
-  Download,
-  Trash2,
-  Settings as SettingsIcon,
-  Mail,
-  Star,
-  Share,
-  ExternalLink,
-  Clock,
-  Globe
+  Loader2
 } from 'lucide-react';
-import { useSettingsStore } from '@/state/settingsStore';
-import { isRemoveAdsActive, toast, isNative } from '@/lib/iap';
 import { useSubscription } from '@/lib/subscription';
-import { AiCreditsPanel } from '@/components/AiCreditsPanel';
-import { addPack, setSubscription } from '@/lib/credits';
-import { getPlanDisplayInfo } from '@/utils/parsingGate';
-import { exportBackup, importBackup } from '@/utils/backup';
-import { getCacheSize, clearCache, formatCacheSize, scheduleDataRetentionCheck } from '@/utils/storage';
-import { 
-  openSystemSettings, 
-  rateApp, 
-  shareDiagnostics, 
-  requestPermission, 
-  checkPermission,
-  nativeToast,
-  nativeEmail
-} from '@/utils/native';
 import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
-import SecurityPrivacyCard from '@/components/settings/SecurityPrivacyCard';
 import DataStorageCard from '@/components/settings/DataStorageCard';
 import { ResourcesSection } from '@/pages/Resources';
 import { Separator } from '@/components/ui/separator';
@@ -102,72 +70,14 @@ const PricingButton = ({
 };
 
 const Settings = () => {
-  const {
-    hidePreviews,
-    appLock,
-    dataStorage,
-    incidentDefaults,
-    setHidePreviews,
-    setAppLock,
-    setDataStorage,
-    setIncidentDefaults,
-  } = useSettingsStore();
-  
   const { isSubscribed, purchaseRemoveAds, restorePurchases } = useSubscription();
   
   const [activeModal, setActiveModal] = useState<string | null>(null);
   const [purchasing, setPurchasing] = useState<string | null>(null);
-  const [importFile, setImportFile] = useState<File | null>(null);
-  const [cacheInfo, setCacheInfo] = useState({ size: 0, itemCount: 0 });
   const [supportLegalOpen, setSupportLegalOpen] = useState(false);
-
-  // Helper function for AI report unit labels
-  const unitLabel = (n: number) => n === 1 ? "AI report" : "AI reports";
-
-  // Load cache info on mount
-  useEffect(() => {
-    const loadCacheInfo = async () => {
-      try {
-        const info = getCacheSize();
-        setCacheInfo(info);
-      } catch (error) {
-        console.warn('Failed to load cache info:', error);
-        setCacheInfo({ size: 0, itemCount: 0 });
-      }
-    };
-    loadCacheInfo();
-  }, []);
-
-  const handleClearCache = async () => {
-    try {
-      await clearCache();
-      const info = getCacheSize();
-      setCacheInfo(info);
-      if (isNative) {
-        nativeToast('Cache cleared.');
-      } else {
-        console.log('Cache cleared.');
-      }
-    } catch (error) {
-      console.error('Failed to clear cache:', error);
-      if (isNative) {
-        nativeToast('Failed to clear cache.');
-      }
-    }
-  };
 
   const closeModal = () => {
     setActiveModal(null);
-    setImportFile(null);
-  };
-
-  const getPlanDisplayName = (plan: string) => {
-    switch (plan) {
-      case 'free': return 'Free';
-      case 'pack': return 'Pack';
-      case 'unlimited': return 'Unlimited';
-      default: return 'Free';
-    }
   };
 
   const handlePurchase = async (purchaseType: string, purchaseFunction: () => Promise<void>) => {
@@ -190,16 +100,6 @@ const Settings = () => {
       console.error("Restore failed:", error);
     } finally {
       setPurchasing(null);
-    }
-  };
-
-  const openSubscriptionManagement = () => {
-    if (isNative && (window as any).Capacitor?.Plugins?.App) {
-      // Native app - open App Store subscription management
-      (window as any).Capacitor.Plugins.App.openUrl({ url: 'itms-apps://apps.apple.com/account/subscriptions' });
-    } else {
-      // Web fallback
-      setActiveModal('subscription');
     }
   };
 
@@ -311,19 +211,6 @@ const Settings = () => {
                   </div>
                 </div>
               )}
-            </AccordionContent>
-          </AccordionItem>
-
-          {/* Security & Privacy */}
-          <AccordionItem value="security" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
-              <div className="flex items-center gap-3">
-                <Shield className="h-4 w-4 text-muted-foreground" />
-                <span>Security & Privacy</span>
-              </div>
-            </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
-              <SecurityPrivacyCard />
             </AccordionContent>
           </AccordionItem>
 
