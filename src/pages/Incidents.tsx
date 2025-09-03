@@ -119,8 +119,7 @@ const IncidentsPage: React.FC = () => {
 
   return (
     <Layout>
-      {/* NOTE: No extra bottom padding here — the Layout shell manages header/footer spacing */}
-      <div className="space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Title */}
         <div className="space-y-1 text-center">
           <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
@@ -129,83 +128,87 @@ const IncidentsPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search by keyword, person, or Case #"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-10 rounded-lg"
-          />
-          {searchTerm && (
-            <button
-              onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
-              aria-label="Clear search"
-            >
-              <X className="h-3 w-3 text-muted-foreground" />
-            </button>
-          )}
-        </div>
-
-        {/* Category filter */}
-        <div>
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-full rounded-lg">
-              <SelectValue placeholder="Filter by category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              {getAllCategories().map((cat) => (
-                <SelectItem key={cat} value={cat}>
-                  {cat}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Bulk bar + list */}
-        <IncidentListControls visibleIds={filteredIncidents.map((i) => i.id)} />
-
-        <div className="space-y-3">
-          {organizedIncidents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="text-sm font-medium mb-1">No incidents recorded</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Create a new incident or organize notes to get started.
-                </p>
-              </CardContent>
-            </Card>
-          ) : filteredIncidents.length === 0 ? (
-            <Card>
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
-                <h3 className="text-sm font-medium mb-1">No incidents found</h3>
-                <p className="text-xs text-muted-foreground text-center">
-                  Try changing your search or filters.
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            orderWithPins(filteredIncidents).map((incident, index) => (
-              <IncidentCard
-                key={incident.id}
-                incident={incident}
-                index={index}
-                pageIds={orderWithPins(filteredIncidents).map((i) => i.id)}
-                onView={() => handleViewIncident(incident)}
-                onExport={() => setExportIncident(incident)}
-                onDelete={() => setDeleteId(incident.id)}
-                onUpdate={loadIncidents}
-                getCategoryTagClass={getCategoryTagClass}
+        <section className="bg-white rounded-2xl ring-1 ring-black/5 shadow-sm p-4 sm:p-6">
+          <div className="space-y-6">
+            {/* Search */}
+            <div className="relative">
+              <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search by keyword, person, or Case #"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-10 rounded-lg"
               />
-            ))
-          )}
-        </div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
+                  aria-label="Clear search"
+                >
+                  <X className="h-3 w-3 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+
+            {/* Category filter */}
+            <div>
+              <Select value={filterCategory} onValueChange={setFilterCategory}>
+                <SelectTrigger className="w-full rounded-lg">
+                  <SelectValue placeholder="Filter by category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {getAllCategories().map((cat) => (
+                    <SelectItem key={cat} value={cat}>
+                      {cat}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Bulk bar + list */}
+            <IncidentListControls visibleIds={filteredIncidents.map((i) => i.id)} />
+
+            <div className="space-y-3">
+              {organizedIncidents.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
+                    <h3 className="text-sm font-medium mb-1">No incidents recorded</h3>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Create a new incident or organize notes to get started.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : filteredIncidents.length === 0 ? (
+                <Card>
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <SearchIcon className="h-8 w-8 text-muted-foreground mb-3" />
+                    <h3 className="text-sm font-medium mb-1">No incidents found</h3>
+                    <p className="text-xs text-muted-foreground text-center">
+                      Try changing your search or filters.
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                orderWithPins(filteredIncidents).map((incident, index) => (
+                  <IncidentCard
+                    key={incident.id}
+                    incident={incident}
+                    index={index}
+                    pageIds={orderWithPins(filteredIncidents).map((i) => i.id)}
+                    onView={() => handleViewIncident(incident)}
+                    onExport={() => setExportIncident(incident)}
+                    onDelete={() => setDeleteId(incident.id)}
+                    onUpdate={loadIncidents}
+                    getCategoryTagClass={getCategoryTagClass}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </section>
 
         <BulkBarMobile />
 
