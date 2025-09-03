@@ -49,3 +49,14 @@ input, select, textarea { font-size: 16px; }
 [data-privacy-veil] {
   backdrop-filter: blur(12px);
 }
+/* Scrollable content area for dialogs/sheets/edit panels on iOS */
+.cc-modal-scroll {
+  max-height: calc(
+    100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px
+  );
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  min-height: 0;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+}
