@@ -6,7 +6,7 @@ const AppHeader: React.FC = () => {
     <header className="sticky top-0 z-40 h-[56px] border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="h-full grid place-items-center">
         <Link to="/" aria-label="Go to Home" className="inline-flex items-center gap-2 select-none">
-          <img src="/logo.png" onError={(e)=>{(e.currentTarget as HTMLImageElement).src='/logo.svg'}} alt="ClearCase" className="h-6 w-6 rounded" />
+          <img src="/logo.png" onError={(e)=>{(e.currentTarget as HTMLImageElement).src='/logo.svg'}} alt="ClearCase" className="h-8 w-8 rounded" />
           <span className="text-lg font-semibold tracking-tight">ClearCase</span>
         </Link>
       </div>
