@@ -174,12 +174,12 @@ const Home = () => {
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
-                <div className="mb-2 text-center">
-                  <h2 id="quick-entry-title" className="cc-title text-xl font-bold">Quick Incident Entry</h2>
-                </div>
-                <p className="text-xs text-muted-foreground mb-2">
-                  Use ClearCase to document workplace incidents, protect your rights, and stay organized.
-                </p>
+                <header className="text-center pt-3 pb-2">
+                  <h1 id="quick-entry-title" className="text-3xl font-bold tracking-tight">Quick Incident Entry</h1>
+                  <p className="mt-2 text-muted-foreground">
+                    Use ClearCase to document workplace incidents, protect your rights, and stay organized.
+                  </p>
+                </header>
                 <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-3">
                   Include Who, What, When, Where, Why, and How for best results.
                 </p>
