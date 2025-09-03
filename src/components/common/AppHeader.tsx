@@ -1,35 +1,35 @@
-// src/components/common/AppHeader.tsx
 import React from "react";
 
-export default function AppHeader() {
+const AppHeader: React.FC = () => {
   return (
     <header
-      className="app-header sticky top-0 z-40 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
       data-sticky-header
-      role="banner"
+      className="app-header sticky top-0 z-40 border-b bg-background/80 backdrop-blur"
+      style={{ height: "56px" }}
     >
-      <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto_1fr] items-center">
-        {/* left slot (for future actions) */}
-        <div className="justify-self-start" />
-
-        {/* centered logo + title */}
-        <div className="justify-self-center flex items-center gap-2 select-none">
-          <picture>
-            <source srcSet="/logo.svg" type="image/svg+xml" />
-            <img
-              src="/logo.png"
-              alt="ClearCase logo"
-              className="h-[20px] w-auto"
-              decoding="async"
-              loading="eager"
-            />
-          </picture>
-          <span className="text-base font-semibold leading-none">ClearCase</span>
+      <div className="mx-auto max-w-7xl h-full grid grid-cols-[1fr_auto_1fr] items-center px-4">
+        <div />
+        <div className="flex items-center gap-2 justify-center">
+          <img
+            src="/logo.png"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              if (!img.dataset.fallback) {
+                img.dataset.fallback = "1";
+                img.src = "/logo.svg";
+              }
+            }}
+            alt="ClearCase"
+            className="h-[20px] w-auto"
+            decoding="async"
+            loading="eager"
+          />
+          <span className="text-[17px] font-semibold">ClearCase</span>
         </div>
-
-        {/* right slot (for future actions) */}
-        <div className="justify-self-end" />
+        <div />
       </div>
     </header>
   );
-}
+};
+
+export default AppHeader;
