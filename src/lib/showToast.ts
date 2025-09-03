@@ -1,5 +1,6 @@
 import React from "react";
 import { create } from "zustand";
+import { toast } from "sonner";
 import { Toast } from "@/components/Toast";
 
 type ToastState = { 
@@ -15,31 +16,24 @@ export const useToastStore = create<ToastState>(set => ({
 }));
 
 export function showSuccessToast(title = "Incident updated successfully", description?: string) {
-  const { show, hide } = useToastStore.getState();
-  show(React.createElement(Toast, { 
-    type: "success", 
-    title, 
-    description, 
-    onClose: hide 
-  }));
+  toast.success(title, {
+    description,
+    duration: 2500,
+    closeButton: true
+  });
 }
 
 export function showErrorToast(title = "An error occurred", description?: string) {
-  const { show, hide } = useToastStore.getState();
-  show(React.createElement(Toast, { 
-    type: "error", 
-    title, 
-    description, 
-    onClose: hide 
-  }));
+  toast.error(title, {
+    description,
+    duration: 3500,
+    closeButton: true
+  });
 }
 
 export function showInfoToast(title: string, description?: string) {
-  const { show, hide } = useToastStore.getState();
-  show(React.createElement(Toast, { 
-    type: "info", 
-    title, 
-    description, 
-    onClose: hide 
-  }));
+  toast.info(title, {
+    description,
+    closeButton: true
+  });
 }
