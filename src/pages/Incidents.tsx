@@ -120,13 +120,12 @@ const IncidentsPage: React.FC = () => {
   return (
     <Layout>
       <div className="cc-page space-y-6">
-        {/* Title */}
-        <div className="space-y-1 text-center">
-          <h2 className="cc-title text-xl font-bold text-foreground">Workplace Incident Reports</h2>
-          <p className="text-xs text-muted-foreground">
+        <header className="text-center pt-3 pb-2">
+          <h1 className="text-3xl font-bold tracking-tight">Workplace Incident Reports</h1>
+          <p className="mt-2 text-muted-foreground">
             View, edit, export, or delete any past incident reports
           </p>
-        </div>
+        </header>
 
         <section className="bg-white rounded-2xl ring-1 ring-black/5 shadow-sm p-4 sm:p-6">
           <div className="space-y-6">
