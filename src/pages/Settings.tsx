@@ -137,13 +137,12 @@ const Settings = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography pb-safe-bottom">
-        {/* Header */}
-        <div className="text-center">
-          <h1 className="text-lg font-medium text-foreground">Settings & Resources</h1>
-          <p className="text-xs text-muted-foreground mt-1">
+        <header className="text-center pt-3 pb-2">
+          <h1 className="text-3xl font-bold tracking-tight">Settings & Resources</h1>
+          <p className="mt-2 text-muted-foreground">
             Manage your preferences and access helpful guides
           </p>
-        </div>
+        </header>
 
         {/* Settings title (visible, matching Resources style) */}
         <h2 id="settings" className="mb-2 text-lg font-medium text-foreground">Settings</h2>
