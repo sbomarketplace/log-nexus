@@ -135,16 +135,7 @@ export default function SlideOverMenu({ open, onClose, anchorRef }: Props) {
         </nav>
         {/* Spacer so footer hugs the bottom while links stay top aligned */}
         <div className="flex-1" />
-        {/* Footer sits above the ad banner and safe-area because of panel padding */}
-        <div
-          className="mt-4 text-center text-xs text-muted-foreground select-none"
-          style={{ 
-            marginBottom: "var(--menu-footer-gap)",
-            paddingBottom: "60px"
-          }}
-        >
-          (C) SBO Marketplace LLC 2025
-        </div>
+        {/* Footer space preserved for layout */}
       </div>
     </div>
   );
