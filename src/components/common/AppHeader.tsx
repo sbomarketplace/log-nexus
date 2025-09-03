@@ -1,23 +1,34 @@
-import { Link } from 'react-router-dom';
+// src/components/common/AppHeader.tsx
+import React from "react";
 
-type Props = { left?: React.ReactNode; right?: React.ReactNode; };
-
-export default function AppHeader({ left, right }: Props) {
+export default function AppHeader() {
   return (
-    <header className="app-header h-14 bg-white/80 border-b border-[hsl(var(--border))]">
-      <div className="mx-auto max-w-screen-md h-full grid grid-cols-[1fr_auto_1fr] items-center px-4">
-        <div className="justify-self-start">{left}</div>
-        <div className="justify-self-center pointer-events-none">
-          <Link to="/" className="flex items-center gap-2 pointer-events-auto">
-            <img 
-              src="/lovable-uploads/581b2158-980b-43c9-89b0-e73fc6de832d.png" 
-              alt="ClearCase Logo" 
-              className="h-6 w-6" 
+    <header
+      className="app-header sticky top-0 z-40 h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80"
+      data-sticky-header
+      role="banner"
+    >
+      <div className="mx-auto h-full max-w-7xl px-4 sm:px-6 lg:px-8 grid grid-cols-[1fr_auto_1fr] items-center">
+        {/* left slot (for future actions) */}
+        <div className="justify-self-start" />
+
+        {/* centered logo + title */}
+        <div className="justify-self-center flex items-center gap-2 select-none">
+          <picture>
+            <source srcSet="/logo.svg" type="image/svg+xml" />
+            <img
+              src="/logo.png"
+              alt="ClearCase logo"
+              className="h-[20px] w-auto"
+              decoding="async"
+              loading="eager"
             />
-            <h1 className="text-base font-semibold tracking-tight">ClearCase</h1>
-          </Link>
+          </picture>
+          <span className="text-base font-semibold leading-none">ClearCase</span>
         </div>
-        <div className="justify-self-end">{right}</div>
+
+        {/* right slot (for future actions) */}
+        <div className="justify-self-end" />
       </div>
     </header>
   );
