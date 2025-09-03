@@ -66,13 +66,13 @@ html, body, #root {
   align-items: center;
 }
 
-/* The only scrollable area */
+/* The only scrollable area - footer space removed */
 .app-content{
   position: fixed;
   left: 0;
   right: 0;
   top: calc(var(--header-h) + var(--safe-top));
-  bottom: calc(var(--footer-h) + var(--safe-bottom));
+  bottom: var(--safe-bottom);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain; /* block rubber-band pull into header/footer */

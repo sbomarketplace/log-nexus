@@ -1,6 +1,5 @@
 // src/components/Layout.tsx
 import { ReactNode, useEffect } from "react";
-import { Footer } from "./Footer";
 import AppHeader from "./common/AppHeader";
 import { Capacitor } from "@capacitor/core";
 import { StatusBar, Style } from "@capacitor/status-bar";
@@ -23,7 +22,6 @@ export const Layout = ({ children }: LayoutProps) => {
           {children}
         </div>
       </main>
-      <Footer />
     </div>
   );
 };
