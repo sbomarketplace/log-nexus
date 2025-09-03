@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
+import PageHero from '@/components/common/PageHero';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategoryOptions } from '@/utils/incidentCategories';
 import { supabase } from '@/integrations/supabase/client';
@@ -405,12 +406,11 @@ const AddIncident = () => {
   return (
     <Layout>
       <div className="add-incident-content cc-page space-y-6">
-        <header className="text-center pt-3 pb-2">
-          <h1 className="text-3xl font-bold tracking-tight">Report New Incident</h1>
-          <p className="mt-2 text-muted-foreground">
-            Provide detailed information about the incident
-          </p>
-        </header>
+        <PageHero 
+          title="Report New Incident" 
+          subtitle="Provide detailed information about the incident"
+          pad="pt-3"
+        />
 
         <form onSubmit={handleSubmit} className="space-y-4">
 

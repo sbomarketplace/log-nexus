@@ -1,4 +1,3 @@
-// src/pages/Incidents.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Input } from "@/components/ui/input";
@@ -6,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SearchIcon, X } from "lucide-react";
+import PageHero from "@/components/common/PageHero";
 
 import { IncidentCard } from "@/components/IncidentCard";
 import { IncidentListControls } from "@/components/IncidentListControls";
@@ -120,12 +120,11 @@ const IncidentsPage: React.FC = () => {
   return (
     <Layout>
       <div className="cc-page space-y-6">
-        <header className="text-center pt-3 pb-2">
-          <h1 className="text-3xl font-bold tracking-tight">Workplace Incident Reports</h1>
-          <p className="mt-2 text-muted-foreground">
-            View, edit, export, or delete any past incident reports
-          </p>
-        </header>
+        <PageHero 
+          title="Workplace Incident Reports" 
+          subtitle="View, edit, export, or delete any past incident reports"
+          pad="pt-3"
+        />
 
         <section className="bg-white rounded-2xl ring-1 ring-black/5 shadow-sm p-4 sm:p-6">
           <div className="space-y-6">

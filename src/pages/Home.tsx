@@ -15,6 +15,7 @@ import IncidentExplorer from '@/components/incidents/IncidentExplorer';
 
 import { OrganizedIncident, organizedIncidentStorage } from '@/utils/organizedIncidentStorage';
 import { processIncident } from '@/services/incidentProcessor';
+import PageHero from '@/components/common/PageHero';
 import { cn } from '@/lib/utils';
 import { getDateSafely } from '@/utils/safeDate';
 
@@ -174,12 +175,11 @@ const Home = () => {
           <div className="mx-auto w-full max-w-xl">
             <div className="bg-card border border-border rounded-2xl shadow-sm p-4 sm:p-5">
               <section aria-labelledby="quick-entry-title">
-                <header className="text-center pt-3 pb-2">
-                  <h1 id="quick-entry-title" className="text-3xl font-bold tracking-tight">Quick Incident Entry</h1>
-                  <p className="mt-2 text-muted-foreground">
-                    Use ClearCase to document workplace incidents, protect your rights, and stay organized.
-                  </p>
-                </header>
+                <PageHero 
+                  title="Quick Incident Entry" 
+                  subtitle="Use ClearCase to document workplace incidents, protect your rights, and stay organized."
+                  pad="pt-3"
+                />
                 <p id="quick-entry-guidance" className="text-xs text-muted-foreground mb-3">
                   Include Who, What, When, Where, Why, and How for best results.
                 </p>
