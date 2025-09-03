@@ -168,7 +168,7 @@ const Home = () => {
 
   return (
     <Layout>
-      <div className="space-y-4 -mt-4 pb-[calc(var(--bottom-inset,58px)+8px)]">
+      <div className="space-y-4 -mt-4 pb-safe-bottom">
         {/* Quick Incident Entry */}
         <div className="mb-4">
           <div className="mx-auto w-full max-w-xl">

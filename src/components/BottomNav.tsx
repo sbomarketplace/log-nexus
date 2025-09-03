@@ -23,10 +23,7 @@ export default function BottomNav() {
     <nav
       role="navigation"
       aria-label="Primary"
-      className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t",
-        "bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80"
-      )}
+      className="fixed bottom-0 inset-x-0 h-[64px] bg-card border-t z-40"
     >
       <div className="mx-auto max-w-2xl">
         <ul className="grid grid-cols-4">

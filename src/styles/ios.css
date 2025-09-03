@@ -1,6 +1,6 @@
 :root {
   --header-h: 56px;
-  --footer-h: 56px;
+  --footer-h: 64px;
 }
 
 /* iOS safe areas */
@@ -14,31 +14,16 @@
 /* Keep header and footer fixed while content scrolls */
 html, body, #root {
   height: 100%;
-  overflow: hidden;
 }
 .app-shell {
+  min-height: 100%;
   display: grid;
   grid-template-rows: var(--header-h) 1fr var(--footer-h);
-  height: 100%;
 }
-.app-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  backdrop-filter: blur(10px);
-}
+
 .app-content {
   overflow: auto;
-  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-}
-.app-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 40;
-  background: hsl(var(--card));
-  backdrop-filter: blur(10px);
-  border-top: 1px solid hsl(var(--border));
 }
 
 /* Input zoom prevention on iOS */
@@ -68,4 +53,8 @@ input, select, textarea { font-size: 16px; }
 }
 [data-sonner-toast] {
   pointer-events: auto;
+}
+
+.pb-safe-bottom {
+  padding-bottom: calc(env(safe-area-inset-bottom) + var(--footer-h) + 8px);
 }
