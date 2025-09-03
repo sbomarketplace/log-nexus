@@ -122,28 +122,28 @@ export default function IncidentExplorer() {
   return (
     <>
       {/* Section Title and Search/Filter Controls */}
-      <div className="mb-6 space-y-4" data-incident-reports-section>
+      <div className="mb-6 space-y-4 on-dark" data-incident-reports-section>
         <div className="space-y-1 text-center">
-          <h2 className="text-xl font-bold text-foreground">Workplace Incident Reports</h2>
-          <p className="text-xs text-muted-foreground">View, edit, export, or delete any past incident reports</p>
+          <h2 className="text-xl font-bold text-white">Workplace Incident Reports</h2>
+          <p className="text-xs text-white/70">View, edit, export, or delete any past incident reports</p>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/70" />
           <Input
             placeholder="Search by keyword, person, or Case #"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10 pr-10 rounded-lg"
+            className="pl-10 pr-10 rounded-lg bg-white/10 text-white placeholder-white/70 border-white/25 focus:border-white/40"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-muted-foreground/20 hover:bg-muted-foreground/40 flex items-center justify-center transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"
               aria-label="Clear search"
             >
-              <X className="h-3 w-3 text-muted-foreground" />
+              <X className="h-3 w-3 text-white/70" />
             </button>
           )}
         </div>
@@ -151,7 +151,7 @@ export default function IncidentExplorer() {
         {/* Category Filter */}
         <div>
           <Select value={filterCategory} onValueChange={setFilterCategory}>
-            <SelectTrigger className="w-full rounded-lg">
+            <SelectTrigger className="w-full rounded-lg bg-white/10 text-white border-white/25 focus:border-white/40">
               <SelectValue placeholder="Filter by category" />
             </SelectTrigger>
             <SelectContent>

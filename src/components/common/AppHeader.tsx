@@ -1,16 +1,16 @@
 import React from "react";
-import { Link } from "react-router-dom";
 
-const AppHeader: React.FC = () => {
+export default function AppHeader() {
   return (
-    <header className="sticky top-0 z-40 h-[56px] border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="h-full flex items-center px-4">
-        <Link to="/" aria-label="Go to Home" className="inline-flex items-center gap-2 select-none">
-          <span className="text-lg font-semibold tracking-tight text-orange-500">ClearCase</span>
-        </Link>
+    <header
+      className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75
+                 h-[var(--app-header-height)] flex items-center px-4"
+      /* Remove any bottom borders or pseudo elements that created a white strip */
+    >
+      <div className="w-full flex items-center justify-between">
+        <div className="text-xl font-semibold tracking-tight text-orange-500">ClearCase</div>
+        {/* Right side actions remain as they are, or keep empty */}
       </div>
     </header>
   );
-};
-
-export default AppHeader;
+}
