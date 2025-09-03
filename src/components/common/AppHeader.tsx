@@ -1,19 +1,14 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const AppHeader: React.FC = () => {
   return (
-    <header className="app-header bg-background border-b h-[56px] sticky top-0 z-40">
+    <header className="sticky top-0 z-40 h-[56px] border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="h-full grid place-items-center">
-        <div className="flex items-center gap-2">
-          <img
-            src="/logo.png"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = "/logo.svg"; }}
-            alt="ClearCase logo"
-            className="h-6 w-6 rounded"
-            draggable={false}
-          />
-          <span className="text-[15px] font-semibold tracking-tight">ClearCase</span>
-        </div>
+        <Link to="/" aria-label="Go to Home" className="inline-flex items-center gap-2 select-none">
+          <img src="/logo.png" onError={(e)=>{(e.currentTarget as HTMLImageElement).src='/logo.svg'}} alt="ClearCase" className="h-6 w-6 rounded" />
+          <span className="text-lg font-semibold tracking-tight">ClearCase</span>
+        </Link>
       </div>
     </header>
   );
