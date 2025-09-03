@@ -505,41 +505,43 @@ export const IncidentCard = ({
 
               {/* Main content */}
               {editing ? (
-                <>
-                  <Textarea
-                    value={draft.what || ""}
-                    onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
-                    rows={8}
-                    className="w-full mb-3 rounded-xl border px-3 py-2 text-sm font-normal"
-                    placeholder="What happened…"
-                  />
-                  
-                   {/* Incident Details Section */}
-                   <div className="grid gap-3 mb-3">
-                     {/* --- WHEN ----------------------------------------------------- */}
-                     <div className="space-y-1.5">
-                       <div className="text-sm font-medium">When</div>
+                /* 👇 NEW SCROLL WRAPPER so inline edit can scroll on iOS */
+                <div className="cc-modal-scroll max-h-[70svh] pr-1">
+                  <>
+                    <Textarea
+                      value={draft.what || ""}
+                      onChange={(e) => setDraft(v => ({ ...v, what: e.target.value }))}
+                      rows={8}
+                      className="w-full mb-3 rounded-xl border px-3 py-2 text-sm font-normal"
+                      placeholder="What happened…"
+                    />
+                    
+                    {/* Incident Details Section */}
+                    <div className="grid gap-3 mb-3">
+                      {/* --- WHEN ----------------------------------------------------- */}
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">When</div>
 
-                       <div className="flex flex-wrap items-center gap-2">
-                         <PillInput
-                           icon="date"
-                           ariaLabel="Incident date"
-                           value={draft.datePart ?? ""}
-                           onChange={(v) => setDraft((d) => ({ ...d, datePart: v }))}
-                         />
+                        <div className="flex flex-wrap items-center gap-2">
+                          <PillInput
+                            icon="date"
+                            ariaLabel="Incident date"
+                            value={draft.datePart ?? ""}
+                            onChange={(v) => setDraft((d) => ({ ...d, datePart: v }))}
+                          />
 
-                         <PillInput
-                           icon="time"
-                           ariaLabel="Incident time"
-                           value={draft.timePart ?? ""}
-                           onChange={(v) => setDraft((d) => ({ ...d, timePart: v }))}
-                         />
-                       </div>
+                          <PillInput
+                            icon="time"
+                            ariaLabel="Incident time"
+                            value={draft.timePart ?? ""}
+                            onChange={(v) => setDraft((d) => ({ ...d, timePart: v }))}
+                          />
+                        </div>
 
-                       {/* Helper text */}
-                       <div className="text-xs text-foreground/60">
-                         Set either date, time, or both. We never default to the current time.
-                       </div>
+                        {/* Helper text */}
+                        <div className="text-xs text-foreground/60">
+                          Set either date, time, or both. We never default to the current time.
+                        </div>
                       </div>
                       
                       <div className="space-y-1.5">
@@ -573,67 +575,68 @@ export const IncidentCard = ({
                       
                       <div className="space-y-1.5">
                         <div className="text-sm font-medium">Who</div>
-                       <Input
-                         className="w-full rounded-xl border px-3 py-2 font-normal"
-                         placeholder="Comma-separated (e.g., Mark, Troy)"
-                         value={draft.who || ""}
-                         onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
-                       />
-                     </div>
+                        <Input
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          placeholder="Comma-separated (e.g., Mark, Troy)"
+                          value={draft.who || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, who: e.target.value }))}
+                        />
+                      </div>
 
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Where</div>
-                      <Input
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        placeholder="e.g., Common area at work"
-                        value={draft.where || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Where</div>
+                        <Input
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          placeholder="e.g., Common area at work"
+                          value={draft.where || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, where: e.target.value }))}
+                        />
+                      </div>
 
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Witnesses</div>
-                      <Textarea
-                        rows={2}
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        placeholder="Comma or line-separated"
-                        value={draft.witnesses || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Witnesses</div>
+                        <Textarea
+                          rows={2}
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          placeholder="Comma or line-separated"
+                          value={draft.witnesses || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, witnesses: e.target.value }))}
+                        />
+                      </div>
 
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Important Quotes</div>
-                      <Textarea
-                        rows={2}
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        placeholder='- Mark: "even the elephant hide?"'
-                        value={draft.quotes || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Important Quotes</div>
+                        <Textarea
+                          rows={2}
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          placeholder='- Mark: "even the elephant hide?"'
+                          value={draft.quotes || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, quotes: e.target.value }))}
+                        />
+                      </div>
 
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Requests / Responses</div>
-                      <Textarea
-                        rows={2}
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        value={draft.requests || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
-                      />
-                    </div>
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Requests / Responses</div>
+                        <Textarea
+                          rows={2}
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          value={draft.requests || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, requests: e.target.value }))}
+                        />
+                      </div>
 
-                    <div className="space-y-1.5">
-                      <div className="text-sm font-medium">Notes</div>
-                      <Textarea
-                        rows={10}
-                        className="w-full rounded-xl border px-3 py-2 font-normal"
-                        value={draft.notes || ""}
-                        onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
-                      />
+                      <div className="space-y-1.5">
+                        <div className="text-sm font-medium">Notes</div>
+                        <Textarea
+                          rows={10}
+                          className="w-full rounded-xl border px-3 py-2 font-normal"
+                          value={draft.notes || ""}
+                          onChange={(e) => setDraft(v => ({ ...v, notes: e.target.value }))}
+                        />
+                      </div>
                     </div>
-                  </div>
-                </>
+                  </>
+                </div>
               ) : (
                 <div className="min-h-[2.5rem] mb-3">
                   <div className="text-sm font-normal leading-snug text-foreground line-clamp-2 break-words overflow-wrap-anywhere">
