@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { organizedIncidentStorage, OrganizedIncident } from '@/utils/organizedIncidentStorage';
-import { ArrowLeftIcon, PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
+import { PlusIcon, XIcon, FileIcon } from '@/components/icons/CustomIcons';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategoryOptions } from '@/utils/incidentCategories';
 import { supabase } from '@/integrations/supabase/client';
@@ -405,16 +405,12 @@ const AddIncident = () => {
   return (
     <Layout>
       <div className="add-incident-content cc-page space-y-6">
-        {/* Header */}
-        <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeftIcon size={16} />
-          </Button>
-          <div>
-            <h1 className="cc-title text-lg font-medium text-foreground">Report New Incident</h1>
-            <p className="text-xs text-muted-foreground">Provide detailed information about the incident</p>
-          </div>
-        </div>
+        <header className="text-center pt-6 pb-2">
+          <h1 className="text-3xl font-bold tracking-tight">Report New Incident</h1>
+          <p className="mt-2 text-muted-foreground">
+            Provide detailed information about the incident
+          </p>
+        </header>
 
         <form onSubmit={handleSubmit} className="space-y-4">
 
