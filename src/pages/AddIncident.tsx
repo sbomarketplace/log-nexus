@@ -292,41 +292,44 @@ const AddIncident = () => {
       return;
     }
 
+    // String guard function to safely convert any value to string
+    const s = (v: unknown) => (typeof v === "string" ? v : v == null ? "" : String(v));
+
     // Create the incident in OrganizedIncident format
     const organizedIncident: OrganizedIncident = {
       id: `incident_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      title: formData.title,
+      title: s(formData.title),
       date: selectedDateTime.toISOString().split('T')[0], // YYYY-MM-DD format
       dateTime: toUTCISO(selectedDateTime), // ISO string
       datePart: selectedDateTime.toISOString().split('T')[0],
       timePart: selectedDateTime.toTimeString().slice(0, 5), // HH:mm format
-      caseNumber: caseNumber.trim() || undefined,
-      categoryOrIssue: formData.category,
-      who: whoInvolved.filter(person => person.name.trim()).map(p => `${p.name}${p.role ? ` (${p.role})` : ''}`).join(', '),
-      what: formData.what,
-      where: formData.where,
+      caseNumber: s(caseNumber).trim() || undefined,
+      categoryOrIssue: s(formData.category),
+      who: whoInvolved.filter(person => person.name.trim()).map(p => `${s(p.name)}${p.role ? ` (${s(p.role)})` : ''}`).join(', '),
+      what: s(formData.what),
+      where: s(formData.where),
       when: selectedDateTime.toTimeString().slice(0, 5), // Time in HH:mm format
-      witnesses: witnesses.filter(w => w.name.trim()).map(w => `${w.name}${w.role ? ` (${w.role})` : ''}`).join(', '),
+      witnesses: witnesses.filter(w => w.name.trim()).map(w => `${s(w.name)}${w.role ? ` (${s(w.role)})` : ''}`).join(', '),
       notes: [
-        formData.how && `How: ${formData.how}`,
-        formData.why && `Why: ${formData.why}`,
+        formData.how && `How: ${s(formData.how)}`,
+        formData.why && `Why: ${s(formData.why)}`,
         unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()).length > 0 && 
           `Union: ${unionInvolvement.filter(ui => ui.name.trim() || ui.union.trim()).map(ui => 
-            `${ui.name}${ui.union ? ` (${ui.union})` : ''}${ui.role ? ` - ${ui.role}` : ''}${ui.notes ? `: ${ui.notes}` : ''}`
+            `${s(ui.name)}${ui.union ? ` (${s(ui.union)})` : ''}${ui.role ? ` - ${s(ui.role)}` : ''}${ui.notes ? `: ${s(ui.notes)}` : ''}`
           ).join('; ')}`,
         tags.length > 0 && `Tags: ${tags.join(', ')}`
       ].filter(Boolean).join('\n\n'),
-      quotes: '',
-      requests: '',
-      timeline: '',
-      policy: '',
-      evidence: '',
+      quotes: s(''),
+      requests: s(''),
+      timeline: s(''),
+      policy: s(''),
+      evidence: s(''),
       files: uploadedFiles.map(file => file.name),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       canonicalEventDate: toUTCISO(selectedDateTime),
       originalEventDateText: selectedDateTime.toISOString().split('T')[0],
-      incidentKey: `${formData.category}_${formData.where}_${selectedDateTime.toISOString().split('T')[0]}`.toLowerCase().replace(/[^a-z0-9_]/g, '_')
+      incidentKey: `${s(formData.category)}_${s(formData.where)}_${selectedDateTime.toISOString().split('T')[0]}`.toLowerCase().replace(/[^a-z0-9_]/g, '_')
     };
 
     organizedIncidentStorage.save(organizedIncident);
