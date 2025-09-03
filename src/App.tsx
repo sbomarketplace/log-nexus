@@ -22,10 +22,10 @@ import {
   triggerRatePromptNow,
   bumpSessionCounter,
 } from "@/lib/rateApp";
+import BottomNav from "@/components/BottomNav";
 import { useStatusBar } from "@/hooks/useStatusBar";
 import { applyPrivacyFromStorage, initPrivacyScreen } from "@/lib/privacyScreen";
 import "@/styles/sensitive.css";
-import "@/styles/ios.css"; // ensure the app-shell (header/footer) rules are loaded
 
 const queryClient = new QueryClient();
 
@@ -35,7 +35,7 @@ const App = () => {
   const [rateModalOpen, setRateModalOpen] = useState(false);
   const { node } = useToastStore();
 
-  // Configure status bar for iOS/Android
+  // Configure status bar for iOS or Android
   useStatusBar();
 
   // Initialize privacy screen system
@@ -47,8 +47,8 @@ const App = () => {
     initPrivacy();
   }, []);
 
+  // Check consent once on load
   useEffect(() => {
-    // Check if user has given consent
     const hasValidConsent = consentStorage.hasValidConsent();
     setHasConsent(hasValidConsent);
     setIsLoading(false);
@@ -60,22 +60,19 @@ const App = () => {
     bumpSessionCounter();
   }, []);
 
-  // Show rate prompt after a delay if conditions are met
+  // Show rate prompt if conditions are met
   useEffect(() => {
     if (!hasConsent) return;
-    const t1 = setTimeout(() => {
+    const checkDelay = setTimeout(() => {
       if (shouldShowRatePrompt({ minSessions: 3, minDaysSinceLast: 7 })) {
-        const t2 = setTimeout(() => triggerRatePromptNow(), 2000);
-        // clean inner timer too
-        return () => clearTimeout(t2);
+        const id = setTimeout(() => triggerRatePromptNow(), 2000);
+        return () => clearTimeout(id);
       }
     }, 100);
-    return () => clearTimeout(t1);
+    return () => clearTimeout(checkDelay);
   }, [hasConsent]);
 
-  const handleConsentGiven = () => {
-    setHasConsent(true);
-  };
+  const handleConsentGiven = () => setHasConsent(true);
 
   if (isLoading) {
     return (
@@ -104,19 +101,22 @@ const App = () => {
           <ScrollToTop />
           <Routes>
             <Route path="/" element={<Home />} />
+            {/* Support both /add and /incidents/new for Add Incident */}
             <Route path="/add" element={<AddIncident />} />
+            <Route path="/incidents/new" element={<AddIncident />} />
+            {/* Incidents list page */}
             <Route path="/incidents" element={<IncidentsPage />} />
-            {/* Main combined page */}
+            {/* Settings */}
             <Route path="/settings" element={<Settings />} />
-            {/* Legacy resources link - redirect into the resources anchor */}
+            {/* Legacy resources path redirects into Settings resources anchor */}
             <Route path="/resources" element={<Navigate to="/settings#resources" replace />} />
-            {/* Legacy route redirects */}
+            {/* Legacy incident routes redirect to the new modal logic */}
             <Route path="/incident/:id" element={<IncidentRedirect />} />
             <Route path="/incident/:id/edit" element={<IncidentRedirect />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            {/* Catch all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-          {/* No global <BottomNav /> here — Layout renders it so it stays pinned */}
+          <BottomNav />
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
