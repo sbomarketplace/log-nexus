@@ -3,6 +3,8 @@
  * Never defaults to current date/time - only extracts what's explicitly found
  */
 
+import { toStr, sReplace } from './strings';
+
 export type ParsedNotes = {
   date?: string | null;           // "YYYY-MM-DD"
   time?: string | null;           // "HH:mm" 24h format
@@ -31,7 +33,7 @@ const reSaid = /(?<speaker>[A-Z][a-z]+)\s+(said|asked|told)\s*:\s*(?:"|")?(?<q>[
 const reRequest = /\b(I\s+(told|asked|requested|reported|emailed)|requested|asked)\b[^.\n]{1,100}[.\n]/gi;
 
 export function parseNotesToStructured(input: { text: string }): ParsedNotes {
-  const text = (input.text || "").trim();
+  const text = toStr(input?.text).trim();
   if (!text) return {};
   
   const out: ParsedNotes = {};
@@ -56,9 +58,8 @@ export function parseNotesToStructured(input: { text: string }): ParsedNotes {
   // Location extraction
   const wm = text.match(reWhere);
   if (wm && wm.groups?.place) {
-    out.where = wm.groups.place.trim()
-      .replace(/\s{2,}/g, " ")
-      .replace(/\s*(,|\.|;)+$/, "");
+    const place = sReplace(wm.groups.place.trim(), /\s{2,}/g, " ");
+    out.where = sReplace(place, /\s*(,|\.|;)+$/, "");
   }
 
   // People extraction
@@ -208,7 +209,7 @@ function buildSummary(text: string): string | null {
   const line = lines.find(s => !s.toLowerCase().startsWith('timeline') && !s.toLowerCase().startsWith('requests'));
   if (!line) return null;
   
-  return sentenceCase(line.replace(/^timeline[:\-]\s*/i, "").replace(/^requests\/responses[:\-]\s*/i, ""));
+  return sentenceCase(sReplace(sReplace(line, /^timeline[:\-]\s*/i, ""), /^requests\/responses[:\-]\s*/i, ""));
 }
 
 function sentenceCase(s: string): string {
@@ -217,12 +218,10 @@ function sentenceCase(s: string): string {
 }
 
 export function extractCaseNumber(text: string): string | null {
-  const m = reCaseNumber.exec(text || "");
+  const m = reCaseNumber.exec(toStr(text));
   if (!m?.[1]) return null;
   // Sanitize: keep letters, numbers, spaces, dash, slash; trim and collapse spaces
-  const cleaned = m[1]
-    .replace(/[^A-Za-z0-9\-\/ ]/g, "")
-    .replace(/\s{2,}/g, " ")
+  const cleaned = sReplace(sReplace(toStr(m[1]), /[^A-Za-z0-9\-\/ ]/g, ""), /\s{2,}/g, " ")
     .trim();
   return cleaned || null;
 }

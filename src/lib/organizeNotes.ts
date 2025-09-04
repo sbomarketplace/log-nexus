@@ -6,6 +6,7 @@
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
 import { parseNotesToStructured } from './notesParser';
 import { formatWhoList } from '@/helpers/people';
+import { toStr, sReplace } from './strings';
 
 export interface OrganizedOutput {
   categoryOrIssue?: string;
@@ -162,7 +163,7 @@ function generateNeutralSummary(text: string, parsed: any): string {
 }
 
 function neutralizeText(text: string): string {
-  return text
+  return toStr(text)
     .replace(/\bi\b/gi, 'You')
     .replace(/\bmy\b/gi, 'your')
     .replace(/\bme\b/gi, 'you')
@@ -204,13 +205,14 @@ function formatQuotes(quotes: { speaker?: string | null; text: string }[]): stri
 
 function formatRequests(requests: string[]): string {
   return requests.map(request => {
-    return neutralizeText(request)
-      .replace(/^i told/i, 'You told')
-      .replace(/^i asked/i, 'You asked')
-      .replace(/^i requested/i, 'You requested')
-      .replace(/^told/i, 'You told')
-      .replace(/^asked/i, 'You asked')
-      .replace(/^requested/i, 'You requested');
+    const base = neutralizeText(request);
+    return sReplace(sReplace(sReplace(sReplace(sReplace(sReplace(base, 
+      /^i told/i, 'You told'), 
+      /^i asked/i, 'You asked'), 
+      /^i requested/i, 'You requested'), 
+      /^told/i, 'You told'), 
+      /^asked/i, 'You asked'), 
+      /^requested/i, 'You requested');
   }).join(' ');
 }
 
