@@ -499,39 +499,6 @@ All colors MUST be HSL.
   .resources-page {
   }
 
-  /* iOS Preview Mode Styles */
-  :root {
-    --app-header-height: 56px;
-    --app-tabbar-height: 64px;
-    --app-bottom-gap: 8px;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  .app-main {
-    padding-top: var(--app-header-height);
-    padding-bottom: calc(var(--app-tabbar-height) + var(--app-bottom-gap) + var(--safe-bottom));
-    min-height: 100%;
-    overscroll-behavior: contain;
-  }
-
-  /* Web-only iOS simulation */
-  body[data-ios-preview="true"] {
-    --safe-top: 47px;    /* iPhone 15 notch area */
-    --safe-bottom: 34px; /* home indicator area */
-    background-color: hsl(var(--background));
-  }
-
-  body[data-ios-preview="true"] .preview-shell {
-    width: 390px;        /* iPhone 15 logical width */
-    margin: 0 auto;
-    position: relative;
-    min-height: 100vh;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.06), 0 30px 60px rgba(0,0,0,0.20);
-    border-radius: 28px;
-    overflow: hidden;
-  }
-
   /* Resources accordion content - expand in normal flow */
   .resources-acc-content {
     position: static;

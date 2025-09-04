@@ -10,7 +10,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { useSubscription } from '@/lib/subscription';
-import Layout from '@/components/Layout';
+import { Layout } from '@/components/Layout';
 import SupportLegalModal from '@/components/SupportLegalModal';
 import DataStorageCard from '@/components/settings/DataStorageCard';
 import { ResourcesSection } from '@/pages/Resources';
