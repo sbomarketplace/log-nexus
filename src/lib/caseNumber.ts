@@ -1,9 +1,7 @@
 // src/lib/caseNumber.ts
-import { toStr } from './strings';
-
 export function extractCaseNumberFlexible(text?: string | null): string | null {
-  const s = toStr(text);
-  if (!s) return null;
+  if (!text) return null;
+  const s = String(text);
 
   // Prefer lines/bullets that start with a label to avoid "in case ..." false positives
   // Supported labels: case, case no., case number, case id, ref/reference, ticket, report
@@ -21,8 +19,8 @@ export function extractCaseNumberFlexible(text?: string | null): string | null {
   for (const rx of patterns) {
     const m = rx.exec(s);
     if (m && (m[2] ? m[2] : m[1])) {
-      const raw = toStr(m[2] || m[1] || "").trim();
-      const cleaned = toStr(raw)
+      const raw = (m[2] || m[1] || "").trim();
+      const cleaned = raw
         .replace(/[^A-Za-z0-9\-\/ ]/g, "")   // keep letters, digits, dash, slash, space
         .replace(/\s{2,}/g, " ")
         .replace(/[.,;:]+$/, "")             // trim trailing punctuation

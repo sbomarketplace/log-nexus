@@ -18,7 +18,6 @@ import { processIncident } from '@/services/incidentProcessor';
 import PageHero from '@/components/common/PageHero';
 import { cn } from '@/lib/utils';
 import { getDateSafely } from '@/utils/safeDate';
-import { toStr, collapseWhitespace } from '@/lib/strings';
 
 // Home page keeps Quick Entry, then uses the shared explorer for the list.
 const Home = () => {
@@ -117,10 +116,7 @@ const Home = () => {
 
     setIsOrganizing(true);
     try {
-      // Ensure safe string handling before passing to organizer
-      const safeTitle = collapseWhitespace(quickNotesTitle);
-      const safeNotes = toStr(quickNotes);
-      const result = await organizeQuickNotes({ title: safeTitle, notes: safeNotes });
+      const result = await organizeQuickNotes({ title: quickNotesTitle, notes: quickNotes });
       const results = result?.normalized?.incidents || [];
 
       if (!results?.length) {
@@ -201,7 +197,7 @@ const Home = () => {
                     type="text"
                     value={quickNotesTitle}
                     onChange={(e) => {
-                      const value = toStr(e.target.value).slice(0, 80);
+                      const value = e.target.value.slice(0, 80);
                       if (titleError) setTitleError('');
                       setQuickNotesTitle(value);
                     }}
@@ -229,7 +225,7 @@ const Home = () => {
                     ref={quickNotesRef}
                     value={quickNotes}
                     onInput={(e) => {
-                      let v = toStr((e.currentTarget as HTMLTextAreaElement).value);
+                      let v = (e.currentTarget as HTMLTextAreaElement).value;
                       if (v.length > MAX_CHARS) {
                         v = v.slice(0, MAX_CHARS);
                         setLimitAnnounce("Character limit reached.");
