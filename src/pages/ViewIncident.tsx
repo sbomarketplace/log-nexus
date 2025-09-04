@@ -9,6 +9,7 @@ import { Incident } from '@/types/incident';
 import { ArrowLeftIcon } from '@/components/icons/CustomIcons';
 import { getDateSafely } from '@/utils/safeDate';
 import { deriveIncidentTime, formatHHMMForUI } from '@/utils/datetime';
+import PageHero from '@/components/common/PageHero';
 
 const ViewIncident = () => {
   const { id } = useParams<{ id: string }>();
@@ -102,35 +103,30 @@ const ViewIncident = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto space-y-4">
-        {/* Header */}
-        <div className="flex items-center space-x-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/')}>
-            <ArrowLeftIcon size={16} />
+      <div className="cc-page space-y-6">
+        <PageHero 
+          title={incident.title || incident.what || "Incident Details"}
+          subtitle={(() => {
+            const info = getIncidentDisplayInfo(incident);
+            const parts = [info.date];
+            if (info.time) parts.push(info.time);
+            if (incident.category && incident.category !== "Uncategorized") {
+              parts.push(`• ${incident.category}`);
+            }
+            return parts.join(' ');
+          })()}
+          pad="pt-3"
+        />
+        
+        {/* Back button */}
+        <div className="flex justify-start">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="mb-2">
+            <ArrowLeftIcon size={16} className="mr-2" />
+            Back to Incidents
           </Button>
-          <div className="flex-1">
-            <h1 className="text-lg font-medium text-foreground">{incident.title || incident.what || "Incident Details"}</h1>
-            <div className="flex flex-wrap items-center gap-2 mt-2">
-              <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
-                {(() => {
-                  const info = getIncidentDisplayInfo(incident);
-                  return info.date;
-                })()}
-              </Badge>
-              {(() => {
-                const info = getIncidentDisplayInfo(incident);
-                return info.time ? (
-                  <Badge variant="outline" className="text-xs bg-neutral-50 border-neutral-200 text-neutral-700">
-                    {info.time}
-                  </Badge>
-                ) : null;
-              })()}
-              <Badge variant="secondary" className="text-xs bg-neutral-200 text-neutral-800 font-medium">
-                {incident.category || "Uncategorized"}
-              </Badge>
-            </div>
-          </div>
         </div>
+
+        <div className="max-w-4xl mx-auto space-y-4">
 
         {/* Summary */}
         <Card>
@@ -275,6 +271,7 @@ const ViewIncident = () => {
             </CardContent>
           </Card>
         )}
+        </div>
       </div>
     </Layout>
   );
