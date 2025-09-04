@@ -4,6 +4,7 @@
  */
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import ModalHeader from '@/components/common/ModalHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -369,8 +370,14 @@ export const ViewIncidentModal = ({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 border-b">
-          <h2 className="text-base font-semibold">Incident Details</h2>
+        <div className="flex-shrink-0 px-5">
+          <ModalHeader 
+            title="Incident Details"
+            align="left"
+          />
+        </div>
+        <div className="flex items-center justify-between px-5 pb-3 border-b">
+          <div></div>
           <div className="flex items-center gap-2">
             {isEditMode ? (
               <>
