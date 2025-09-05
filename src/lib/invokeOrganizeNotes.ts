@@ -1,9 +1,33 @@
 import { supabase } from "@/integrations/supabase/client";
+import { toStr, normalizeNewlines, cleanTabs } from "@/lib/text";
 
-export async function organizeQuickNotes(payload: { title: string; notes: string }) {
+/** Input from the Home page quick entry card */
+export type QuickNotesInput = {
+  title?: unknown;
+  notes?: unknown;
+};
+
+/** Return type is kept generic so existing callers do not break */
+export type QuickNotesResult = {
+  ok: boolean;
+  data?: any;
+  error?: string;
+};
+
+export async function organizeQuickNotes(input: QuickNotesInput): Promise<any> {
+  // Always coerce first so .replace never runs on undefined
+  const title = toStr(input?.title).trim();
+  // Do simple, safe cleaning only on strings
+  const notes = cleanTabs(normalizeNewlines(input?.notes));
+
+  // If nothing provided, exit gracefully instead of throwing
+  if (!title && !notes) {
+    return { normalized: { incidents: [] } };
+  }
+
   try {
     const { data, error } = await supabase.functions.invoke("organize-incidents", {
-      body: { notes: payload.notes }
+      body: { notes }
     });
 
     if (error) {
@@ -28,3 +52,5 @@ export async function organizeQuickNotes(payload: { title: string; notes: string
     throw new Error(msg);
   }
 }
+
+export default organizeQuickNotes;
