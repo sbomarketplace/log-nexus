@@ -407,7 +407,7 @@ const AddIncident = () => {
     <Layout>
       <div className="add-incident-content cc-page space-y-6">
         <PageHero 
-          title="Add Incident" 
+          title="Report New Incident" 
           subtitle="Provide detailed information about the incident"
           pad="pt-3"
         />

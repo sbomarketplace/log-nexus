@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ModalHeader from '@/components/common/ModalHeader';
 import { Button } from '@/components/ui/button';
 import { Loader2, Mail, FileText, Printer, Save, File, FileImage, Archive, Table } from 'lucide-react';
 import { OrganizedIncident } from '@/utils/organizedIncidentStorage';
@@ -115,13 +114,14 @@ export const BulkExportModal = ({ isOpen, onClose, incidents }: BulkExportModalP
         aria-modal="true"
         aria-labelledby="bulk-export-title"
       >
-        <div className="flex-shrink-0">
-          <ModalHeader 
-            title="Multiple Incident Export"
-            subtitle={`${incidentCount} incidents selected`}
-            align="center"
-          />
-        </div>
+        <DialogHeader className="pb-4 flex-shrink-0">
+          <DialogTitle id="bulk-export-title" className="text-center">
+            Multiple Incident Export
+          </DialogTitle>
+          <div className="text-sm text-muted-foreground text-center">
+            {incidentCount} incidents selected
+          </div>
+        </DialogHeader>
         
         {/* Main Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">

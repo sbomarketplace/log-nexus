@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import ModalHeader from '@/components/common/ModalHeader';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Card, CardContent } from '@/components/ui/card';
 import { Download } from 'lucide-react';
@@ -59,10 +58,9 @@ export const ExportModal = ({ open, onOpenChange }: ExportModalProps) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md w-[calc(100vw-2rem)] max-h-[80vh] rounded-xl shadow-2xl border-2">
-        <ModalHeader 
-          title="Export Incidents"
-          align="center"
-        />
+        <DialogHeader className="pb-4">
+          <DialogTitle className="text-center">Export Incidents</DialogTitle>
+        </DialogHeader>
         
         <ScrollArea className="max-h-[50vh] pr-2">
           <div className="space-y-3">

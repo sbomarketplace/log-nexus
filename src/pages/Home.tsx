@@ -7,7 +7,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { SearchIcon, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { organizeQuickNotes } from '@/lib/invokeOrganizeNotes';
-import { toStr } from '@/lib/text';
 import { OrganizeNotesModal } from '@/components/OrganizeNotesModal';
 import { IncidentModal } from '@/components/IncidentModal';
 import { ensureAIAllowed } from '@/lib/ai-quota';
@@ -117,10 +116,7 @@ const Home = () => {
 
     setIsOrganizing(true);
     try {
-      const result = await organizeQuickNotes({ 
-        title: toStr(quickNotesTitle), 
-        notes: toStr(quickNotes) 
-      });
+      const result = await organizeQuickNotes({ title: quickNotesTitle, notes: quickNotes });
       const results = result?.normalized?.incidents || [];
 
       if (!results?.length) {

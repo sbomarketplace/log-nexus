@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import ModalHeader from '@/components/common/ModalHeader';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -346,13 +345,8 @@ export const IncidentModal = ({ incidentId, open, onOpenChange, onIncidentUpdate
         aria-busy={isSaving}
       >
         {/* Header */}
-        <div className="flex-shrink-0 px-6">
-          <ModalHeader 
-            title="Incident Details"
-            align="left"
-          />
-        </div>
-        <div className="flex items-center justify-between border-b px-6 pb-4">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <h1 className="text-lg font-semibold">Incident Details</h1>
           <div className="flex items-center gap-2">
             {isEditMode && (
               <Button onClick={handleSave} disabled={isSaving} className="min-w-[80px]">

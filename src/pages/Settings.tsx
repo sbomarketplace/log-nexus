@@ -16,7 +16,6 @@ import DataStorageCard from '@/components/settings/DataStorageCard';
 import { ResourcesSection } from '@/pages/Resources';
 import { Separator } from '@/components/ui/separator';
 import InlineAd from '@/components/ads/InlineAd';
-import PageHero from '@/components/common/PageHero';
 import '../styles/settings.css';
 import '../styles/modal.css';
 
@@ -138,11 +137,12 @@ const Settings = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto space-y-6 settings-page incident-typography pb-safe-bottom">
-        <PageHero 
-          title="Settings & Resources"
-          subtitle="Manage your preferences and access helpful guides"
-          pad="pt-3"
-        />
+        <header className="text-center pt-3 pb-2">
+          <h1 className="text-3xl font-bold tracking-tight">Settings & Resources</h1>
+          <p className="mt-2 text-muted-foreground">
+            Manage your preferences and access helpful guides
+          </p>
+        </header>
 
         {/* Settings title (visible, matching Resources style) */}
         <h2 id="settings" className="mb-2 text-lg font-medium text-foreground">Settings</h2>
