@@ -1,0 +1,413 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Layout variables for safe areas and bottom navigation */
+:root {
+  --header-h: 56px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --nav-h: 56px;
+  --content-gap: -4px;
+  --content-bottom-inset: calc(var(--nav-h) + var(--safe-bottom) + var(--content-gap));
+  --bottom-inset: var(--safe-bottom);
+  --menu-footer-gap: 4px;
+}
+
+/* Layout variables for consistent spacing */
+:root { 
+  overscroll-behavior-y: none;
+  --cc-bottom-nav-h: 72px;
+  --cc-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --cc-bottom-gap: 8px;
+}
+
+/* Design System Color Tokens - All HSL values */
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 220 9% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 220 9% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 9% 15%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 15% 96%;
+    --secondary-foreground: 220 9% 15%;
+
+    --muted: 220 13% 95%;
+    --muted-foreground: 220 9% 46%;
+
+    --accent: 214 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 25 95% 53%;
+
+    --radius: 0.5rem;
+
+    /* Category tint colors */
+    --safety-tint: 0 84% 95%;
+    --harassment-tint: 25 95% 95%;
+    --accusation-tint: 214 100% 95%;
+    --policy-tint: 142 76% 95%;
+    --default-tint: 220 13% 95%;
+  }
+
+  .dark {
+    --background: 220 9% 9%;
+    --foreground: 220 13% 95%;
+
+    --card: 220 9% 12%;
+    --card-foreground: 220 13% 95%;
+
+    --popover: 220 9% 12%;
+    --popover-foreground: 220 13% 95%;
+
+    --primary: 25 95% 53%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 9% 15%;
+    --secondary-foreground: 220 13% 95%;
+
+    --muted: 220 9% 15%;
+    --muted-foreground: 220 9% 65%;
+
+    --accent: 214 100% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 220 9% 20%;
+    --input: 220 9% 20%;
+    --ring: 25 95% 53%;
+
+    /* Category tint colors - dark mode */
+    --safety-tint: 0 84% 15%;
+    --harassment-tint: 25 95% 15%;
+    --accusation-tint: 214 100% 15%;
+    --policy-tint: 142 76% 15%;
+    --default-tint: 220 9% 15%;
+  }
+}
+
+/* Base styles and mobile fixes */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  /* Prevent iOS font zoom and respect dynamic viewport */
+  html, body { 
+    -webkit-text-size-adjust: 100%; 
+    height: 100%;
+    scroll-behavior: smooth;
+    overscroll-behavior-y: none; 
+  }
+
+  #root { 
+    height: 100%;
+    min-height: 100dvh;
+  }
+
+  body {
+    @apply bg-background text-foreground text-sm;
+  }
+  
+  /* Compact typography defaults */
+  h1 { @apply text-lg font-semibold; }
+  h2 { @apply text-base font-semibold; }
+  h3 { @apply text-sm font-medium; }
+  
+  p, div, span { @apply text-sm; }
+  label { @apply text-xs font-medium; }
+  
+  /* iOS-only: keep inputs >=16px so focusing doesn't zoom */
+  @supports (-webkit-touch-callout: none) {
+    input, textarea, select { font-size: 16px !important; }
+  }
+
+  /* Prevent mobile zoom on inputs - use 16px minimum font-size */
+  input, textarea, select { @apply text-base; }
+
+  /* Ensure anchors do not hide under sticky header */
+  [id] {
+    scroll-margin-top: 64px;
+  }
+}
+
+/* Layout utilities */
+@layer utilities {
+  /* Page wrapper */
+  .cc-page {
+    min-height: 100%;
+  }
+
+  /* Page container that reserves space for bottom navigation */
+  .page-container {
+    padding-bottom: var(--content-bottom-inset);
+    min-height: 100dvh;
+    box-sizing: border-box;
+  }
+
+  /* Sticky header baseline */
+  .app-header {
+    position: sticky;
+    top: 0;
+    height: var(--header-h);
+    z-index: 50;
+    backdrop-filter: saturate(180%) blur(10px);
+  }
+
+  /* Drawer safe areas */
+  .drawer-content {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Sticky bars that respect iPhone safe areas */
+  .cc-sticky-top {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 50;
+    height: 56px;
+    background: rgba(255,255,255,0.9);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    backdrop-filter: saturate(180%) blur(8px);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    transform: translateZ(0);
+  }
+  
+  .cc-sticky-bottom {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 50;
+    height: 64px;
+    background: rgba(255,255,255,0.9);
+    -webkit-backdrop-filter: saturate(180%) blur(8px);
+    backdrop-filter: saturate(180%) blur(8px);
+    border-top: 1px solid rgba(0,0,0,0.06);
+    padding-bottom: env(safe-area-inset-bottom);
+    transform: translateZ(0);
+  }
+
+  /* If a page has its own fixed CTA bar, keep it above the nav by 8px */
+  .cc-sticky-cta {
+    position: sticky; 
+    bottom: calc(var(--cc-bottom-nav-h) + var(--cc-safe-bottom) + var(--cc-bottom-gap));
+    z-index: 30;
+  }
+
+  /* Line clamping utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+  
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.5;
+  }
+
+  /* Category tag gradients */
+  .category-safety {
+    @apply bg-gradient-to-r from-red-500 to-red-600 text-white;
+  }
+  
+  .category-harassment {
+    @apply bg-gradient-to-r from-orange-500 to-orange-600 text-white;
+  }
+  
+  .category-accusation {
+    @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white;
+  }
+  
+  .category-policy {
+    @apply bg-gradient-to-r from-green-500 to-green-600 text-white;
+  }
+  
+  .category-default {
+    @apply bg-gradient-to-r from-gray-500 to-gray-600 text-white;
+  }
+
+  /* Category tint border classes */
+  .category-tint-safety {
+    border-left-color: hsl(var(--safety-tint));
+  }
+
+  .category-tint-harassment {
+    border-left-color: hsl(var(--harassment-tint));
+  }
+
+  .category-tint-accusation {
+    border-left-color: hsl(var(--accusation-tint));
+  }
+
+  .category-tint-policy {
+    border-left-color: hsl(var(--policy-tint));
+  }
+
+  .category-tint-default {
+    border-left-color: hsl(var(--default-tint));
+  }
+
+  /* Overflow and word breaking utilities */
+  .break-words {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .overflow-wrap-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .break-all {
+    word-break: break-all;
+  }
+
+  .phone-link {
+    @apply text-primary hover:underline transition-colors cursor-pointer;
+  }
+
+  /* Chip micro-tuning for smallest phones */
+  @media (max-width: 380px) {
+    .chip-xs { 
+      font-size: 10px; 
+      padding: 2px 6px; 
+    }
+  }
+
+  /* Override for chip components to match category pill size */
+  .chip-xs-text {
+    font-size: 8.5px !important;
+    font-weight: bold !important;
+  }
+  
+  @media (min-width: 640px) {
+    .chip-xs-text {
+      font-size: 9.5px !important;
+      font-weight: bold !important;
+    }
+  }
+
+  /* Pill field styles */
+  .pill-field {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: #f3f4f6;
+    border-radius: 9999px;
+    padding: 2px 4px;
+  }
+
+  /* Ensure min widths so text never clips */
+  .pill-field.date input[type="date"] {
+    min-width: 95px;
+  }
+
+  .pill-field.time input[type="time"] {
+    min-width: 80px;
+  }
+
+  /* Override default input styles in pills */
+  .pill-field input {
+    border: 0 !important;
+    background: #fff !important;
+    border-radius: 9999px !important;
+    padding: 2px 6px !important;
+    font-size: 13px !important;
+    line-height: 1.2;
+    height: 24px !important;
+    box-shadow: none !important;
+  }
+
+  .pill-field input:focus {
+    outline: 2px solid hsl(var(--primary));
+    outline-offset: -2px;
+  }
+
+  /* Prevent iOS zoom on date/time inputs */
+  .cc-field-label + input[type="date"],
+  .cc-field-label + input[type="time"],
+  input[type="date"].cc-field-label,
+  input[type="time"].cc-field-label,
+  input[type="date"],
+  input[type="time"] {
+    font-size: 16px !important;
+  }
+}
+
+/* Modal System */
+.cc-float-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cc-float-modal {
+  background: hsl(var(--background));
+  border-radius: 16px;
+  box-shadow: 
+    0 10px 25px -3px rgba(0, 0, 0, 0.1), 
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 1.5rem;
+}
+
+/* Settings page styles */
+.settings-section {
+  @apply border border-border rounded-lg overflow-hidden bg-card;
+}
+
+.settings-section-header {
+  @apply px-4 py-3 border-none hover:bg-muted/50 transition-colors;
+}
+
+.settings-section-content {
+  @apply px-4 pb-4;
+}
+
+.settings-row {
+  @apply flex items-center justify-between py-3 px-4 rounded-lg transition-colors;
+}
+
+.settings-row-label {
+  @apply flex-1;
+}
+
+.settings-row-title {
+  @apply text-sm font-medium text-foreground;
+}
+
+.settings-row-description {
+  @apply text-xs text-muted-foreground mt-0.5 block;
+}
