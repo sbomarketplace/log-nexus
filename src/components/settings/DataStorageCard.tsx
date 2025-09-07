@@ -18,19 +18,19 @@ export default function DataStorageCard() {
   }
 
   return (
-    <div className="rounded-xl border bg-white p-4">
+    <div className="rounded-xl border bg-white p-4 overflow-hidden">
       <div className="mb-3 flex items-center gap-2">
-        <Database className="h-5 w-5 text-gray-600" />
-        <p className="font-semibold">Data &amp; Storage</p>
+        <Database className="h-4 w-4 text-gray-600" />
+        <p className="font-semibold truncate">Data & Storage</p>
       </div>
 
-      <div className="rounded-xl border p-4">
-        <p className="text-sm text-gray-700 mb-3">Manage your incident data</p>
+      <div className="rounded-xl border p-4 overflow-hidden">
+        <p className="text-sm text-gray-700 mb-3 long-copy">Manage your incident data</p>
 
         <button
           onClick={() => setConfirmDeleteAll(true)}
           disabled={busy}
-          className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100 disabled:opacity-60 min-h-12 whitespace-nowrap overflow-hidden text-ellipsis"
         >
           <Trash2 className="h-4 w-4" />
           Delete all incident reports

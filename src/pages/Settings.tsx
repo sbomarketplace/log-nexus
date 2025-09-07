@@ -45,9 +45,9 @@ const PricingButton = ({
       disabled={disabled}
       aria-pressed={selected}
       className={`
-        w-full min-h-[64px] px-4 py-3 rounded-lg border
+        w-full min-h-12 px-4 py-3 rounded-lg border
         flex flex-col items-center justify-center gap-1
-        text-center whitespace-normal leading-tight
+        text-center whitespace-nowrap overflow-hidden text-ellipsis
         focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 
         transition-all duration-200
         ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
@@ -59,10 +59,10 @@ const PricingButton = ({
       `.trim()}
     >
       {loading && <Loader2 className="h-4 w-4 animate-spin mb-1" />}
-      <span className={`font-semibold text-base ${selected ? 'text-primary-foreground' : 'text-foreground'}`}>
+      <span className={`font-semibold text-base overflow-hidden text-ellipsis ${selected ? 'text-primary-foreground' : 'text-foreground'}`}>
         {price}
       </span>
-      <span className={`text-base ${selected ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}>
+      <span className={`text-base overflow-hidden text-ellipsis ${selected ? 'text-primary-foreground/90' : 'text-muted-foreground'}`}>
         {caption}
       </span>
     </button>
@@ -151,19 +151,19 @@ const Settings = () => {
         <Accordion type="multiple" className="space-y-4">
           {/* Remove Ads Subscription */}
           <AccordionItem value="account" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
+            <AccordionTrigger className="min-h-12 px-4 py-3 flex items-center gap-3 settings-section-header">
               <div className="flex items-center gap-3">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <span>Remove Ads Subscription</span>
+                <span className="truncate">Remove Ads Subscription</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
+            <AccordionContent className="settings-section-content cc-acc-content overflow-hidden">
               {/* Subscription Status */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div>
-                    <div className="text-base font-semibold">Subscription Status</div>
-                    <div className="text-base text-muted-foreground">
+                  <div className="flex-1 min-w-0">
+                    <div className="block text-base font-semibold leading-tight truncate">Subscription Status</div>
+                    <div className="block text-sm text-muted-foreground leading-snug long-copy">
                       {isSubscribed ? "Your ad-free subscription is active." : "Current plan and billing"}
                     </div>
                   </div>
@@ -178,7 +178,7 @@ const Settings = () => {
 
                 {/* Purchase Buttons (hidden when subscribed) */}
                 {!isSubscribed && (
-                  <>
+                  <div className="grid gap-3 sm:grid-cols-2">
                     <PricingButton
                       price="Remove Ads — $4.99/mo"
                       caption="Hide banner ads permanently"
@@ -186,7 +186,7 @@ const Settings = () => {
                       onClick={() => handlePurchase('removeAds', async () => {
                         await purchaseRemoveAds();
                       })}
-                      className="w-full"
+                      className="w-full min-h-12 whitespace-nowrap overflow-hidden text-ellipsis"
                     />
                     <PricingButton
                       price="Restore Purchases"
@@ -195,9 +195,9 @@ const Settings = () => {
                       onClick={() => handlePurchase('restore', async () => {
                         await restorePurchases();
                       })}
-                      className="w-full"
+                      className="w-full min-h-12 whitespace-nowrap overflow-hidden text-ellipsis"
                     />
-                  </>
+                  </div>
                 )}
               </div>
 
@@ -215,13 +215,13 @@ const Settings = () => {
 
           {/* Data & Storage */}
           <AccordionItem value="data" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
+            <AccordionTrigger className="min-h-12 px-4 py-3 flex items-center gap-3 settings-section-header">
               <div className="flex items-center gap-3">
                 <Database className="h-4 w-4 text-muted-foreground" />
-                <span>Data & Storage</span>
+                <span className="truncate">Data & Storage</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
+            <AccordionContent className="settings-section-content cc-acc-content overflow-hidden">
               <DataStorageCard />
             </AccordionContent>
           </AccordionItem>
@@ -229,21 +229,21 @@ const Settings = () => {
 
           {/* Support & Legal */}
           <AccordionItem value="support" className="settings-section">
-            <AccordionTrigger className="settings-section-header">
+            <AccordionTrigger className="min-h-12 px-4 py-3 flex items-center gap-3 settings-section-header">
               <div className="flex items-center gap-3">
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                <span>Support & Legal</span>
+                <span className="truncate">Support & Legal</span>
               </div>
             </AccordionTrigger>
-            <AccordionContent className="settings-section-content cc-acc-content">
+            <AccordionContent className="settings-section-content cc-acc-content overflow-hidden">
               {/* Support & Legal */}
               <div 
-                className="settings-row cursor-pointer hover:bg-muted/20"
+                className="settings-row min-h-12 px-4 py-3 rounded-xl flex items-center justify-between overflow-hidden cursor-pointer hover:bg-muted/20"
                 onClick={() => setSupportLegalOpen(true)}
               >
-                <div className="settings-row-label">
-                  <span className="settings-row-title">Support & Legal</span>
-                  <span className="settings-row-description">
+                <div className="flex-1 min-w-0">
+                  <span className="block text-base font-semibold leading-tight truncate">Support & Legal</span>
+                  <span className="block text-sm text-muted-foreground leading-snug truncate">
                     Terms, Privacy, Contact Support, Rate App
                   </span>
                 </div>
@@ -254,7 +254,9 @@ const Settings = () => {
         </Accordion>
 
         {/* Inline Banner Ad */}
-        <InlineAd slot="settings" />
+        <div className="w-full overflow-hidden rounded-xl">
+          <InlineAd slot="settings" />
+        </div>
 
         {/* Balanced divider – equal spacing above and below the line */}
         <Separator className="mt-4 mb-4" />

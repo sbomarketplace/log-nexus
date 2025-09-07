@@ -39,20 +39,20 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
       <div className="relative mx-4 w-full max-w-2xl rounded-2xl bg-white shadow-xl">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b">
-          <h2 className="text-lg font-semibold">
+          <h2 className="text-xl font-semibold leading-tight break-words">
             ClearCase Terms, Privacy, and Cookie Policy
           </h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100 whitespace-nowrap overflow-hidden text-ellipsis"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {/* Scrollable Content */}
-        <div className="max-h-[calc(70vh-120px)] overflow-y-auto px-5 py-4 space-y-6">
+        <div className="max-h-[70vh] overflow-y-auto px-6 py-4 long-copy space-y-6">
           <p className="text-sm text-gray-500">Effective: {effectiveDate}</p>
 
           {/* TERMS */}
@@ -245,21 +245,21 @@ export default function SupportLegalModal({ onClose }: SupportLegalModalProps) {
 
         {/* Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 border-t px-5 py-3">
-          <span className="text-xs text-gray-500">Version {appVersion}</span>
+          <span className="text-xs text-gray-500 truncate">Version {appVersion}</span>
           <div className="flex items-center gap-4">
             <button
               onClick={handleContactSupport}
-              className="text-primary font-semibold"
+              className="text-primary font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
             >
               Contact Support
             </button>
             <button
-              className="text-primary font-semibold"
+              className="text-primary font-semibold whitespace-nowrap overflow-hidden text-ellipsis"
               onClick={handleRateApp}
             >
               Rate the App
             </button>
-            <button onClick={onClose} className="text-red-600 font-semibold">
+            <button onClick={onClose} className="text-red-600 font-semibold whitespace-nowrap overflow-hidden text-ellipsis">
               Close
             </button>
           </div>

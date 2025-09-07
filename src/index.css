@@ -400,6 +400,12 @@ All colors MUST be HSL.
     }
   }
 
+  /* Global rule for long text nodes - prevents overflow */
+  .long-copy {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
   /* Prevent iOS zoom on date/time inputs */
   .cc-field-label + input[type="date"],
   .cc-field-label + input[type="time"],
