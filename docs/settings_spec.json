@@ -1,0 +1,392 @@
+{
+  "screenId": "settings",
+  "route": "/settings",
+  "redirectRoutes": [
+    { "from": "/resources", "to": "/settings#resources", "type": "replace" }
+  ],
+  "header": {
+    "title": "Settings & Resources",
+    "subtitle": "Manage your preferences and access helpful guides",
+    "topSpacing": { "fromHeader": "pt-3 pb-2" },
+    "headerBorder": "1px solid rgba(0,0,0,0.06)",
+    "layout": "text-center"
+  },
+  "layout": {
+    "container": "max-w-4xl mx-auto space-y-6 pb-safe-bottom",
+    "safeAreas": {
+      "top": "56px fixed header",
+      "bottom": "env(safe-area-inset-bottom)"
+    }
+  },
+  "sections": [
+    {
+      "id": "settings-header",
+      "type": "sectionHeader",
+      "title": "Settings",
+      "anchor": "settings",
+      "className": "mb-2 text-lg font-medium text-foreground"
+    },
+    {
+      "id": "settings-accordion",
+      "type": "accordion",
+      "allowMultiple": true,
+      "spacing": "space-y-4",
+      "items": [
+        {
+          "id": "remove-ads",
+          "type": "accordionItem",
+          "value": "account",
+          "title": "Remove Ads Subscription",
+          "icon": "Shield",
+          "iconStyle": "h-4 w-4 text-muted-foreground",
+          "className": "settings-section",
+          "headerClassName": "settings-section-header",
+          "contentClassName": "settings-section-content cc-acc-content",
+          "content": {
+            "type": "subscriptionSection",
+            "items": [
+              {
+                "id": "subscription-status",
+                "type": "statusRow",
+                "title": "Subscription Status",
+                "description": {
+                  "free": "Current plan and billing",
+                  "paid": "Your ad-free subscription is active."
+                },
+                "badge": {
+                  "free": { "text": "FREE", "className": "bg-muted text-muted-foreground" },
+                  "paid": { "text": "PAID", "className": "bg-green-100 text-green-700" }
+                },
+                "layout": "flex items-center justify-between p-4 border rounded-lg"
+              },
+              {
+                "id": "purchase-buttons",
+                "type": "purchaseButtonGroup",
+                "visibilityCondition": "!isSubscribed",
+                "buttons": [
+                  {
+                    "id": "remove-ads-button",
+                    "type": "pricingButton",
+                    "price": "Remove Ads — $4.99/mo",
+                    "caption": "Hide banner ads permanently",
+                    "action": "purchaseRemoveAds",
+                    "loadingState": "purchasing === 'removeAds'",
+                    "className": "w-full"
+                  },
+                  {
+                    "id": "restore-button", 
+                    "type": "pricingButton",
+                    "price": "Restore Purchases",
+                    "caption": "Restore previous purchases",
+                    "action": "restorePurchases",
+                    "loadingState": "purchasing === 'restore'",
+                    "className": "w-full"
+                  }
+                ]
+              },
+              {
+                "id": "dev-debug",
+                "type": "debugInfo",
+                "visibilityCondition": "import.meta.env.DEV && import.meta.env.VITE_SHOW_DEV_IAP === \"true\"",
+                "content": "IAP Product IDs",
+                "className": "mt-4 p-3 bg-muted/30 rounded-lg border"
+              }
+            ]
+          }
+        },
+        {
+          "id": "data-storage",
+          "type": "accordionItem", 
+          "value": "data",
+          "title": "Data & Storage",
+          "icon": "Database",
+          "iconStyle": "h-4 w-4 text-muted-foreground",
+          "className": "settings-section",
+          "headerClassName": "settings-section-header",
+          "contentClassName": "settings-section-content cc-acc-content",
+          "content": {
+            "type": "component",
+            "component": "DataStorageCard",
+            "props": {},
+            "internalStructure": {
+              "cardWrapper": "rounded-xl border bg-white p-4",
+              "header": {
+                "icon": "Database",
+                "iconStyle": "h-5 w-5 text-gray-600",
+                "title": "Data & Storage"
+              },
+              "innerSection": "rounded-xl border p-4",
+              "description": "Manage your incident data",
+              "deleteButton": {
+                "label": "Delete all incident reports",
+                "icon": "Trash2",
+                "iconStyle": "h-4 w-4", 
+                "className": "inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700 hover:bg-red-100 disabled:opacity-60",
+                "action": "openConfirmDeleteModal",
+                "confirmModal": {
+                  "title": "Delete ALL incident reports?",
+                  "description": "This permanently deletes every incident you've saved on this device.",
+                  "requireText": "DELETE",
+                  "confirmLabel": "Delete permanently",
+                  "danger": true
+                }
+              }
+            }
+          }
+        },
+        {
+          "id": "support-legal",
+          "type": "accordionItem",
+          "value": "support", 
+          "title": "Support & Legal",
+          "icon": "HelpCircle",
+          "iconStyle": "h-4 w-4 text-muted-foreground",
+          "className": "settings-section",
+          "headerClassName": "settings-section-header", 
+          "contentClassName": "settings-section-content cc-acc-content",
+          "content": {
+            "type": "linkRow",
+            "title": "Support & Legal",
+            "description": "Terms, Privacy, Contact Support, Rate App",
+            "icon": "ChevronRight",
+            "iconStyle": "h-4 w-4 text-muted-foreground",
+            "className": "settings-row cursor-pointer hover:bg-muted/20",
+            "action": { "kind": "modal", "target": "SupportLegalModal" }
+          }
+        }
+      ]
+    },
+    {
+      "id": "inline-ad",
+      "type": "advertisement",
+      "component": "InlineAd",
+      "slot": "settings",
+      "visibilityCondition": "!isSubscribed",
+      "placeholderMode": "import.meta.env.VITE_SHOW_AD_PLACEHOLDERS === \"true\" || (!(window as any).cordova && import.meta.env.DEV)",
+      "spacing": "my-3"
+    },
+    {
+      "id": "separator",
+      "type": "separator",
+      "spacing": "mt-4 mb-4"
+    },
+    {
+      "id": "resources-header",
+      "type": "sectionHeader", 
+      "title": "Resources",
+      "anchor": "resources",
+      "className": "mb-2 text-lg font-medium text-foreground scroll-mt-16"
+    },
+    {
+      "id": "resources-section",
+      "type": "component",
+      "component": "ResourcesSection",
+      "className": "scroll-mt-16",
+      "description": "Collapsible resource categories with workplace documentation, legal resources, safety information, and advocacy groups"
+    }
+  ],
+  "modals": [
+    {
+      "id": "support-legal-modal",
+      "component": "SupportLegalModal",
+      "trigger": "Support & Legal row click",
+      "properties": {
+        "overlay": "fixed inset-0 z-50 flex items-center justify-center",
+        "container": "max-w-2xl rounded-2xl bg-white shadow-xl",
+        "header": {
+          "title": "ClearCase Terms, Privacy, and Cookie Policy",
+          "closeButton": "X icon in rounded hover area"
+        },
+        "content": {
+          "maxHeight": "calc(70vh-120px)",
+          "overflow": "overflow-y-auto",
+          "sections": ["terms", "privacy", "cookies"]
+        },
+        "footer": {
+          "appVersion": "Version 1.0.0",
+          "actions": ["Contact Support", "Rate the App", "Close"]
+        }
+      }
+    },
+    {
+      "id": "floating-modal",
+      "component": "FloatingModal", 
+      "trigger": "Subscription management (unused in main flow)",
+      "properties": {
+        "overlay": "cc-float-modal-overlay with blur backdrop",
+        "container": "cc-float-modal max-width 640px", 
+        "title": "Manage Subscription",
+        "content": "Restore purchases button with loading state"
+      }
+    }
+  ],
+  "legal": {
+    "terms": {
+      "path": "src/content/legal/terms.md",
+      "exists": true,
+      "effectiveDate": "Aug 23, 2025",
+      "sections": [
+        "What ClearCase Is (and Isn't)",
+        "Eligibility & Your Account",
+        "License",
+        "Your Content", 
+        "Acceptable Use",
+        "AI Features",
+        "Purchases & Subscriptions",
+        "Privacy",
+        "Security",
+        "Termination",
+        "Disclaimers & Liability", 
+        "Changes",
+        "Contact"
+      ],
+      "pricingMentioned": {
+        "freeTier": "3 AI reports",
+        "paid": ["5 AI reports ($1.99)", "60 AI reports ($19.99)", "Unlimited ($99/month)"]
+      },
+      "contact": "SBOMarkteplace@gmail.com"
+    },
+    "privacy": {
+      "path": "src/content/legal/privacy.md",
+      "exists": true, 
+      "effectiveDate": "Aug 23, 2025",
+      "sections": [
+        "Information We Collect",
+        "How We Use It", 
+        "Sharing",
+        "AI Processing",
+        "Data Retention",
+        "Your Choices",
+        "Security",
+        "Children",
+        "International Use", 
+        "Changes",
+        "Contact"
+      ],
+      "contact": "SBOMarkteplace@gmail.com"
+    },
+    "cookies": {
+      "path": "src/content/legal/cookies.md", 
+      "exists": true,
+      "effectiveDate": "Aug 23, 2025",
+      "sections": [
+        "What We Use",
+        "Your Choices", 
+        "Contact"
+      ],
+      "contact": "SBOMarkteplace@gmail.com"
+    },
+    "modalImplementation": {
+      "path": "src/components/SupportLegalModal.tsx",
+      "inlineContent": true,
+      "note": "Legal text is embedded directly in the modal component, not loaded from markdown files"
+    }
+  },
+  "ui": {
+    "designSystem": {
+      "colors": {
+        "primary": "25 95% 53%",
+        "secondary": "220 15% 96%",
+        "accent": "214 100% 50%",
+        "success": "142 76% 36%",
+        "destructive": "0 84% 60%", 
+        "muted": "220 13% 95%",
+        "border": "220 13% 91%",
+        "background": "0 0% 98%",
+        "foreground": "220 9% 15%"
+      },
+      "typography": {
+        "pageTitle": "text-3xl font-bold tracking-tight",
+        "sectionHeader": "text-lg font-medium",
+        "rowTitle": "text-base font-semibold", 
+        "rowDescription": "text-base text-muted-foreground",
+        "badgeText": "text-xs font-medium"
+      },
+      "spacing": {
+        "pageContainer": "max-w-4xl mx-auto space-y-6 pb-safe-bottom",
+        "heroSpacing": "text-center pt-3 pb-2",
+        "accordionSpacing": "space-y-4",
+        "sectionPadding": "p-4"
+      },
+      "components": {
+        "card": {
+          "radius": "rounded-lg",
+          "shadow": "shadow-sm", 
+          "border": "border"
+        },
+        "modal": {
+          "radius": "rounded-2xl",
+          "shadow": "shadow-xl", 
+          "maxWidth": "max-w-2xl"
+        },
+        "accordion": {
+          "section": "settings-section",
+          "header": "settings-section-header", 
+          "content": "settings-section-content cc-acc-content"
+        }
+      }
+    },
+    "animations": {
+      "accordion": {
+        "down": "accordion-down 0.2s ease-out",
+        "up": "accordion-up 0.2s ease-in"
+      },
+      "hover": "transition-colors",
+      "chevronRotation": "transition-transform duration-200"
+    },
+    "responsive": {
+      "container": "px-4 sm:px-6 lg:px-8",
+      "breakpoints": "Standard Tailwind breakpoints"
+    }
+  },
+  "behavior": {
+    "accordion": {
+      "type": "multiple", 
+      "allowSimultaneousOpen": true,
+      "chevronRotation": "180deg when open"
+    },
+    "modals": {
+      "backdropDismiss": true,
+      "keyboardEscape": true,
+      "focusManagement": "Returns focus to trigger on close"
+    },
+    "stateManagement": {
+      "subscription": "useSubscription hook",
+      "purchasing": "Local state with loading indicators",
+      "modalVisibility": "Local state per modal"
+    },
+    "actions": {
+      "purchase": "Async with loading states and error handling",
+      "restore": "Async with loading states",
+      "deleteData": "Confirmation modal with text verification",
+      "contactSupport": "mailto: link to SBOMarketplaceapp@gmail.com",
+      "rateApp": "openStoreReview() function call"
+    }
+  },
+  "icons": {
+    "library": "lucide-react",
+    "version": "^0.462.0", 
+    "usage": [
+      { "name": "Shield", "locations": ["Remove Ads Subscription icon"], "size": "h-4 w-4" },
+      { "name": "Database", "locations": ["Data & Storage icon", "DataStorageCard header"], "size": "h-4 w-4 | h-5 w-5" },
+      { "name": "HelpCircle", "locations": ["Support & Legal icon"], "size": "h-4 w-4" },
+      { "name": "ChevronRight", "locations": ["Support & Legal row arrow"], "size": "h-4 w-4" },
+      { "name": "ChevronDown", "locations": ["Accordion triggers"], "size": "h-4 w-4" },
+      { "name": "Trash2", "locations": ["Delete button"], "size": "h-4 w-4" },
+      { "name": "X", "locations": ["Modal close buttons"], "size": "h-4 w-4 | h-5 w-5" },
+      { "name": "Loader2", "locations": ["Loading spinners"], "size": "h-4 w-4", "animation": "animate-spin" }
+    ]
+  },
+  "dependencies": {
+    "core": [
+      "@radix-ui/react-accordion@^1.2.11",
+      "@radix-ui/react-separator@^1.1.7",
+      "lucide-react@^0.462.0"
+    ],
+    "utilities": [
+      "class-variance-authority@^0.7.1",
+      "clsx@^2.1.1", 
+      "tailwind-merge@^2.6.0"
+    ]
+  }
+}
